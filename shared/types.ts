@@ -46,7 +46,7 @@ export interface MetricsRow {
   ytdPct: number;
   volume: string;
   class: AssetClass;
-  sentiment: number; // 0-100
+  sentiment: number;
   peRatio?: number;
   rsi?: number;
   miniSeries: SeriesPoint[];
@@ -112,4 +112,44 @@ export interface QuantData {
   riskReward: RiskRewardPoint[];
   drawdown: DrawdownData;
   correlation: CorrelationData;
+}
+/** New Intelligence Hub Types **/
+export interface ScreenerStock {
+  symbol: string;
+  name: string;
+  price: number;
+  changePct: number;
+  peRatio: number;
+  yieldPct: number;
+  marketCap: string;
+  volatility: number;
+  sharpe: number;
+  sector: string;
+}
+export interface SentimentArticle {
+  id: string;
+  source: string;
+  headline: string;
+  summary: string;
+  timestamp: number;
+  sentiment: 'positive' | 'negative' | 'neutral';
+  score: number;
+  url: string;
+}
+export interface SentimentOverview {
+  symbol: string;
+  overallScore: number; // 0-100
+  mentions24h: number;
+  trend: 'improving' | 'declining' | 'stable';
+  articles: SentimentArticle[];
+}
+export interface AcademyTopic {
+  id: string;
+  title: string;
+  description: string;
+  category: 'Risk' | 'Strategy' | 'Basics' | 'Advanced';
+  difficulty: 'Beginner' | 'Intermediate' | 'Expert';
+  readingTimeMin: number;
+  content: string;
+  interactiveType?: 'sharpe-calc' | 'monte-carlo-sim' | 'corr-matrix';
 }

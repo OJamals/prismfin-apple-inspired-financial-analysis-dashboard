@@ -1,5 +1,5 @@
 import React from "react";
-import { Home, PieChart, Settings, TrendingUp } from "lucide-react";
+import { Home, PieChart, Settings, TrendingUp, Search, Newspaper, BookOpen } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import {
   SidebarContent,
@@ -13,6 +13,9 @@ export function AppSidebar(): JSX.Element {
   const navItems = [
     { label: "Dashboard", icon: Home, path: "/" },
     { label: "Quant Lab", icon: TrendingUp, path: "/quant" },
+    { label: "Screener", icon: Search, path: "/screener" },
+    { label: "Sentiment", icon: Newspaper, path: "/sentiment" },
+    { label: "Academy", icon: BookOpen, path: "/academy" },
     { label: "Settings", icon: Settings, path: "/settings" },
   ];
   return (
@@ -53,10 +56,10 @@ export function AppSidebar(): JSX.Element {
       <SidebarFooter className="p-8 mt-auto">
         <div className="flex flex-col gap-1 rounded-3xl bg-card/50 backdrop-blur-md p-5 ring-1 ring-border/20 border border-border/20 shadow-soft">
           <div className="flex items-center justify-between">
-            <p className="text-[10px] font-bold text-foreground uppercase tracking-widest">System Status</p>
+            <p className="text-[10px] font-bold text-foreground uppercase tracking-widest">Intelligence Hub</p>
             <div className="size-1.5 rounded-full bg-brand-teal animate-pulse" />
           </div>
-          <p className="text-[10px] text-muted-foreground leading-relaxed mt-1 font-medium">Core Intelligence Online</p>
+          <p className="text-[10px] text-muted-foreground leading-relaxed mt-1 font-medium">Market Feeds Online</p>
         </div>
       </SidebarFooter>
     </div>

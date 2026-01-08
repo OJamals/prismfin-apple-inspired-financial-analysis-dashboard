@@ -14,6 +14,10 @@ import '@/index.css'
 import { HomePage } from '@/pages/HomePage'
 import { SettingsPage } from '@/pages/SettingsPage'
 import { QuantPage } from '@/pages/QuantPage'
+import { ScreenerPage } from '@/pages/ScreenerPage';
+// Placeholder stubs for the other intelligence hub pages
+const SentimentPage = () => <HomePage />; 
+const AcademyPage = () => <HomePage />;
 const queryClient = new QueryClient();
 const router = createBrowserRouter([
   {
@@ -24,6 +28,21 @@ const router = createBrowserRouter([
   {
     path: "/quant",
     element: <QuantPage />,
+    errorElement: <RouteErrorBoundary />,
+  },
+  {
+    path: "/screener",
+    element: <ScreenerPage />,
+    errorElement: <RouteErrorBoundary />,
+  },
+  {
+    path: "/sentiment",
+    element: <SentimentPage />,
+    errorElement: <RouteErrorBoundary />,
+  },
+  {
+    path: "/academy",
+    element: <AcademyPage />,
     errorElement: <RouteErrorBoundary />,
   },
   {
