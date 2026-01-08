@@ -1,16 +1,18 @@
+import React from 'react';
 import {
   Drawer,
   DrawerContent,
   DrawerHeader,
   DrawerTitle,
-  DrawerDescription
+  DrawerDescription,
+  DrawerFooter
 } from '@/components/ui/drawer';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { formatPct } from '@/lib/format';
 import { ScreenerStock } from '@shared/types';
+import { Card, CardContent } from '@/components/ui/card';
+import { formatCurrencyUSD, formatPct } from '@/lib/format';
+import { Button } from '@/components/ui/button';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } from 'recharts';
-import { Zap } from 'lucide-react';
+import { X, TrendingUp, Shield, Zap, Target } from 'lucide-react';
 interface StockCompareDrawerProps {
   selectedStocks: ScreenerStock[];
   isOpen: boolean;

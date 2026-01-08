@@ -14,23 +14,49 @@ import {
   RiskRewardPoint,
   DrawdownData,
   CorrelationData,
-  MonteCarloSeriesPoint
+  MonteCarloSeriesPoint,
+  SentimentCategory
 } from './types';
+const SYMBOLS = [
+  'AAPL', 'MSFT', 'GOOGL', 'AMZN', 'NVDA', 'META', 'TSLA', 'V', 'JPM', 'UNH',
+  'HD', 'PG', 'MA', 'XOM', 'CVX', 'ABBV', 'LLY', 'PEP', 'KO', 'COST',
+  'AVGO', 'CSCO', 'ACN', 'ORCL', 'ADBE', 'LIN', 'TXN', 'MRK', 'PFE', 'NKE',
+  'AMD', 'NFLX', 'INTC', 'CMCSA', 'QCOM', 'HON', 'AMAT', 'SBUX', 'LOW', 'CAT',
+  'INTU', 'UPS', 'IBM', 'BA', 'AMGN', 'GE', 'MS', 'NEE', 'PM', 'GS'
+];
+const SECTORS = ['Technology', 'Financials', 'Healthcare', 'Energy', 'Consumer Staples', 'Consumer Discretionary', 'Industrials', 'Real Estate'];
 export function getMockScreenerData(): ScreenerStock[] {
-  const sectors = ['Technology', 'Energy', 'Healthcare', 'Financials', 'Consumer Staples', 'Real Estate'];
-  const symbols = ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'NVDA', 'META', 'TSLA', 'V', 'JPM', 'UNH'];
-  return symbols.map((symbol, i) => ({
-    symbol,
-    name: `${symbol} Corp`,
-    price: 100 + Math.random() * 500,
-    changePct: (Math.random() - 0.4) * 5,
-    peRatio: 15 + Math.random() * 20,
-    yieldPct: Math.random() * 4,
-    marketCap: `${(Math.random() * 2).toFixed(1)}T`,
-    volatility: 15 + Math.random() * 20,
-    sharpe: 0.5 + Math.random() * 2,
-    sector: sectors[i % sectors.length]
-  }));
+  return SYMBOLS.map((symbol, i) => {
+    const sector = SECTORS[i % SECTORS.length];
+    // Deterministic bias based on sector
+    let peBase = 15;
+    let yieldBase = 1.5;
+    let pegBase = 1.2;
+    if (sector === 'Technology') { peBase = 25; yieldBase = 0.5; pegBase = 1.8; }
+    if (sector === 'Energy') { peBase = 10; yieldBase = 4.0; pegBase = 0.8; }
+    if (sector === 'Financials') { peBase = 12; yieldBase = 2.5; pegBase = 1.0; }
+    const sentimentScore = Math.random();
+    const sentiment: SentimentCategory = sentimentScore > 0.6 ? 'Bullish' : sentimentScore < 0.3 ? 'Bearish' : 'Neutral';
+    return {
+      symbol,
+      name: `${symbol} Corporation`,
+      price: 50 + Math.random() * 450,
+      changePct: (Math.random() - 0.4) * 6,
+      peRatio: peBase + Math.random() * 10,
+      pegRatio: pegBase + Math.random() * 0.8,
+      yieldPct: yieldBase + Math.random() * 2,
+      marketCap: `${(0.1 + Math.random() * 2.5).toFixed(1)}T`,
+      volatility: 15 + Math.random() * 25,
+      sharpe: 0.2 + Math.random() * 2.5,
+      beta: 0.5 + Math.random() * 1.5,
+      sector,
+      sentiment,
+      miniSeries: Array.from({ length: 10 }).map((_, j) => ({
+        label: `T-${j}`,
+        value: 100 + (Math.random() - 0.5) * 20
+      }))
+    };
+  });
 }
 export function generateSentimentOverview(symbol: string): SentimentOverview {
   const articles: SentimentArticle[] = Array.from({ length: 5 }).map((_, i) => ({

@@ -111,17 +111,36 @@ export interface QuantData {
   correlation: CorrelationData;
 }
 /** New Intelligence Hub Types **/
+export type SentimentCategory = 'Bullish' | 'Neutral' | 'Bearish';
 export interface ScreenerStock {
   symbol: string;
   name: string;
   price: number;
   changePct: number;
   peRatio: number;
+  pegRatio: number;
   yieldPct: number;
   marketCap: string;
   volatility: number;
   sharpe: number;
+  beta: number;
   sector: string;
+  sentiment: SentimentCategory;
+  miniSeries: SeriesPoint[];
+}
+export interface ScreenerPreset {
+  id: string;
+  label: string;
+  filters: Partial<ScreenerFilters>;
+}
+export interface ScreenerFilters {
+  pe: number[];
+  yield: number[];
+  sharpe: number[];
+  peg: number[];
+  beta: number[];
+  sector: string;
+  sentiment: string;
 }
 export interface SentimentArticle {
   id: string;
