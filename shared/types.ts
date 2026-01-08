@@ -25,13 +25,18 @@ export interface HoldingsMetrics {
   yieldLabel: string;
 }
 export type AlertPriority = 'high' | 'medium' | 'low';
+export type AlertType = 'volatility' | 'info' | 'technical' | 'sentiment';
 export interface Alert {
   id: string;
-  type: string;
+  type: AlertType;
   message: string;
   priority: AlertPriority;
   timestamp: number;
   assetSymbol?: string;
+}
+export interface NewsHeadline {
+  headline: string;
+  score: number; // 0-100
 }
 export interface MetricsRow {
   name: string;
@@ -45,6 +50,7 @@ export interface MetricsRow {
   peRatio?: number;
   rsi?: number;
   miniSeries: SeriesPoint[];
+  news?: NewsHeadline[];
 }
 export interface DashboardData {
   range: TimeRange;

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Bell, AlertTriangle, Info, Check, X } from 'lucide-react';
+import { Bell, AlertTriangle, Info, Check, X, TrendingUp, Activity } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSearchParams } from 'react-router-dom';
 import { api } from '@/lib/api-client';
@@ -40,6 +40,30 @@ export function AlertCenter() {
   });
   const unreadCount = alerts.length;
   const hasHighPriority = alerts.some(a => a.priority === 'high');
+  const getAlertIcon = (type: string, priority: string) => {
+    switch(type) {
+      case 'technical':
+        return <TrendingUp className="size-5" />;
+      case 'volatility':
+        return <AlertTriangle className="size-5" />;
+      case 'sentiment':
+        return <Activity className="size-5" />;
+      default:
+        return <Info className="size-5" />;
+    }
+  };
+  const getAlertStyles = (type: string, priority: string) => {
+    if (type === 'technical' && priority === 'high') {
+      return "bg-indigo-50 text-indigo-600 shadow-[0_0_15px_-3px_rgba(79,70,229,0.3)] border-indigo-100 ring-1 ring-indigo-200";
+    }
+    if (priority === 'high') {
+      return "bg-rose-50 text-rose-600 border-rose-100 ring-1 ring-rose-200";
+    }
+    if (priority === 'medium') {
+      return "bg-amber-50 text-amber-600 border-amber-100";
+    }
+    return "bg-brand-blue/5 text-brand-blue border-brand-blue/10";
+  };
   return (
     <Sheet>
       <SheetTrigger asChild>
@@ -65,11 +89,11 @@ export function AlertCenter() {
         <SheetHeader className="p-8 border-b border-border/5">
           <div className="flex items-center justify-between">
             <div className="space-y-1">
-              <SheetTitle className="text-2xl font-bold font-display tracking-tight">Alerts</SheetTitle>
+              <SheetTitle className="text-2xl font-bold font-display tracking-tight">Alert Intelligence</SheetTitle>
               <SheetDescription className="text-xs text-muted-foreground font-medium uppercase tracking-widest">{mode} environment</SheetDescription>
             </div>
             <Badge variant="secondary" className="rounded-xl px-3 py-1 bg-secondary/80 text-foreground font-bold">
-              {unreadCount} Active
+              {unreadCount} Signal{unreadCount !== 1 ? 's' : ''}
             </Badge>
           </div>
         </SheetHeader>
@@ -80,9 +104,9 @@ export function AlertCenter() {
                 <div className="size-16 rounded-3xl bg-gain-50 text-gain-500 flex items-center justify-center mb-6 shadow-sm">
                   <Check className="size-8" />
                 </div>
-                <h3 className="text-lg font-bold font-display">All Clear</h3>
+                <h3 className="text-lg font-bold font-display">System Neutral</h3>
                 <p className="text-sm text-muted-foreground mt-2 max-w-[200px] leading-relaxed">
-                  No notifications for the current {mode} market view.
+                  No critical volatility or technical signals detected in {mode} markets.
                 </p>
               </div>
             ) : (
@@ -93,16 +117,15 @@ export function AlertCenter() {
                   animate={{ opacity: 1, x: 0 }}
                   className={cn(
                     "group relative p-5 rounded-3xl border bg-card shadow-soft transition-all hover:shadow-premium border-card/60",
-                    alert.priority === 'high' ? "ring-1 ring-rose-100" : ""
+                    alert.priority === 'high' ? "ring-1 ring-offset-2 ring-transparent" : ""
                   )}
                 >
                   <div className="flex gap-4">
                     <div className={cn(
-                      "mt-1 size-10 rounded-2xl flex items-center justify-center shrink-0 shadow-sm",
-                      alert.priority === 'high' ? "bg-rose-50 text-rose-500" : 
-                      alert.priority === 'medium' ? "bg-amber-50 text-amber-500" : "bg-brand-blue/5 text-brand-blue"
+                      "mt-1 size-10 rounded-2xl flex items-center justify-center shrink-0 shadow-sm transition-all",
+                      getAlertStyles(alert.type, alert.priority)
                     )}>
-                      {alert.type === 'volatility' ? <AlertTriangle className="size-5" /> : <Info className="size-5" />}
+                      {getAlertIcon(alert.type, alert.priority)}
                     </div>
                     <div className="flex-1 space-y-2">
                       <div className="flex items-center justify-between">
@@ -120,10 +143,13 @@ export function AlertCenter() {
                       </div>
                       <p className="text-sm font-bold leading-snug text-foreground">{alert.message}</p>
                       {alert.assetSymbol && (
-                        <div className="pt-1">
-                          <Badge variant="outline" className="rounded-lg text-[10px] border-brand-blue/20 text-brand-blue bg-brand-blue/5 font-bold cursor-pointer hover:bg-brand-blue hover:text-white transition-colors">
-                            Analyze {alert.assetSymbol}
+                        <div className="pt-1 flex items-center gap-2">
+                          <Badge variant="outline" className="rounded-lg text-[10px] border-brand-blue/20 text-brand-blue bg-brand-blue/5 font-bold cursor-pointer hover:bg-brand-blue hover:text-white transition-all shadow-sm">
+                            Drill-Down {alert.assetSymbol}
                           </Badge>
+                          {alert.type === 'technical' && (
+                            <div className="size-1.5 rounded-full bg-indigo-500 animate-pulse" />
+                          )}
                         </div>
                       )}
                     </div>

@@ -10,10 +10,11 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { MetricsRow } from '@shared/types';
 import { formatCurrencyUSD, formatPct } from '@/lib/format';
-import { TrendingUp, TrendingDown, ChevronDown, ChevronUp, Zap, Target } from 'lucide-react';
+import { TrendingUp, TrendingDown, ChevronDown, ChevronUp, Zap, Target, Newspaper } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
 import { AreaChart, Area, ResponsiveContainer } from 'recharts';
+import { Badge } from '@/components/ui/badge';
 interface MetricsTableCardProps {
   rows: MetricsRow[];
 }
@@ -109,7 +110,8 @@ export function MetricsTableCard({ rows }: MetricsTableCardProps) {
                                 transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
                                 className="overflow-hidden bg-muted/5"
                               >
-                                <div className="px-10 py-12 grid grid-cols-1 md:grid-cols-3 gap-12 border-t border-white/40">
+                                <div className="px-10 py-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 border-t border-white/40">
+                                  {/* Momentum Section */}
                                   <div className="space-y-6">
                                     <div className="flex items-center gap-2.5 text-[10px] font-bold text-muted-foreground uppercase tracking-widest opacity-80">
                                       <Zap className="size-4 text-amber-500 fill-amber-500" />
@@ -136,6 +138,28 @@ export function MetricsTableCard({ rows }: MetricsTableCardProps) {
                                       </ResponsiveContainer>
                                     </div>
                                   </div>
+                                  {/* News Section (New) */}
+                                  <div className="space-y-6 lg:col-span-2">
+                                    <div className="flex items-center gap-2.5 text-[10px] font-bold text-muted-foreground uppercase tracking-widest opacity-80">
+                                      <Newspaper className="size-4 text-brand-blue" />
+                                      Contextual Intelligence
+                                    </div>
+                                    <div className="space-y-3">
+                                      {row.news?.map((n, i) => (
+                                        <div key={i} className="flex items-center justify-between p-3.5 rounded-2xl bg-white border border-white/60 shadow-sm ring-1 ring-black/5 hover:shadow-md transition-all group/news">
+                                          <p className="text-xs font-bold text-foreground leading-snug line-clamp-1 flex-1 pr-4">{n.headline}</p>
+                                          <Badge className={cn(
+                                            "rounded-lg px-2 py-0.5 text-[10px] font-black border-none shrink-0",
+                                            n.score > 70 ? "bg-gain-50 text-gain-700" : n.score < 35 ? "bg-loss-50 text-loss-700" : "bg-slate-50 text-slate-600"
+                                          )}>
+                                            {n.score}%
+                                          </Badge>
+                                        </div>
+                                      ))}
+                                      {!row.news && <p className="text-xs text-muted-foreground italic">No recent intelligence reports found.</p>}
+                                    </div>
+                                  </div>
+                                  {/* Stats & Sentiment Section */}
                                   <div className="space-y-6">
                                     <div className="flex items-center gap-2.5 text-[10px] font-bold text-muted-foreground uppercase tracking-widest opacity-80">
                                       <Target className="size-4 text-brand-blue fill-brand-blue" />
@@ -161,23 +185,6 @@ export function MetricsTableCard({ rows }: MetricsTableCardProps) {
                                           style={{ width: `${safeSentiment}%` }}
                                         />
                                       </div>
-                                    </div>
-                                  </div>
-                                  <div className="grid grid-cols-2 gap-6">
-                                    <div className="p-6 rounded-[2rem] bg-white shadow-soft border border-white/60 hover:shadow-premium transition-all ring-1 ring-black/5">
-                                      <p className="text-[10px] font-bold text-muted-foreground uppercase mb-2 tracking-tighter opacity-70">P/E Ratio</p>
-                                      <p className="text-xl font-bold tabular-nums text-foreground">{row.peRatio ?? 'N/A'}</p>
-                                    </div>
-                                    <div className="p-6 rounded-[2rem] bg-white shadow-soft border border-white/60 hover:shadow-premium transition-all ring-1 ring-black/5">
-                                      <p className="text-[10px] font-bold text-muted-foreground uppercase mb-2 tracking-tighter opacity-70">RSI (14D)</p>
-                                      <p className={cn(
-                                        "text-xl font-bold tabular-nums",
-                                        (row.rsi ?? 50) > 70 ? "text-[#FF3B30]" : (row.rsi ?? 50) < 30 ? "text-[#34C759]" : "text-foreground"
-                                      )}>{row.rsi ?? 'N/A'}</p>
-                                    </div>
-                                    <div className="col-span-2 px-1 space-y-1">
-                                      <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest opacity-40">Volume Dynamics</p>
-                                      <p className="text-xs font-bold text-foreground/70 tracking-tight tabular-nums">{row.volume}</p>
                                     </div>
                                   </div>
                                 </div>

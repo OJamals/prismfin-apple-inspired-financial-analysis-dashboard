@@ -14,7 +14,8 @@ import {
   DrawdownData,
   DrawdownPoint,
   CorrelationData,
-  HoldingsMetrics
+  HoldingsMetrics,
+  NewsHeadline
 } from './types';
 export function calculateHoldingsMetrics(rows: MetricsRow[]): HoldingsMetrics {
   if (!rows || rows.length === 0) {
@@ -79,27 +80,71 @@ function generateMiniSeries(base: number): SeriesPoint[] {
     value: base * (0.92 + Math.random() * 0.16)
   }));
 }
+function generateMockNews(symbol: string): NewsHeadline[] {
+  const templates = [
+    { text: "Earnings Momentum Continues for {s}", baseScore: 85 },
+    { text: "Regulatory Framework Update Affecting {s}", baseScore: 45 },
+    { text: "Institutional Accumulation Detected in {s}", baseScore: 78 },
+    { text: "Supply Chain Constraints Hit {s} Production", baseScore: 32 },
+    { text: "New Product Launch Drives Sentiment for {s}", baseScore: 92 },
+    { text: "Macro Headwinds Pressure {s} Valuation", baseScore: 40 },
+  ];
+  const shuffled = [...templates].sort(() => 0.5 - Math.random());
+  return shuffled.slice(0, 3).map(t => ({
+    headline: t.text.replace('{s}', symbol),
+    score: Math.min(100, Math.max(0, t.baseScore + (Math.random() * 20 - 10)))
+  }));
+}
 export function getMockRows(): MetricsRow[] {
   const jitter = (val: number, factor: number = 0.05) => val * (1 + (Math.random() - 0.5) * factor);
-  return [
-    { name: 'Apple Inc.', symbol: 'AAPL', price: jitter(189.43), changePct: jitter(1.2, 0.5), ytdPct: 12.4, volume: '54.2M', class: 'equity', sentiment: Math.floor(jitter(78, 0.2)), peRatio: 28.4, rsi: 62, miniSeries: generateMiniSeries(189) },
-    { name: 'Microsoft Corp.', symbol: 'MSFT', price: jitter(415.22), changePct: jitter(-0.4, 0.5), ytdPct: 15.1, volume: '22.1M', class: 'equity', sentiment: Math.floor(jitter(65, 0.2)), peRatio: 35.2, rsi: 48, miniSeries: generateMiniSeries(415) },
-    { name: 'Nvidia Corp.', symbol: 'NVDA', price: jitter(882.33), changePct: jitter(3.5, 0.5), ytdPct: 78.2, volume: '88.5M', class: 'equity', sentiment: Math.floor(jitter(92, 0.2)), peRatio: 74.1, rsi: 72, miniSeries: generateMiniSeries(882) },
-    { name: 'Bitcoin', symbol: 'BTC', price: jitter(64200), changePct: jitter(5.2, 1.0), ytdPct: 45.1, volume: '32.1B', class: 'crypto', sentiment: Math.floor(jitter(84, 0.2)), rsi: 68, miniSeries: generateMiniSeries(64200) },
-    { name: 'Ethereum', symbol: 'ETH', price: jitter(3450), changePct: jitter(-1.2, 1.0), ytdPct: 32.4, volume: '18.4B', class: 'crypto', sentiment: Math.floor(jitter(71, 0.2)), rsi: 54, miniSeries: generateMiniSeries(3450) },
-    { name: 'US 10Y Treasury', symbol: 'US10Y', price: jitter(98.42, 0.01), changePct: jitter(0.1, 0.1), ytdPct: -2.4, volume: 'N/A', class: 'fixed-income', sentiment: Math.floor(jitter(45, 0.1)), rsi: 42, miniSeries: generateMiniSeries(98) },
+  const data = [
+    { name: 'Apple Inc.', symbol: 'AAPL', price: jitter(189.43), changePct: jitter(1.2, 0.5), ytdPct: 12.4, volume: '54.2M', class: 'equity', sentiment: Math.floor(jitter(78, 0.2)), peRatio: 28.4, rsi: 62 },
+    { name: 'Microsoft Corp.', symbol: 'MSFT', price: jitter(415.22), changePct: jitter(-0.4, 0.5), ytdPct: 15.1, volume: '22.1M', class: 'equity', sentiment: Math.floor(jitter(65, 0.2)), peRatio: 35.2, rsi: 48 },
+    { name: 'Nvidia Corp.', symbol: 'NVDA', price: jitter(882.33), changePct: jitter(3.5, 0.5), ytdPct: 78.2, volume: '88.5M', class: 'equity', sentiment: Math.floor(jitter(92, 0.2)), peRatio: 74.1, rsi: 72 },
+    { name: 'Bitcoin', symbol: 'BTC', price: jitter(64200), changePct: jitter(5.2, 1.0), ytdPct: 45.1, volume: '32.1B', class: 'crypto', sentiment: Math.floor(jitter(84, 0.2)), rsi: 68 },
+    { name: 'Ethereum', symbol: 'ETH', price: jitter(3450), changePct: jitter(-1.2, 1.0), ytdPct: 32.4, volume: '18.4B', class: 'crypto', sentiment: Math.floor(jitter(71, 0.2)), rsi: 54 },
+    { name: 'US 10Y Treasury', symbol: 'US10Y', price: jitter(98.42, 0.01), changePct: jitter(0.1, 0.1), ytdPct: -2.4, volume: 'N/A', class: 'fixed-income', sentiment: Math.floor(jitter(45, 0.1)), rsi: 42 },
   ];
+  return data.map(d => ({
+    ...d,
+    miniSeries: generateMiniSeries(d.price),
+    news: generateMockNews(d.symbol)
+  } as MetricsRow));
 }
 export function generateAlerts(rows: MetricsRow[], mode: TradingMode): Alert[] {
   const alerts: Alert[] = [];
-  const threshold = mode === 'live' ? 2 : 4;
+  const isLive = mode === 'live';
   rows.forEach(r => {
+    // Volatility Alerts
+    const threshold = isLive ? 2 : 4;
     if (Math.abs(r.changePct) > threshold) {
       alerts.push({
-        id: `alert-${r.symbol}-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
+        id: `alert-${r.symbol}-vol-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
         type: 'volatility',
-        message: `${mode.toUpperCase()} Alert: ${r.symbol} ${r.changePct.toFixed(2)}% move detected.`,
+        message: `${mode.toUpperCase()}: ${r.symbol} volatile move of ${r.changePct.toFixed(2)}%.`,
         priority: Math.abs(r.changePct) > 5 ? 'high' : 'medium',
+        timestamp: Date.now(),
+        assetSymbol: r.symbol
+      });
+    }
+    // Technical Technical Signals (RSI Extremes)
+    if (r.rsi && (r.rsi > 70 || r.rsi < 30)) {
+      alerts.push({
+        id: `alert-${r.symbol}-rsi-${Date.now()}`,
+        type: 'technical',
+        message: `Technical: ${r.symbol} RSI at ${r.rsi.toFixed(0)} (${r.rsi > 70 ? 'Overbought' : 'Oversold'}).`,
+        priority: 'medium',
+        timestamp: Date.now(),
+        assetSymbol: r.symbol
+      });
+    }
+    // Randomized "Golden Cross" events for variety
+    if (Math.random() > 0.85) {
+      alerts.push({
+        id: `alert-${r.symbol}-cross-${Date.now()}`,
+        type: 'technical',
+        message: `Signal: ${r.symbol} Golden Cross (50DMA/200DMA crossover) confirmed.`,
+        priority: 'high',
         timestamp: Date.now(),
         assetSymbol: r.symbol
       });
@@ -109,7 +154,7 @@ export function generateAlerts(rows: MetricsRow[], mode: TradingMode): Alert[] {
     alerts.push({
       id: `alert-system-${Date.now()}`,
       type: 'info',
-      message: `${mode === 'live' ? 'Live market' : 'Paper sim'} stability confirmed.`,
+      message: `${isLive ? 'Live market' : 'Paper sim'} stability confirmed.`,
       priority: 'low',
       timestamp: Date.now()
     });
@@ -139,7 +184,6 @@ function generateMonteCarlo(horizon: '1Y' | '5Y' | '10Y', mode: TradingMode): Mo
   const drift = isLive ? 0.008 : 0.012;
   const volBase = isLive ? 0.05 : 0.03;
   for (let i = 0; i <= steps; i++) {
-    // Dispersion grows with sqrt of time
     const vol = volBase * Math.sqrt((i + 1) / 12);
     series.push({
       label: `Month ${i}`,
@@ -155,7 +199,6 @@ function generateMonteCarlo(horizon: '1Y' | '5Y' | '10Y', mode: TradingMode): Mo
 function generateRiskRewardData(): RiskRewardPoint[] {
   const symbols = ['AAPL', 'MSFT', 'NVDA', 'TSLA', 'GOOGL', 'AMZN', 'META', 'BRK.B', 'BTC', 'ETH', 'GOLD', 'TLT'];
   return symbols.map(s => {
-    // More distinct clusters
     const isVolatile = ['BTC', 'ETH', 'TSLA', 'NVDA'].includes(s);
     const isSafe = ['GOLD', 'TLT', 'BRK.B'].includes(s);
     const ret = isVolatile ? (15 + Math.random() * 35) : isSafe ? (2 + Math.random() * 8) : (8 + Math.random() * 15);
@@ -190,7 +233,6 @@ function generateCorrelationMatrix(): CorrelationData {
       if (i === j) {
         matrix[s1][s2] = 1.0;
       } else {
-        // Create some negative correlations (e.g., Gold vs BTC/Tech)
         const isHedge = (s1 === 'GOLD' || s2 === 'GOLD');
         const base = isHedge ? -0.4 : 0.6;
         matrix[s1][s2] = parseFloat((base + (Math.random() - 0.5) * 0.4).toFixed(2));
