@@ -171,13 +171,41 @@ export interface SentimentOverview {
   trend: 'improving' | 'declining' | 'stable';
   articles: SentimentArticle[];
 }
+// --- Academy & Learning Hub Types ---
+export type AcademyDifficulty = 'Beginner' | 'Intermediate' | 'Advanced';
+export type AcademyStepType = 'content' | 'video' | 'interactive' | 'quiz' | 'diagram';
+export interface AcademyStep {
+  id: string;
+  title: string;
+  type: AcademyStepType;
+  content: string;
+  formula?: string;
+  interactiveType?: 'sharpe-calc' | 'monte-carlo-sim' | 'corr-matrix' | 'bell-curve';
+  videoUrl?: string;
+}
+export interface QuizQuestion {
+  question: string;
+  options: string[];
+  correctIndex: number;
+  explanation: string;
+}
+export interface AcademyQuizData {
+  questions: QuizQuestion[];
+}
 export interface AcademyTopic {
   id: string;
   title: string;
   description: string;
+  trackId: 'foundations' | 'risk' | 'quantitative';
   category: 'Risk' | 'Strategy' | 'Basics' | 'Advanced';
-  difficulty: 'Beginner' | 'Intermediate' | 'Expert';
+  difficulty: AcademyDifficulty;
   readingTimeMin: number;
   content: string;
-  interactiveType?: 'sharpe-calc' | 'monte-carlo-sim' | 'corr-matrix';
+  steps: AcademyStep[];
+  quiz?: AcademyQuizData;
+}
+export interface FinancialTerm {
+  term: string;
+  definition: string;
+  category: string;
 }
