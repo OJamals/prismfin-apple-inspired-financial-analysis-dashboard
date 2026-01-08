@@ -1,5 +1,5 @@
 import React from "react";
-import { Home, PieChart, FileText, Settings, Search, TrendingUp } from "lucide-react";
+import { Home, PieChart, FileText, Settings, Search, TrendingUp, Newspaper, BookOpen } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import {
   SidebarContent,
@@ -17,6 +17,9 @@ export function AppSidebar(): JSX.Element {
     { label: "Dashboard", icon: Home, path: "/" },
     { label: "Reports", icon: FileText, path: "/reports" },
     { label: "Quant", icon: TrendingUp, path: "/quant" },
+    { label: "Screener", icon: Search, path: "/screener" },
+    { label: "News", icon: Newspaper, path: "/news" },
+    { label: "Academy", icon: BookOpen, path: "/academy" },
     { label: "Settings", icon: Settings, path: "/settings" },
   ];
   return (
@@ -41,7 +44,7 @@ export function AppSidebar(): JSX.Element {
       <SidebarContent className="px-3 mt-2">
         <SidebarGroup>
           <SidebarGroupLabel className="px-4 mb-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground/50">
-            Analytics
+            Intelligence
           </SidebarGroupLabel>
           <ul className="space-y-1">
             {navItems.map(({label, icon: Icon, path}) => {
@@ -73,7 +76,7 @@ export function AppSidebar(): JSX.Element {
             <p className="text-xs font-bold text-foreground">Pro Account</p>
             <div className="size-1.5 rounded-full bg-brand-teal animate-pulse" />
           </div>
-          <p className="text-[10px] text-muted-foreground leading-relaxed">Advanced risk simulations enabled</p>
+          <p className="text-[10px] text-muted-foreground leading-relaxed">Advanced intelligence enabled</p>
         </div>
       </SidebarFooter>
     </div>

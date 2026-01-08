@@ -14,7 +14,11 @@ import {
   DrawdownData,
   DrawdownPoint,
   CorrelationData,
-  HoldingsMetrics
+  HoldingsMetrics,
+  ScreenerStock,
+  NewsArticle,
+  SentimentData,
+  MarketIntelligence
 } from './types';
 export function calculateHoldingsMetrics(rows: MetricsRow[]): HoldingsMetrics {
   if (!rows || rows.length === 0) {
@@ -95,6 +99,61 @@ export function getMockRows(): MetricsRow[] {
     { name: 'Ethereum', symbol: 'ETH', price: jitter(3450), changePct: jitter(-1.2, 1.0), ytdPct: 32.4, volume: '18.4B', class: 'crypto', sentiment: Math.floor(jitter(71, 0.2)), rsi: 54, miniSeries: generateMiniSeries(3450) },
     { name: 'US 10Y Treasury', symbol: 'US10Y', price: jitter(98.42, 0.01), changePct: jitter(0.1, 0.1), ytdPct: -2.4, volume: 'N/A', class: 'fixed-income', sentiment: Math.floor(jitter(45, 0.1)), rsi: 42, miniSeries: generateMiniSeries(98) },
   ];
+}
+export function generateScreenerStocks(): ScreenerStock[] {
+  const symbols = ['AAPL', 'MSFT', 'NVDA', 'TSLA', 'GOOGL', 'AMZN', 'META', 'BRK.B', 'LLY', 'AVGO', 'V', 'JPM', 'UNH', 'MA', 'COST', 'PG', 'HD', 'NFLX', 'ABBV', 'KO', 'PEP', 'ADBE', 'CRM', 'AMD', 'BAC'];
+  return symbols.map(s => ({
+    symbol: s,
+    name: `${s} Corporation`,
+    price: 50 + Math.random() * 950,
+    changePct: (Math.random() - 0.4) * 8,
+    peRatio: 10 + Math.random() * 60,
+    divYield: Math.random() * 5,
+    rsi: 20 + Math.random() * 60,
+    score: 30 + Math.random() * 65
+  }));
+}
+export function generateMarketIntelligence(symbol: string): MarketIntelligence {
+  const articles: NewsArticle[] = [
+    {
+      id: `art-1-${symbol}`,
+      title: `${symbol} Resilience Noted in Recent Institutional Audits`,
+      source: 'Wall Street Intel',
+      timestamp: Date.now() - 3600000,
+      url: '#',
+      summary: `Analysts highlight the structural strength of ${symbol} following a robust quarterly performance, citing increased margins and reduced overhead.`,
+      sentiment: 'positive'
+    },
+    {
+      id: `art-2-${symbol}`,
+      title: `Regulatory Headwinds May Impact ${symbol} Logistics`,
+      source: 'Global Market Wire',
+      timestamp: Date.now() - 7200000,
+      url: '#',
+      summary: `Recent shifts in international trade policy suggest potential cost increases for ${symbol} operations in the Asia-Pacific region.`,
+      sentiment: 'negative'
+    },
+    {
+      id: `art-3-${symbol}`,
+      title: `Retail Sentiment for ${symbol} Remains Stable`,
+      source: 'PrismFin Analytics',
+      timestamp: Date.now() - 14400000,
+      url: '#',
+      summary: `Social metrics and retail flow indicate a neutral outlook as investors wait for the upcoming product lifecycle reveal.`,
+      sentiment: 'neutral'
+    }
+  ];
+  const score = symbol === 'NVDA' ? 88 : symbol === 'AAPL' ? 72 : 50 + Math.random() * 30;
+  return {
+    articles,
+    sentiment: {
+      symbol,
+      score: Math.floor(score),
+      bullishPct: Math.floor(score),
+      bearishPct: 100 - Math.floor(score),
+      outlook: score > 70 ? 'The overall sentiment remains highly constructive, driven by institutional adoption.' : 'Current market mood is cautious, balancing growth prospects against macro volatility.'
+    }
+  };
 }
 export function generateAlerts(rows: MetricsRow[], mode: TradingMode): Alert[] {
   const alerts: Alert[] = [];
