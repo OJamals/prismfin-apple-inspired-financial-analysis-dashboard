@@ -1,7 +1,7 @@
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { HoldingsMetrics } from '@shared/types';
-import { ShieldCheck, Activity, Landmark } from 'lucide-react';
+import { ShieldCheck, Activity, Landmark, TrendingUp } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
 interface HoldingsMetricsGridProps {

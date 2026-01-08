@@ -53,7 +53,6 @@ export class DashboardEntity extends Entity<DashboardState> {
     if (!data) {
       data = generateDashboard(range, mode);
     }
-    // Deep clone to prevent accidental mutations of internal state
     const clonedData = JSON.parse(JSON.stringify(data)) as DashboardData;
     clonedData.alerts = (clonedData.alerts ?? []).filter(a => !dismissedAlertIds.includes(a.id));
     return clonedData;
@@ -71,7 +70,6 @@ export class DashboardEntity extends Entity<DashboardState> {
     const state = await this.ensureState();
     const modeQuant = state?.quantByRange?.[mode] ?? DashboardEntity.initialState.quantByRange[mode];
     const data = modeQuant[range] ?? generateQuantData(range, mode);
-    // Deep clone decoupling
     return JSON.parse(JSON.stringify(data)) as QuantData;
   }
   async refreshRange(range: TimeRange, mode: TradingMode): Promise<DashboardData> {
