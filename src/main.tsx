@@ -15,9 +15,6 @@ import { HomePage } from '@/pages/HomePage'
 import { ReportsPage } from '@/pages/ReportsPage'
 import { SettingsPage } from '@/pages/SettingsPage'
 import { QuantPage } from '@/pages/QuantPage'
-import { ScreenerPage } from '@/pages/ScreenerPage'
-import { NewsPage } from '@/pages/NewsPage'
-import { AcademyPage } from '@/pages/AcademyPage'
 const queryClient = new QueryClient();
 const router = createBrowserRouter([
   {
@@ -33,21 +30,6 @@ const router = createBrowserRouter([
   {
     path: "/quant",
     element: <QuantPage />,
-    errorElement: <RouteErrorBoundary />,
-  },
-  {
-    path: "/screener",
-    element: <ScreenerPage />,
-    errorElement: <RouteErrorBoundary />,
-  },
-  {
-    path: "/news",
-    element: <NewsPage />,
-    errorElement: <RouteErrorBoundary />,
-  },
-  {
-    path: "/academy",
-    element: <AcademyPage />,
     errorElement: <RouteErrorBoundary />,
   },
   {

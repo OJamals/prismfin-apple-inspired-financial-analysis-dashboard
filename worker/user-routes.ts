@@ -3,7 +3,6 @@ import type { Env } from './core-utils';
 import { ok, bad } from './core-utils';
 import { DashboardEntity } from "./entities";
 import { TimeRange, TradingMode } from "@shared/types";
-import { generateScreenerStocks, generateMarketIntelligence } from "@shared/mock-data";
 export function userRoutes(app: Hono<{ Bindings: Env }>) {
   app.get('/api/dashboard', async (c) => {
     await DashboardEntity.ensureSeed(c.env);
@@ -51,24 +50,5 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
     const entity = new DashboardEntity(c.env, 'main');
     const updated = await entity.refreshQuant(range, mode);
     return ok(c, updated);
-  });
-  /** Phase 11 Routes **/
-  app.get('/api/screener', async (c) => {
-    const peMax = parseFloat(c.req.query('peMax') || '100');
-    const yieldMin = parseFloat(c.req.query('yieldMin') || '0');
-    const rsiMin = parseFloat(c.req.query('rsiMin') || '0');
-    let stocks = generateScreenerStocks();
-    // Apply basic filters
-    stocks = stocks.filter(s => 
-      s.peRatio <= peMax && 
-      s.divYield >= yieldMin && 
-      s.rsi >= rsiMin
-    );
-    return ok(c, stocks);
-  });
-  app.get('/api/news', async (c) => {
-    const symbol = (c.req.query('symbol') || 'AAPL').toUpperCase();
-    const data = generateMarketIntelligence(symbol);
-    return ok(c, data);
   });
 }
