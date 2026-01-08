@@ -16,6 +16,14 @@ export interface Kpi {
   value: number;
   deltaPct: number;
 }
+export interface HoldingsMetrics {
+  diversificationPct: number;
+  diversificationLabel: string;
+  riskLevel: 'Conservative' | 'Moderate' | 'Aggressive';
+  beta: number;
+  yieldPct: number;
+  yieldLabel: string;
+}
 export type AlertPriority = 'high' | 'medium' | 'low';
 export interface Alert {
   id: string;
@@ -43,6 +51,7 @@ export interface DashboardData {
   mode: TradingMode;
   updatedAt: number;
   kpis: Kpi[];
+  holdingsMetrics: HoldingsMetrics;
   performance: SeriesPoint[];
   cashflow: SeriesPoint[];
   rows: MetricsRow[];

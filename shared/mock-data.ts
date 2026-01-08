@@ -13,8 +13,30 @@ import {
   RiskRewardPoint,
   DrawdownData,
   DrawdownPoint,
-  CorrelationData
+  CorrelationData,
+  HoldingsMetrics
 } from './types';
+export function calculateHoldingsMetrics(rows: MetricsRow[]): HoldingsMetrics {
+  const uniqueClasses = new Set(rows.map(r => r.class));
+  const diversificationPct = Math.min(100, (uniqueClasses.size / 4) * 100);
+  const avgSentiment = rows.reduce((acc, r) => acc + r.sentiment, 0) / rows.length;
+  let riskLevel: 'Conservative' | 'Moderate' | 'Aggressive' = 'Moderate';
+  if (avgSentiment > 80) riskLevel = 'Aggressive';
+  else if (avgSentiment < 40) riskLevel = 'Conservative';
+  // Mock Beta based on asset mix
+  const hasCrypto = rows.some(r => r.class === 'crypto');
+  const beta = hasCrypto ? 1.42 : 1.08;
+  // Mock yield derived from price/sentiment ratio
+  const yieldPct = rows.reduce((acc, r) => acc + (r.class === 'fixed-income' ? 4.5 : 1.2), 0) / rows.length;
+  return {
+    diversificationPct,
+    diversificationLabel: diversificationPct > 70 ? 'High across sectors' : 'Concentrated',
+    riskLevel,
+    beta,
+    yieldPct: parseFloat(yieldPct.toFixed(2)),
+    yieldLabel: 'Annual projection'
+  };
+}
 export function getMockKPIs(mode: TradingMode): Kpi[] {
   const isLive = mode === 'live';
   return [
@@ -69,7 +91,7 @@ export function getMockRows(): MetricsRow[] {
 }
 export function generateAlerts(rows: MetricsRow[], mode: TradingMode): Alert[] {
   const alerts: Alert[] = [];
-  const threshold = mode === 'live' ? 2 : 4; // More sensitive in live
+  const threshold = mode === 'live' ? 2 : 4; 
   rows.forEach(r => {
     if (Math.abs(r.changePct) > threshold) {
       alerts.push({
@@ -100,6 +122,7 @@ export function generateDashboard(range: TimeRange, mode: TradingMode): Dashboar
     mode,
     updatedAt: Date.now(),
     kpis: getMockKPIs(mode),
+    holdingsMetrics: calculateHoldingsMetrics(rows),
     performance: getMockPerformance(range, mode),
     cashflow: getMockCashflow(),
     rows: rows,

@@ -17,6 +17,22 @@ export function KpiSkeleton({ className }: SkeletonProps) {
     </div>
   );
 }
+export function HoldingsMetricsSkeleton({ className }: SkeletonProps) {
+  return (
+    <div className={cn("grid grid-cols-1 md:grid-cols-3 gap-8", className)}>
+      {Array.from({ length: 3 }).map((_, i) => (
+        <div key={i} className="h-48 rounded-4xl bg-card shadow-soft p-8 shimmer-fast border border-card/60 flex flex-col gap-4">
+          <div className="h-10 w-10 bg-muted/40 rounded-2xl" />
+          <div className="space-y-2 mt-2">
+            <div className="h-4 w-24 bg-muted/50 rounded-md" />
+            <div className="h-8 w-20 bg-muted/70 rounded-lg" />
+            <div className="h-3 w-32 bg-muted/30 rounded-md" />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
 export function ChartSkeleton({ className }: SkeletonProps) {
   return (
     <div className={cn("h-[400px] rounded-4xl bg-card shadow-soft p-8 shimmer-fast border border-card/60", className)}>
@@ -26,9 +42,9 @@ export function ChartSkeleton({ className }: SkeletonProps) {
       </div>
       <div className="h-64 w-full flex items-end gap-2 px-2">
         {Array.from({ length: 12 }).map((_, i) => (
-          <div 
-            key={i} 
-            className="flex-1 bg-muted/20 rounded-t-xl" 
+          <div
+            key={i}
+            className="flex-1 bg-muted/20 rounded-t-xl"
             style={{ height: `${20 + Math.random() * 60}%` }}
           />
         ))}
