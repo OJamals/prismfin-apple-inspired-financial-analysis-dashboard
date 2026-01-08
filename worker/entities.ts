@@ -92,6 +92,10 @@ export class DashboardEntity extends Entity<DashboardState> {
     const state = await this.ensureState();
     const rangeQuant = state?.quantByRange ?? DashboardEntity.initialState.quantByRange;
     let data = rangeQuant[range] ?? generateQuantData(range);
+    // Ensure pulse hydration
+    if (!data.pulse) {
+      data.pulse = generateQuantData(range).pulse;
+    }
     // Defensive check for Monte Carlo structure
     if (!data.monteCarlo || !data.monteCarlo['10Y']) {
       data = generateQuantData(range);

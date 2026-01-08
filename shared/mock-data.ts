@@ -189,6 +189,13 @@ function generateMCSim(horizon: '1Y' | '5Y' | '10Y'): MonteCarloStats {
   };
 }
 export function generateQuantData(range: TimeRange): QuantData {
+  const pulse: PulseMetric = {
+    summary: "Institutional Alpha Threshold Reached",
+    detail: "The current portfolio model demonstrates a Sharpe Ratio in the top 10% of its peer sector. Risk decomposition suggests high capital efficiency.",
+    health: 'healthy',
+    comparisonLabel: "Portfolio efficiency exceeds market benchmark by 4.5% adjusted for vol"
+  };
+
   return {
     range,
     updatedAt: Date.now(),
@@ -219,6 +226,7 @@ export function generateQuantData(range: TimeRange): QuantData {
       sharpe: 0.8 + Math.random() * 1.5,
       weight: 5 + Math.random() * 15
     })),
+    pulse,
     drawdown: {
       maxDrawdown: 12.4,
       series: Array.from({ length: 30 }).map((_, i) => ({

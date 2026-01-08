@@ -137,6 +137,7 @@ export interface QuantData {
   riskReward: RiskRewardPoint[];
   drawdown: DrawdownData;
   correlation: CorrelationData;
+  pulse: PulseMetric;
 }
 export type SentimentCategory = 'Bullish' | 'Neutral' | 'Bearish';
 export interface ScreenerStock {

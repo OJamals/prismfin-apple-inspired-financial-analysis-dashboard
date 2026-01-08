@@ -13,6 +13,7 @@ import { MonthlyReturnsCard } from '@/components/finance/MonthlyReturnsCard';
 import { TopMoversCard } from '@/components/finance/TopMoversCard';
 import { BetaSensitivityCard } from '@/components/finance/BetaSensitivityCard';
 import { PortfolioPulseCard } from '@/components/finance/PortfolioPulseCard';
+import { ErrorRecoveryDisplay } from '@/components/finance/ErrorRecoveryDisplay';
 import { HoldingsMetricsSkeleton, ChartSkeleton } from '@/components/finance/PremiumSkeleton';
 import { motion, AnimatePresence, Variants } from 'framer-motion';
 import { toast } from 'sonner';
@@ -100,11 +101,7 @@ export function HomePage() {
                 </div>
               </motion.div>
             ) : isError ? (
-              <motion.div key="error" className="py-40 text-center rounded-[3rem] bg-card shadow-xl flex flex-col items-center justify-center space-y-8">
-                <AlertTriangle className="size-16 text-loss-500" />
-                <h2 className="text-3xl font-bold">Data Link Failed</h2>
-                <Button onClick={() => refetch()} className="rounded-2xl h-12 px-8 bg-foreground text-background">Reconnect Feed</Button>
-              </motion.div>
+              <ErrorRecoveryDisplay key="error" onRetry={() => refetch()} />
             ) : (
               <motion.div
                 key="content"

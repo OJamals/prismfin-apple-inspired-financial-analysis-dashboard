@@ -17,6 +17,13 @@ export function KpiSkeleton({ className }: SkeletonProps) {
     </div>
   );
 }
+export function PulseSkeleton({ className }: SkeletonProps) {
+  return (
+    <div className={cn("h-48 w-full rounded-5xl bg-card shadow-premium p-12 shimmer-fast border border-card/60", className)}>
+      <div className="h-20 w-full bg-muted/20 rounded-3xl" />
+    </div>
+  );
+}
 export function HoldingsMetricsSkeleton({ className }: SkeletonProps) {
   return (
     <div className={cn("grid grid-cols-1 md:grid-cols-3 gap-8", className)}>

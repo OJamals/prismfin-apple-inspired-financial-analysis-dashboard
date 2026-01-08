@@ -128,6 +128,13 @@ export function MetricsTableCard({ rows }: MetricsTableCardProps) {
                                   <span className="text-[9px] text-muted-foreground uppercase font-black">Open Paper Mode</span>
                                 </div>
                               </ContextMenuItem>
+                              <ContextMenuItem onClick={() => navigate(`/screener?sector=${row.sector || 'Technology'}&sentiment=${row.sentiment > 50 ? 'Bullish' : 'Neutral'}`)} className="rounded-xl px-4 py-3 gap-3">
+                                <Search className="size-4 text-indigo-500" />
+                                <div className="flex flex-col">
+                                  <span className="font-bold text-xs">Find Similar</span>
+                                  <span className="text-[9px] text-muted-foreground uppercase font-black">Cross-Sector Analysis</span>
+                                </div>
+                              </ContextMenuItem>
                               <ContextMenuSeparator className="bg-border/20 my-1" />
                               <ContextMenuItem onClick={() => navigate(`/sentiment?ticker=${row.symbol}`)} className="rounded-xl px-4 py-3 gap-3">
                                 <Newspaper className="size-4 text-brand-teal" />

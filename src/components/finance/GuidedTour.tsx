@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { ChevronRight, ChevronLeft, X, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { ChevronLeft, ChevronRight, Sparkles, X } from 'lucide-react';
-import { AnimatePresence, motion } from 'framer-motion';
 export interface TourStep {
   targetId: string;
   title: string;
@@ -22,7 +22,6 @@ export function GuidedTour({ steps, onComplete, isOpen }: GuidedTourProps) {
     if (!isOpen) return;
     const updateCoords = () => {
       const step = steps[currentStepIdx];
-      if (!step) return;
       const el = document.getElementById(step.targetId);
       if (el) {
         const rect = el.getBoundingClientRect();
@@ -33,21 +32,14 @@ export function GuidedTour({ steps, onComplete, isOpen }: GuidedTourProps) {
           height: rect.height,
         });
         el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      } else {
-        console.warn(`GuidedTour: Element with id "${step.targetId}" not found.`);
       }
     };
     updateCoords();
-    const timeoutId = setTimeout(updateCoords, 100);
     window.addEventListener('resize', updateCoords);
-    return () => {
-      window.removeEventListener('resize', updateCoords);
-      clearTimeout(timeoutId);
-    };
+    return () => window.removeEventListener('resize', updateCoords);
   }, [currentStepIdx, isOpen, steps]);
   if (!isOpen) return null;
   const step = steps[currentStepIdx];
-  if (!step) return null;
   const getPopoverStyles = () => {
     const gap = 20;
     switch (step.position) {
@@ -72,14 +64,15 @@ export function GuidedTour({ steps, onComplete, isOpen }: GuidedTourProps) {
   };
   return (
     <div className="fixed inset-0 z-[100] pointer-events-none">
+      {/* Spotlight Overlay */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         className="absolute inset-0 bg-black/40 backdrop-blur-[2px]"
         style={{
-        clipPath: (coords.width > 0 && coords.height > 0) ? `polygon(0% 0%, 0% 100%, ${coords.left}px 100%, ${coords.left}px ${coords.top}px, ${coords.left + coords.width}px ${coords.top}px, ${coords.left + coords.width}px ${coords.top + coords.height}px, ${coords.left}px ${coords.top + coords.height}px, ${coords.left}px 100%, 100% 100%, 100% 0%)` : 'none'
-      }}
+          clipPath: `polygon(0% 0%, 0% 100%, ${coords.left}px 100%, ${coords.left}px ${coords.top}px, ${coords.left + coords.width}px ${coords.top}px, ${coords.left + coords.width}px ${coords.top + coords.height}px, ${coords.left}px ${coords.top + coords.height}px, ${coords.left}px 100%, 100% 100%, 100% 0%)`
+        }}
       />
       <AnimatePresence mode="wait">
         <motion.div

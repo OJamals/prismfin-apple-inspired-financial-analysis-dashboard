@@ -11,12 +11,16 @@ import { RiskRewardScatterCard } from '@/components/finance/RiskRewardScatterCar
 import { DrawdownChartCard } from '@/components/finance/DrawdownChartCard';
 import { CorrelationMatrixCard } from '@/components/finance/CorrelationMatrixCard';
 import { AIAnalystNote } from '@/components/finance/AIAnalystNote';
-import { ChartSkeleton } from '@/components/finance/PremiumSkeleton';
+import { PortfolioPulseCard } from '@/components/finance/PortfolioPulseCard';
+import { ErrorRecoveryDisplay } from '@/components/finance/ErrorRecoveryDisplay';
+import { ChartSkeleton, PulseSkeleton } from '@/components/finance/PremiumSkeleton';
+import { GuidedTour, TourStep } from '@/components/finance/GuidedTour';
+import { useTourState } from '@/hooks/use-tour-state';
 import { motion, AnimatePresence, Variants } from 'framer-motion';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { FileDown, Layout, LayoutPanelLeft } from 'lucide-react';
+import { FileDown, Layout, LayoutPanelLeft, Sparkles } from 'lucide-react';
 const containerVariants: Variants = {
   hidden: { opacity: 0 },
   show: {
@@ -29,21 +33,27 @@ const containerVariants: Variants = {
 };
 const itemVariants: Variants = {
   hidden: { opacity: 0, scale: 0.98, y: 15 },
-  show: { 
-    opacity: 1, 
-    scale: 1, 
-    y: 0, 
-    transition: { 
-      duration: 0.6, 
-      ease: "easeOut" 
-    } 
+  show: {
+    opacity: 1,
+    scale: 1,
+    y: 0,
+    transition: {
+      duration: 0.6,
+      ease: "easeOut"
+    }
   }
 };
+const QUANT_TOUR_STEPS: TourStep[] = [
+  { targetId: 'quant-pulse', title: 'Intelligence Summary', content: 'Get an instant plain-English breakdown of your portfolios quantitative standing.', position: 'bottom' },
+  { targetId: 'efficiency-frontier', title: 'Risk-Reward Mapping', content: 'Visualize how your assets map against the theoretical efficiency frontier.', position: 'right' },
+  { targetId: 'monte-carlo', title: 'Predictive Wealth', content: 'Forecast potential terminal value ranges using institutional-grade simulation.', position: 'top' }
+];
 export function QuantPage() {
   const [range, setRange] = useState<TimeRange>('6M');
   const [density, setDensity] = useState<DensityMode>('comfortable');
   const queryClient = useQueryClient();
-  const { data, isLoading } = useQuery<QuantData>({
+  const { isTourOpen, startTour, completeTour } = useTourState('quant-lab');
+  const { data, isLoading, isError, refetch } = useQuery<QuantData>({
     queryKey: ['quant', range],
     queryFn: () => api<QuantData>(`/api/quant?range=${range}`),
   });
@@ -89,18 +99,28 @@ export function QuantPage() {
                   <LayoutPanelLeft className="size-3.5 mr-2" /> Compact
                 </Button>
               </div>
-              <Button variant="ghost" size="sm" onClick={() => toast.success('Institutional risk report generated.')} className="rounded-xl h-9 px-4 text-xs font-bold bg-accent shadow-sm text-accent-foreground">
-                <FileDown className="size-3.5 mr-2" /> Export PDF
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button variant="ghost" size="sm" onClick={startTour} className="rounded-xl h-9 px-4 text-xs font-bold bg-brand-blue/10 text-brand-blue hover:bg-brand-blue/20">
+                  <Sparkles className="size-3.5 mr-2" /> Show Me
+                </Button>
+                <Button variant="ghost" size="sm" onClick={() => toast.success('Institutional risk report generated.')} className="rounded-xl h-9 px-4 text-xs font-bold bg-accent shadow-sm text-accent-foreground">
+                  <FileDown className="size-3.5 mr-2" /> Export PDF
+                </Button>
+              </div>
             </div>
           </div>
           <AnimatePresence mode="wait">
             {isLoading ? (
-              <motion.div key="loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-                <div className="lg:col-span-12"><ChartSkeleton /></div>
-                <div className="lg:col-span-6"><ChartSkeleton /></div>
-                <div className="lg:col-span-6"><ChartSkeleton /></div>
+              <motion.div key="loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-12">
+                <PulseSkeleton />
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                  <div className="lg:col-span-12"><ChartSkeleton /></div>
+                  <div className="lg:col-span-6"><ChartSkeleton /></div>
+                  <div className="lg:col-span-6"><ChartSkeleton /></div>
+                </div>
               </motion.div>
+            ) : isError ? (
+              <ErrorRecoveryDisplay key="error" onRetry={() => refetch()} />
             ) : (
               <motion.div
                 key="content"
@@ -112,6 +132,11 @@ export function QuantPage() {
                   density === 'comfortable' ? "gap-10" : "gap-4"
                 )}
               >
+                {data?.pulse && (
+                  <motion.div variants={itemVariants} className="lg:col-span-12" id="quant-pulse">
+                    <PortfolioPulseCard pulse={data.pulse} />
+                  </motion.div>
+                )}
                 {data?.insight && (
                   <motion.div variants={itemVariants} className="lg:col-span-12">
                     <AIAnalystNote insight={data.insight} />
@@ -130,13 +155,13 @@ export function QuantPage() {
                 <motion.div variants={itemVariants} className="lg:col-span-4">
                   <FactorAttributionCard factors={data?.factors ?? []} />
                 </motion.div>
-                <motion.div variants={itemVariants} className="lg:col-span-6">
+                <motion.div variants={itemVariants} className="lg:col-span-6" id="efficiency-frontier">
                   <RiskRewardScatterCard data={data?.riskReward ?? []} />
                 </motion.div>
                 <motion.div variants={itemVariants} className="lg:col-span-6">
                   <CorrelationMatrixCard data={data?.correlation ?? { symbols: [], matrix: {} }} />
                 </motion.div>
-                <motion.div variants={itemVariants} className="lg:col-span-12 pb-12">
+                <motion.div variants={itemVariants} className="lg:col-span-12 pb-12" id="monte-carlo">
                   <MonteCarloCard data={data?.monteCarlo ?? ({} as any)} />
                 </motion.div>
               </motion.div>
@@ -144,6 +169,7 @@ export function QuantPage() {
           </AnimatePresence>
         </div>
       </div>
+      <GuidedTour steps={QUANT_TOUR_STEPS} isOpen={isTourOpen} onComplete={completeTour} />
     </AppLayout>
   );
 }
