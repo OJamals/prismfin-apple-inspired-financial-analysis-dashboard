@@ -18,6 +18,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { formatDistanceToNow } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
+import { toast } from 'sonner';
 export function AlertCenter() {
   const queryClient = useQueryClient();
   const [searchParams] = useSearchParams();
@@ -27,6 +28,7 @@ export function AlertCenter() {
     queryKey: ['alerts', mode],
     queryFn: () => api<Alert[]>(`/api/alerts?mode=${mode}`),
     refetchInterval: isLive ? 15000 : 60000,
+    enabled: typeof document !== 'undefined' ? !document.hidden : true,
   });
   const dismissMutation = useMutation({
     mutationFn: (id: string) => api('/api/alerts/dismiss', {
@@ -40,6 +42,11 @@ export function AlertCenter() {
   });
   const unreadCount = alerts.length;
   const hasHighPriority = alerts.some(a => a.priority === 'high');
+  const handleDrillDown = (symbol: string) => {
+    toast.info(`Analyzing signals for ${symbol}`, {
+      description: "Aggregating order-book depth and technical confluence...",
+    });
+  };
   const getAlertIcon = (type: string, priority: string) => {
     switch(type) {
       case 'technical':
@@ -67,7 +74,12 @@ export function AlertCenter() {
   return (
     <Sheet>
       <SheetTrigger asChild>
-        <Button variant="ghost" size="icon" className="relative rounded-2xl h-11 w-11 bg-card/80 border border-card/60 shadow-soft hover:shadow-md transition-all active:scale-95 group">
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          className="relative rounded-2xl h-11 w-11 bg-card/80 border border-card/60 shadow-soft hover:shadow-md transition-all active:scale-95 group"
+          aria-label={`Open alerts, ${unreadCount} items`}
+        >
           <Bell className={cn("size-5 transition-colors", unreadCount > 0 ? "text-foreground" : "text-muted-foreground group-hover:text-foreground")} />
           {unreadCount > 0 && (
             <motion.div
@@ -87,7 +99,7 @@ export function AlertCenter() {
       </SheetTrigger>
       <SheetContent className="w-full sm:max-w-md p-0 border-l border-border/40 bg-card/90 backdrop-blur-3xl">
         <SheetHeader className="p-8 border-b border-border/5">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-wrap items-center justify-between gap-4">
             <div className="space-y-1">
               <SheetTitle className="text-2xl font-bold font-display tracking-tight">Alert Intelligence</SheetTitle>
               <SheetDescription className="text-xs text-muted-foreground font-medium uppercase tracking-widest">{mode} environment</SheetDescription>
@@ -137,6 +149,7 @@ export function AlertCenter() {
                           size="icon"
                           className="size-8 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity hover:bg-muted/50"
                           onClick={() => dismissMutation.mutate(alert.id)}
+                          aria-label="Dismiss alert"
                         >
                           <X className="size-4" />
                         </Button>
@@ -144,7 +157,11 @@ export function AlertCenter() {
                       <p className="text-sm font-bold leading-snug text-foreground">{alert.message}</p>
                       {alert.assetSymbol && (
                         <div className="pt-1 flex items-center gap-2">
-                          <Badge variant="outline" className="rounded-lg text-[10px] border-brand-blue/20 text-brand-blue bg-brand-blue/5 font-bold cursor-pointer hover:bg-brand-blue hover:text-white transition-all shadow-sm">
+                          <Badge 
+                            variant="outline" 
+                            className="rounded-lg text-[10px] border-brand-blue/20 text-brand-blue bg-brand-blue/5 font-bold cursor-pointer hover:bg-brand-blue hover:text-white transition-all shadow-sm"
+                            onClick={() => handleDrillDown(alert.assetSymbol!)}
+                          >
                             Drill-Down {alert.assetSymbol}
                           </Badge>
                           {alert.type === 'technical' && (

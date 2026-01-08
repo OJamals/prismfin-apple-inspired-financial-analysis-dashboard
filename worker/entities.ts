@@ -54,14 +54,21 @@ export class DashboardEntity extends Entity<DashboardState> {
     if (!data) {
       data = generateDashboard(range, mode);
     }
-    // Defensive check to ensure 'news' exists on all rows (migration support)
-    data.rows = data.rows.map(row => {
-      if (!row.news || row.news.length === 0) {
-        const fullRows = getMockRows();
-        const match = fullRows.find(r => r.symbol === row.symbol);
-        return { ...row, news: match?.news ?? [] };
-      }
-      return row;
+    // Comprehensive migration and defensive field mapping
+    data.rows = (data.rows ?? []).map(row => {
+      const fullRows = getMockRows();
+      const match = fullRows.find(r => r.symbol === row.symbol);
+      return {
+        ...row,
+        // Ensure critical presentation fields exist
+        news: row.news && row.news.length > 0 ? row.news : (match?.news ?? []),
+        sentiment: row.sentiment !== undefined ? row.sentiment : (match?.sentiment ?? 50),
+        miniSeries: row.miniSeries && row.miniSeries.length > 0 ? row.miniSeries : (match?.miniSeries ?? []),
+        class: row.class || (match?.class ?? 'equity'),
+        price: row.price || (match?.price ?? 0),
+        changePct: row.changePct || (match?.changePct ?? 0),
+        ytdPct: row.ytdPct || (match?.ytdPct ?? 0),
+      } as MetricsRow;
     });
     const clonedData = JSON.parse(JSON.stringify(data)) as DashboardData;
     clonedData.alerts = (clonedData.alerts ?? []).filter(a => !dismissedAlertIds.includes(a.id));
