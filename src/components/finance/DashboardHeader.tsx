@@ -1,5 +1,5 @@
 import React from 'react';
-import { RefreshCw, Download } from 'lucide-react';
+import { RefreshCw, Download, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Select,
@@ -10,7 +10,6 @@ import {
 } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
 import { ThemeToggle } from '@/components/ThemeToggle';
-import { motion } from 'framer-motion';
 interface DashboardHeaderProps {
   title: string;
   subtitle: string;
@@ -28,57 +27,48 @@ export function DashboardHeader({
   isRefreshing,
 }: DashboardHeaderProps) {
   return (
-    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-      <div className="space-y-1.5">
-        <h1 className="text-3xl md:text-5xl font-bold tracking-tight text-foreground font-display">
+    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="space-y-1">
+        <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground font-display">
           {title}
         </h1>
-        <p className="text-muted-foreground/70 text-sm md:text-base font-medium max-w-xl leading-relaxed">
+        <p className="text-muted-foreground text-sm md:text-base">
           {subtitle}
         </p>
       </div>
-      <div className="flex items-center gap-2.5 bg-card/40 p-1.5 rounded-2xl border border-card/60 shadow-soft ring-1 ring-border/20 backdrop-blur-md">
+      <div className="flex items-center gap-2">
         {onRangeChange && (
           <Select value={range} onValueChange={onRangeChange}>
-            <SelectTrigger className="w-[110px] bg-card border-none shadow-sm rounded-xl h-10 font-bold text-xs uppercase tracking-widest focus:ring-1 focus:ring-brand-blue/30 outline-none">
+            <SelectTrigger className="w-[100px] bg-white border-none shadow-soft rounded-xl h-10">
               <SelectValue placeholder="Range" />
             </SelectTrigger>
-            <SelectContent className="rounded-2xl bg-card/90 backdrop-blur-xl border-card/40 shadow-premium">
-              <SelectItem value="1M" className="rounded-lg text-xs font-bold uppercase tracking-widest py-2.5">1 Month</SelectItem>
-              <SelectItem value="3M" className="rounded-lg text-xs font-bold uppercase tracking-widest py-2.5">3 Months</SelectItem>
-              <SelectItem value="6M" className="rounded-lg text-xs font-bold uppercase tracking-widest py-2.5">6 Months</SelectItem>
-              <SelectItem value="1Y" className="rounded-lg text-xs font-bold uppercase tracking-widest py-2.5">1 Year</SelectItem>
+            <SelectContent>
+              <SelectItem value="1M">1 Month</SelectItem>
+              <SelectItem value="3M">3 Months</SelectItem>
+              <SelectItem value="6M">6 Months</SelectItem>
+              <SelectItem value="1Y">1 Year</SelectItem>
             </SelectContent>
           </Select>
         )}
-        <div className="flex items-center h-10 px-1 gap-1">
-          {onRefresh && (
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={onRefresh}
-                disabled={isRefreshing}
-                className="rounded-xl h-9 w-9 bg-card shadow-sm hover:bg-muted/50 border-none transition-all"
-              >
-                <RefreshCw className={cn("size-4 text-brand-blue", isRefreshing && "animate-spin")} />
-              </Button>
-            </motion.div>
-          )}
-          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="rounded-xl h-9 w-9 bg-card shadow-sm hover:bg-muted/50 border-none transition-all"
-            >
-              <Download className="size-4 text-muted-foreground" />
-            </Button>
-          </motion.div>
-          <div className="w-px h-5 bg-muted/40 mx-1" />
-          <motion.div whileHover={{ scale: 1.1, rotate: 12 }} whileTap={{ scale: 0.9 }} className="flex items-center justify-center h-9 w-9 bg-card rounded-xl shadow-sm hover:bg-muted/50 transition-all">
-            <ThemeToggle className="static top-0 right-0" />
-          </motion.div>
-        </div>
+        {onRefresh && (
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onRefresh}
+            disabled={isRefreshing}
+            className="rounded-xl h-10 w-10 bg-white shadow-soft hover:bg-muted"
+          >
+            <RefreshCw className={cn("size-4", isRefreshing && "animate-spin")} />
+          </Button>
+        )}
+        <Button
+          variant="ghost"
+          size="icon"
+          className="rounded-xl h-10 w-10 bg-white shadow-soft hover:bg-muted"
+        >
+          <Download className="size-4" />
+        </Button>
+        <ThemeToggle className="static" />
       </div>
     </div>
   );

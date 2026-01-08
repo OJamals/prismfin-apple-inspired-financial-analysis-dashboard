@@ -92,6 +92,11 @@ export default {
   		colors: {
   			background: 'hsl(var(--background))',
   			foreground: 'hsl(var(--foreground))',
+  			canvas: '#F9FAFB',
+  			brand: {
+  				teal: '#14B8A6',
+  				blue: '#0EA5E9',
+  			},
   			muted: {
   				DEFAULT: 'hsl(var(--muted))',
   				foreground: 'hsl(var(--muted-foreground))'

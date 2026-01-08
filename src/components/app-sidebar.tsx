@@ -1,6 +1,6 @@
-/* This is a demo sidebar. **COMPULSORY** Edit this file to customize the sidebar OR remove it from appLayout OR don't use appLayout at all */
 import React from "react";
-import { Home, Layers, Compass, Star, Settings, LifeBuoy } from "lucide-react";
+import { Home, PieChart, FileText, Settings, Search, Box } from "lucide-react";
+import { Link, useLocation } from "react-router-dom";
 import {
   Sidebar,
   SidebarContent,
@@ -13,60 +13,64 @@ import {
   SidebarMenu,
   SidebarMenuItem,
   SidebarMenuButton,
-  SidebarMenuAction,
-  SidebarMenuBadge,
 } from "@/components/ui/sidebar";
-
+import { cn } from "@/lib/utils";
 export function AppSidebar(): JSX.Element {
+  const location = useLocation();
+  const navItems = [
+    { label: "Dashboard", icon: Home, path: "/" },
+    { label: "Holdings", icon: Box, path: "/holdings" },
+    { label: "Reports", icon: FileText, path: "/reports" },
+    { label: "Settings", icon: Settings, path: "/settings" },
+  ];
   return (
-    <Sidebar>
-      <SidebarHeader>
-        <div className="flex items-center gap-2 px-2 py-1">
-          <div className="h-6 w-6 rounded-md bg-gradient-to-br from-indigo-500 to-purple-500" />
-          <span className="text-sm font-medium">Demo Sidebar</span>
+    <Sidebar className="bg-white/60 backdrop-blur-xl border-r border-white/60 shadow-soft">
+      <SidebarHeader className="pt-6 pb-4">
+        <div className="flex items-center gap-3 px-3 py-1">
+          <div className="h-8 w-8 rounded-xl bg-gradient-to-br from-brand-teal to-brand-blue flex items-center justify-center shadow-soft">
+            <PieChart className="size-5 text-white" />
+          </div>
+          <span className="text-xl font-bold tracking-tight text-foreground font-display">PrismFin</span>
         </div>
-        <SidebarInput placeholder="Search" />
+        <div className="px-3 mt-4">
+          <div className="relative">
+            <Search className="absolute left-2.5 top-2.5 size-4 text-muted-foreground" />
+            <SidebarInput placeholder="Search" className="pl-9 bg-secondary/50 border-none h-9 text-sm" />
+          </div>
+        </div>
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
-          <SidebarMenu>
-            <SidebarMenuItem>
-              <SidebarMenuButton asChild isActive>
-                <a href="#"><Home /> <span>Home</span></a>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-            <SidebarMenuItem>
-              <SidebarMenuButton asChild>
-                <a href="#"><Layers /> <span>Projects</span></a>
-              </SidebarMenuButton>
-              <SidebarMenuAction>
-                <Star className="size-4" />
-              </SidebarMenuAction>
-            </SidebarMenuItem>
-            <SidebarMenuItem>
-              <SidebarMenuButton asChild>
-                <a href="#"><Compass /> <span>Explore</span></a>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
+          <SidebarGroupLabel className="px-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground/70">Menu</SidebarGroupLabel>
+          <SidebarMenu className="px-2">
+            {navItems.map((item) => (
+              <SidebarMenuItem key={item.path}>
+                <SidebarMenuButton
+                  asChild
+                  isActive={location.pathname === item.path}
+                  className={cn(
+                    "rounded-xl px-4 py-5 transition-all duration-200",
+                    location.pathname === item.path 
+                      ? "bg-white shadow-soft text-brand-blue font-semibold" 
+                      : "text-muted-foreground hover:bg-white/50"
+                  )}
+                >
+                  <Link to={item.path}>
+                    <item.icon className={cn("size-5", location.pathname === item.path ? "text-brand-blue" : "text-muted-foreground")} />
+                    <span>{item.label}</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            ))}
           </SidebarMenu>
         </SidebarGroup>
-
-        <SidebarSeparator />
-
-        <SidebarGroup>
-          <SidebarGroupLabel>Quick Links</SidebarGroupLabel>
-          <SidebarMenu>
-            <SidebarMenuItem>
-              <SidebarMenuButton asChild>
-                <a href="#"><Star /> <span>Starred</span></a>
-              </SidebarMenuButton>
-              <SidebarMenuBadge>5</SidebarMenuBadge>
-            </SidebarMenuItem>
-          </SidebarMenu>
-        </SidebarGroup>
+        <SidebarSeparator className="mx-4 opacity-50" />
       </SidebarContent>
-      <SidebarFooter>
-        <div className="px-2 text-xs text-muted-foreground">A simple shadcn sidebar</div>
+      <SidebarFooter className="p-6">
+        <div className="flex flex-col gap-1 rounded-2xl bg-muted/40 p-4">
+          <p className="text-xs font-medium text-foreground">Pro Plan</p>
+          <p className="text-[10px] text-muted-foreground">Premium Analysis Enabled</p>
+        </div>
       </SidebarFooter>
     </Sidebar>
   );

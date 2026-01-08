@@ -1,15 +1,52 @@
-import type { User, Chat, ChatMessage } from './types';
-
-export const MOCK_USERS: User[] = [
-  { id: 'u1', name: 'User A' },
-  { id: 'u2', name: 'User B' }
-];
-
-export const MOCK_CHATS: Chat[] = [
-  { id: 'c1', title: 'General' },
-];
-
-export const MOCK_CHAT_MESSAGES: ChatMessage[] = [
-  { id: 'm1', chatId: 'c1', userId: 'u1', text: 'Hello', ts: Date.now() },
-];
-  
+import { DashboardData, TimeRange, SeriesPoint, Kpi, MetricsRow } from './types';
+export function getMockKPIs(): Kpi[] {
+  return [
+    { id: '1', label: 'Portfolio Value', value: 124500.65, deltaPct: 2.4 },
+    { id: '2', label: 'Daily P&L', value: 3450.21, deltaPct: 1.2 },
+    { id: '3', label: 'YTD Return', value: 15.8, deltaPct: 0.5 },
+    { id: '4', label: 'Total Gains', value: 24500.00, deltaPct: 4.8 },
+  ];
+}
+export function getMockPerformance(range: TimeRange): SeriesPoint[] {
+  const points = range === '1M' ? 30 : range === '3M' ? 90 : range === '6M' ? 180 : 365;
+  const skip = range === '1M' ? 1 : range === '3M' ? 3 : range === '6M' ? 6 : 12;
+  const results: SeriesPoint[] = [];
+  let current = 100000;
+  for (let i = 0; i < points; i += skip) {
+    current += (Math.random() - 0.45) * 2000;
+    results.push({
+      label: `Day ${i}`,
+      value: parseFloat(current.toFixed(2))
+    });
+  }
+  return results;
+}
+export function getMockCashflow(): SeriesPoint[] {
+  return [
+    { label: 'Jan', value: 4500 },
+    { label: 'Feb', value: 5200 },
+    { label: 'Mar', value: 4800 },
+    { label: 'Apr', value: 6100 },
+    { label: 'May', value: 5900 },
+    { label: 'Jun', value: 7200 },
+  ];
+}
+export function getMockRows(): MetricsRow[] {
+  return [
+    { name: 'Apple Inc.', symbol: 'AAPL', price: 189.43, changePct: 1.2, ytdPct: 12.4, volume: '54.2M' },
+    { name: 'Microsoft Corp.', symbol: 'MSFT', price: 415.22, changePct: -0.4, ytdPct: 15.1, volume: '22.1M' },
+    { name: 'Nvidia Corp.', symbol: 'NVDA', price: 882.33, changePct: 3.5, ytdPct: 78.2, volume: '88.5M' },
+    { name: 'Tesla Inc.', symbol: 'TSLA', price: 172.50, changePct: -2.1, ytdPct: -31.4, volume: '95.2M' },
+    { name: 'Alphabet Inc.', symbol: 'GOOGL', price: 154.21, changePct: 0.8, ytdPct: 9.8, volume: '28.4M' },
+  ];
+}
+export function generateDashboard(range: TimeRange): DashboardData {
+  return {
+    range,
+    updatedAt: Date.now(),
+    kpis: getMockKPIs(),
+    performance: getMockPerformance(range),
+    cashflow: getMockCashflow(),
+    rows: getMockRows(),
+  };
+}
