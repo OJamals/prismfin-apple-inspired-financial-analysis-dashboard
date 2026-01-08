@@ -1,5 +1,5 @@
 import React from "react";
-import { Home, PieChart, FileText, Settings, Search, Box, TrendingUp } from "lucide-react";
+import { Home, PieChart, FileText, Settings, Search, TrendingUp } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import {
   SidebarContent,
@@ -15,7 +15,6 @@ export function AppSidebar(): JSX.Element {
   const location = useLocation();
   const navItems = [
     { label: "Dashboard", icon: Home, path: "/" },
-    { label: "Holdings", icon: Box, path: "/holdings" },
     { label: "Reports", icon: FileText, path: "/reports" },
     { label: "Quant", icon: TrendingUp, path: "/quant" },
     { label: "Settings", icon: Settings, path: "/settings" },
@@ -32,9 +31,9 @@ export function AppSidebar(): JSX.Element {
         <div className="px-3 mt-6">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground/60" />
-            <SidebarInput 
-              placeholder="Search assets..." 
-              className="pl-9 bg-secondary/60 border-none h-10 text-sm rounded-xl focus-visible:ring-1 focus-visible:ring-brand-blue/30" 
+            <SidebarInput
+              placeholder="Search assets..."
+              className="pl-9 bg-secondary/60 border-none h-10 text-sm rounded-xl focus-visible:ring-1 focus-visible:ring-brand-blue/30"
             />
           </div>
         </div>
@@ -53,8 +52,8 @@ export function AppSidebar(): JSX.Element {
                     to={path}
                     className={cn(
                       "flex items-center gap-3 rounded-xl px-4 py-3 transition-all duration-200 group",
-                      active 
-                        ? "bg-white shadow-soft text-brand-blue font-semibold ring-1 ring-border/10" 
+                      active
+                        ? "bg-white shadow-soft text-brand-blue font-semibold ring-1 ring-border/10"
                         : "hover:bg-muted/60 text-muted-foreground hover:text-foreground"
                     )}
                   >
