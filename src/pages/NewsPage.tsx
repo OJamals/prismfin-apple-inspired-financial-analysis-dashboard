@@ -14,6 +14,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { ExternalLink, Newspaper, BrainCircuit, Globe, Search } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Button } from '@/components/ui/button';
 export function NewsPage() {
   const [symbol, setSymbol] = useState('NVDA');
   const [inputValue, setInputValue] = useState('NVDA');
