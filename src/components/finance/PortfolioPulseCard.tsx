@@ -69,7 +69,7 @@ export function PortfolioPulseCard({ pulse }: PortfolioPulseCardProps) {
         isOpen={showDetail}
         onClose={() => setShowDetail(false)}
         metricName="Portfolio Health"
-        pulse={pulse}
+        description={pulse.detail}
       />
     </div>
   );

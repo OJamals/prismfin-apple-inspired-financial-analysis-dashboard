@@ -36,7 +36,7 @@ export function PerformanceChartCard({ portfolio, benchmark, range }: Performanc
         benchmark: adjustedBench
       };
     });
-  }, [portfolio, benchmark, benchmarkType, showBenchmark]);
+  }, [portfolio, benchmark, benchmarkType]);
   return (
     <Card className="rounded-4xl border-none shadow-soft bg-card overflow-hidden h-full">
       <CardHeader className="flex flex-col md:flex-row md:items-center justify-between p-8 pb-0 gap-4">
