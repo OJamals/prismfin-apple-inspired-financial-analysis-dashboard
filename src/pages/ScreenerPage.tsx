@@ -42,7 +42,10 @@ export function ScreenerPage() {
   const [filters, setFilters] = useState<ScreenerFilters>(INITIAL_FILTERS);
   const [selectedSymbols, setSelectedSymbols] = useState<string[]>([]);
   const filtersRef = useRef(filters);
-  filtersRef.current = filters;
+  useEffect(() => {
+    filtersRef.current = filters;
+  }, [filters]);
+  
   useEffect(() => {
     const sector = searchParams.get('sector') || 'all';
     const sentiment = searchParams.get('sentiment') || 'all';
@@ -67,7 +70,7 @@ export function ScreenerPage() {
     if (JSON.stringify(filtersRef.current) !== JSON.stringify(newFilters)) {
       setFilters(newFilters);
     }
-  }, [searchParams]);
+  }, [searchParams, filtersRef]);
   const { data: stocks = [], isLoading } = useQuery<ScreenerStock[]>({
     queryKey: ['screener'],
     queryFn: () => api<ScreenerStock[]>('/api/screener'),
@@ -111,24 +114,24 @@ export function ScreenerPage() {
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
             <DashboardHeader title="Equity Screener" subtitle="Cross-sectional factor engine." />
             <div className="flex items-center gap-3 bg-card/60 p-1.5 rounded-2xl border border-card/60 shadow-soft backdrop-blur-md">
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                onClick={() => setViewMode('compact')} 
-                className={cn("rounded-xl transition-all", viewMode === 'compact' && "bg-white shadow-sm")}
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setViewMode('compact')}
+                className={cn("rounded-xl transition-all", viewMode === 'compact' && "bg-accent shadow-sm text-accent-foreground")}
               >
                 <List className="size-4" />
               </Button>
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                onClick={() => setViewMode('detailed')} 
-                className={cn("rounded-xl transition-all", viewMode === 'detailed' && "bg-white shadow-sm")}
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setViewMode('detailed')}
+                className={cn("rounded-xl transition-all", viewMode === 'detailed' && "bg-accent shadow-sm text-accent-foreground")}
               >
                 <LayoutGrid className="size-4" />
               </Button>
               <div className="w-px h-5 bg-border/20 mx-1" />
-              <Button variant="ghost" size="icon" onClick={handleShare} className="rounded-xl text-muted-foreground hover:text-brand-blue">
+              <Button variant="ghost" size="icon" onClick={handleShare} className="rounded-xl text-muted-foreground hover:text-accent-foreground hover:bg-accent/20">
                 <Share2 className="size-4" />
               </Button>
             </div>
@@ -224,11 +227,11 @@ export function ScreenerPage() {
           </div>
         </div>
       </div>
-      <StockCompareDrawer 
-        selectedStocks={stocks.filter(s => selectedSymbols.includes(s.symbol))} 
-        isOpen={selectedSymbols.length > 1} 
-        onClose={() => {}} 
-        onClear={() => setSelectedSymbols([])} 
+      <StockCompareDrawer
+        selectedStocks={filteredStocks.filter(s => selectedSymbols.includes(s.symbol))}
+        isOpen={selectedSymbols.length > 1}
+        onClose={() => {}}
+        onClear={() => setSelectedSymbols([])}
       />
     </AppLayout>
   );

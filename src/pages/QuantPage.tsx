@@ -76,7 +76,7 @@ export function QuantPage() {
                   variant="ghost"
                   size="sm"
                   onClick={() => setDensity('comfortable')}
-                  className={cn("rounded-xl h-9 px-4 text-xs font-bold", density === 'comfortable' && "bg-white shadow-sm text-brand-blue")}
+                  className={cn("rounded-xl h-9 px-4 text-xs font-bold", density === 'comfortable' && "bg-accent shadow-sm text-accent-foreground")}
                 >
                   <Layout className="size-3.5 mr-2" /> Comfortable
                 </Button>
@@ -84,19 +84,19 @@ export function QuantPage() {
                   variant="ghost"
                   size="sm"
                   onClick={() => setDensity('compact')}
-                  className={cn("rounded-xl h-9 px-4 text-xs font-bold", density === 'compact' && "bg-white shadow-sm text-brand-blue")}
+                  className={cn("rounded-xl h-9 px-4 text-xs font-bold", density === 'compact' && "bg-accent shadow-sm text-accent-foreground")}
                 >
                   <LayoutPanelLeft className="size-3.5 mr-2" /> Compact
                 </Button>
               </div>
-              <Button variant="outline" size="sm" onClick={() => toast.success('Institutional risk report generated.')} className="rounded-xl h-9 px-4 text-xs font-bold border-none bg-white shadow-sm">
-                <FileDown className="size-3.5 mr-2 text-brand-blue" /> Export PDF
+              <Button variant="ghost" size="sm" onClick={() => toast.success('Institutional risk report generated.')} className="rounded-xl h-9 px-4 text-xs font-bold bg-accent shadow-sm text-accent-foreground">
+                <FileDown className="size-3.5 mr-2" /> Export PDF
               </Button>
             </div>
           </div>
           <AnimatePresence mode="wait">
             {isLoading ? (
-              <motion.div key="loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <motion.div key="loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="grid grid-cols-1 lg:grid-cols-12 gap-8">
                 <div className="lg:col-span-12"><ChartSkeleton /></div>
                 <div className="lg:col-span-6"><ChartSkeleton /></div>
                 <div className="lg:col-span-6"><ChartSkeleton /></div>
