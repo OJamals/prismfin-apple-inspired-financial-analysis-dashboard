@@ -1,14 +1,15 @@
-import React, { useState, useMemo } from 'react';
-import { AcademyTopic, AcademyStep } from '@shared/types';
+import React, { useState } from 'react';
+import { AcademyTopic } from '@shared/types';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { useAcademyProgress } from '@/hooks/use-academy-progress';
 import { AcademyQuiz } from './AcademyQuiz';
 import { AcademyDiagrams } from './AcademyDiagrams';
-import { 
-  CheckCircle2, BookOpen, Clock, ChevronRight, ChevronLeft, 
-  BarChart, PlayCircle, Info 
+import {
+  CheckCircle2, ChevronRight, ChevronLeft,
+  Info
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
@@ -47,8 +48,8 @@ export function AcademyTopicDetail({ topic }: AcademyTopicDetailProps) {
                 onClick={() => setCurrentStepIdx(idx)}
                 className={cn(
                   "w-full text-left p-4 rounded-2xl text-sm font-bold transition-all flex items-center justify-between group",
-                  currentStepIdx === idx 
-                    ? "bg-foreground text-background shadow-lg" 
+                  currentStepIdx === idx
+                    ? "bg-foreground text-background shadow-lg"
                     : "hover:bg-muted text-muted-foreground hover:text-foreground"
                 )}
               >

@@ -88,7 +88,7 @@ export function getMockAcademyTopics(): AcademyTopic[] {
       content: 'The Sharpe ratio is the standard for institutional performance appraisal.',
       steps: [
         { id: 's1', title: 'Introduction', type: 'content', content: 'Learn why returns alone are deceptive.' },
-        { id: 's2', title: 'The Formula', type: 'content', content: 'Understanding the excess return over risk-free rate.', formula: 'S = (R_p - R_f) / \sigma_p' },
+        { id: 's2', title: 'The Formula', type: 'content', content: 'Understanding the excess return over risk-free rate.', formula: 'S = (R_p - R_f) / \\\\sigma_p' },
         { id: 's3', title: 'Interactive Calc', type: 'interactive', interactiveType: 'sharpe-calc', content: 'Try simulating different risk profiles.' },
         { id: 's4', title: 'Assessment', type: 'quiz', content: 'Test your understanding.' }
       ],
