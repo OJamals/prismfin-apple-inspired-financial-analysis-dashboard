@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useSearchParams } from 'react-router-dom';
 import { api } from '@/lib/api-client';
-import { DashboardData, TimeRange, TradingMode } from '@shared/types';
+import { DashboardData, TimeRange } from '@shared/types';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { DashboardHeader } from '@/components/finance/DashboardHeader';
 import { HoldingsMetricsGrid } from '@/components/finance/HoldingsMetricsGrid';
@@ -13,21 +12,18 @@ import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 export function HomePage() {
   const [range, setRange] = useState<TimeRange>('6M');
-  const [searchParams] = useSearchParams();
-  const mode = (searchParams.get('mode') as TradingMode) || 'live';
   const queryClient = useQueryClient();
   const { data, isLoading, isError } = useQuery<DashboardData>({
-    queryKey: ['dashboard', range, mode],
-    queryFn: () => api<DashboardData>(`/api/dashboard?range=${range}&mode=${mode}`),
+    queryKey: ['dashboard', range],
+    queryFn: () => api<DashboardData>(`/api/dashboard?range=${range}`),
     retry: 1,
   });
   const refreshMutation = useMutation({
-    mutationFn: () => api<DashboardData>(`/api/dashboard/refresh?range=${range}&mode=${mode}`, { method: 'POST' }),
+    mutationFn: () => api<DashboardData>(`/api/dashboard/refresh?range=${range}`, { method: 'POST' }),
     onSuccess: () => {
-      // Synchronize both dashboard and alerts to capture fresh market signals
-      queryClient.invalidateQueries({ queryKey: ['dashboard', range, mode] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard', range] });
       queryClient.invalidateQueries({ queryKey: ['alerts'] });
-      toast.success(`${mode === 'live' ? 'Market' : 'Simulation'} state refreshed`, {
+      toast.success('Market state synchronized', {
         icon: <div className="size-3 rounded-full bg-gradient-to-tr from-brand-teal to-brand-blue animate-pulse" />
       });
     },
@@ -40,12 +36,11 @@ export function HomePage() {
         <div className="py-8 md:py-10 lg:py-12 space-y-12">
           <DashboardHeader
             title="Holdings Overview"
-            subtitle={mode === 'live' ? "Analyzing real-time portfolio intelligence and position health." : "Simulating portfolio resilience against hypothetical risk factors."}
+            subtitle="Analyzing real-time portfolio intelligence and position health in a unified analytical framework."
             range={range}
             onRangeChange={(r) => setRange(r as TimeRange)}
             onRefresh={onRefresh}
             isRefreshing={refreshMutation.isPending}
-            mode={mode}
           />
           <AnimatePresence mode="popLayout" initial={false}>
             {isLoading ? (
@@ -75,7 +70,7 @@ export function HomePage() {
                 </div>
                 <div className="space-y-2">
                   <p className="text-2xl font-bold font-display tracking-tight text-foreground">Data Link Failed</p>
-                  <p className="text-muted-foreground font-medium max-w-xs mx-auto leading-relaxed">PrismFin could not reconcile the current {mode} holdings feed. Please check your connectivity.</p>
+                  <p className="text-muted-foreground font-medium max-w-xs mx-auto leading-relaxed">PrismFin could not reconcile the current holdings feed. Please check your connectivity.</p>
                 </div>
               </motion.div>
             ) : (

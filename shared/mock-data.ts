@@ -1,7 +1,6 @@
 import {
   DashboardData,
   TimeRange,
-  TradingMode,
   SeriesPoint,
   Kpi,
   MetricsRow,
@@ -126,10 +125,9 @@ export function generateCorrelationMatrix(): CorrelationData {
   });
   return { symbols, matrix };
 }
-export function generateQuantData(range: TimeRange, mode: TradingMode): QuantData {
+export function generateQuantData(range: TimeRange): QuantData {
   return {
     range,
-    mode,
     updatedAt: Date.now(),
     portfolio: Array.from({ length: 20 }).map((_, i) => ({ label: `D${i}`, value: 100000 + i * 800 })),
     benchmark: Array.from({ length: 20 }).map((_, i) => ({ label: `D${i}`, value: 100000 + i * 600 })),
@@ -154,7 +152,7 @@ export function calculateHoldingsMetrics(rows: MetricsRow[]) {
     yieldLabel: 'Annual projection'
   };
 }
-export function getMockKPIs(mode: TradingMode): Kpi[] {
+export function getMockKPIs(): Kpi[] {
   return [
     { id: '1', label: 'Portfolio Value', value: 124500.65, deltaPct: 2.4 },
     { id: '2', label: 'Daily P&L', value: 3450.21, deltaPct: 1.2 },
@@ -168,10 +166,10 @@ export function getMockRows(): MetricsRow[] {
     { name: 'Bitcoin', symbol: 'BTC', price: 64200, changePct: 5.2, ytdPct: 45.1, volume: '32.1B', class: 'crypto', sentiment: 84, miniSeries: [] },
   ];
 }
-export function generateDashboard(range: TimeRange, mode: TradingMode): DashboardData {
+export function generateDashboard(range: TimeRange): DashboardData {
   return {
-    range, mode, updatedAt: Date.now(),
-    kpis: getMockKPIs(mode),
+    range, updatedAt: Date.now(),
+    kpis: getMockKPIs(),
     holdingsMetrics: calculateHoldingsMetrics([]),
     performance: Array.from({ length: 20 }).map((_, i) => ({ label: `Day ${i}`, value: 100000 + i * 500 })),
     cashflow: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'].map(m => ({ label: m, value: 4000 + Math.random() * 2000 })),

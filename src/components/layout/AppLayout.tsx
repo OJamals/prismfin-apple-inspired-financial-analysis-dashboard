@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from "@/components/ui/sheet";
 import { PanelLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { GlobalFilter } from "@/components/finance/GlobalFilter";
 import { AlertCenter } from "@/components/finance/AlertCenter";
 type AppLayoutProps = {
   children: React.ReactNode;
@@ -27,20 +26,17 @@ export function AppLayout({ children, container = false, className, contentClass
     container ? 'max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-10 lg:py-12 w-full' : 'w-full',
     contentClassName
   );
-  // Desktop View
   if (!isMobile) {
     return (
       <div className={cn('flex h-screen overflow-hidden bg-canvas', className)}>
         <div className={cn('w-[17.5rem] h-full flex flex-col shrink-0', sidebarClass)}>
           <AppSidebar />
         </div>
-        <main 
-          className="flex-1 overflow-y-auto relative flex flex-col"
-          aria-label="Main Content"
-        >
-          <header className="sticky top-0 z-30 px-6 py-4 bg-canvas/80 backdrop-blur-md border-b border-border/5 flex items-center justify-between gap-4 translate-z-0">
-            <div className="flex-1 max-w-2xl">
-              <GlobalFilter />
+        <main className="flex-1 overflow-y-auto relative flex flex-col" aria-label="Main Content">
+          <header className="sticky top-0 z-30 px-8 py-5 bg-canvas/80 backdrop-blur-md border-b border-border/5 flex items-center justify-between gap-4 translate-z-0">
+            <div className="flex flex-col">
+              <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Unified Intelligence</span>
+              <span className="text-lg font-bold font-display tracking-tight">Institutional Terminal</span>
             </div>
             <div className="flex items-center gap-4">
               <AlertCenter />
@@ -53,7 +49,6 @@ export function AppLayout({ children, container = false, className, contentClass
       </div>
     );
   }
-  // Mobile View
   return (
     <>
       <div className={cn('relative min-h-screen flex flex-col bg-canvas', className)}>
@@ -73,13 +68,7 @@ export function AppLayout({ children, container = false, className, contentClass
           </div>
           <AlertCenter />
         </header>
-        <div className="px-4 py-3 bg-muted/40 border-b border-border/5 shrink-0 overflow-hidden">
-           <GlobalFilter />
-        </div>
-        <main 
-          className="flex-1 overflow-y-auto"
-          aria-label="Main Content"
-        >
+        <main className="flex-1 overflow-y-auto" aria-label="Main Content">
           <div className={contentPaddingClass}>
             {children}
           </div>

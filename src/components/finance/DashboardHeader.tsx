@@ -11,8 +11,6 @@ import {
 import { cn } from '@/lib/utils';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { motion } from 'framer-motion';
-import { Badge } from '@/components/ui/badge';
-import { TradingMode } from '@shared/types';
 interface DashboardHeaderProps {
   title: string;
   subtitle: string;
@@ -20,7 +18,6 @@ interface DashboardHeaderProps {
   onRangeChange?: (range: string) => void;
   onRefresh?: () => void;
   isRefreshing?: boolean;
-  mode?: TradingMode;
 }
 export function DashboardHeader({
   title,
@@ -29,27 +26,13 @@ export function DashboardHeader({
   onRangeChange,
   onRefresh,
   isRefreshing,
-  mode = 'live'
 }: DashboardHeaderProps) {
-  const isLive = mode === 'live';
   return (
     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
       <div className="space-y-1.5">
-        <div className="flex items-center gap-3">
-          <h1 className="text-3xl md:text-5xl font-bold tracking-tight text-foreground font-display">
-            {title}
-          </h1>
-          <Badge
-            variant="secondary"
-            className={cn(
-              "rounded-xl px-3 py-1 flex items-center justify-center gap-2 border-none font-bold uppercase tracking-widest text-[10px] shadow-sm",
-              isLive ? "bg-rose-50 text-rose-600" : "bg-emerald-50 text-emerald-600"
-            )}
-          >
-            <div className={cn("size-1.5 rounded-full shrink-0", isLive ? "bg-rose-500 animate-pulse" : "bg-emerald-500")} />
-            <span className="leading-none">{mode}</span>
-          </Badge>
-        </div>
+        <h1 className="text-3xl md:text-5xl font-bold tracking-tight text-foreground font-display">
+          {title}
+        </h1>
         <p className="text-muted-foreground/70 text-sm md:text-base font-medium max-w-xl leading-relaxed">
           {subtitle}
         </p>
