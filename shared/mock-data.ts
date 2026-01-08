@@ -140,6 +140,7 @@ export function generateDashboard(range: TimeRange): DashboardData {
   const mockRows = getMockRows();
   return {
     range,
+    mode: 'paper',
     updatedAt: Date.now(),
     kpis: [
       { id: '1', label: 'Portfolio Value', value: 124500.65, deltaPct: 2.4 },
@@ -197,6 +198,7 @@ export function generateQuantData(range: TimeRange): QuantData {
   };
   return {
     range,
+    mode: 'paper',
     updatedAt: Date.now(),
     insight: {
       summary: 'The portfolio demonstrates robust alpha generation against the S&P 500 benchmark, primarily driven by core technology exposure and disciplined risk hedging.',
