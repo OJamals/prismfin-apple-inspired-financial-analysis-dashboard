@@ -3,45 +3,46 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { CorrelationData } from '@shared/types';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
+import { Info } from 'lucide-react';
 interface CorrelationMatrixCardProps {
   data: CorrelationData;
 }
 export function CorrelationMatrixCard({ data }: CorrelationMatrixCardProps) {
   const { symbols, matrix } = data;
   const getCellColor = (val: number) => {
-    if (val === 1) return 'bg-slate-50 text-muted-foreground/30';
-    // Positive Correlation Scale (Warm)
-    if (val > 0.85) return 'bg-rose-600 text-white';
-    if (val > 0.65) return 'bg-rose-400 text-white';
-    if (val > 0.45) return 'bg-rose-200 text-rose-900';
-    // Diversifiers (Cool)
-    if (val > 0.15) return 'bg-brand-blue/10 text-brand-blue';
-    if (val > -0.15) return 'bg-brand-teal/20 text-brand-teal font-extrabold';
-    if (val > -0.5) return 'bg-brand-blue/40 text-white shadow-inner';
-    return 'bg-brand-blue/70 text-white shadow-inner';
+    if (val === 1) return 'bg-slate-50 text-slate-300';
+    // Positive Correlation (Red Scale)
+    if (val > 0.7) return 'bg-rose-600 text-white';
+    if (val > 0.3) return 'bg-rose-300 text-rose-900';
+    if (val > 0) return 'bg-rose-50 text-rose-800';
+    // Negative Correlation (Blue Scale)
+    if (val > -0.3) return 'bg-blue-50 text-blue-800';
+    if (val > -0.7) return 'bg-blue-300 text-blue-900';
+    return 'bg-blue-600 text-white';
   };
   const getLabel = (val: number) => {
     if (val === 1) return "Self Correlation";
-    if (val > 0.7) return "Strong Positive";
-    if (val > 0.4) return "Moderate Positive";
-    if (val > 0.1) return "Weak Positive";
-    if (val > -0.1) return "Pure Diversifier";
-    return "Negative Correlation";
+    if (val > 0.7) return "High Positive Synchronization";
+    if (val > 0.3) return "Moderate Positive Coupling";
+    if (val > 0) return "Slight Positive Drift";
+    if (val > -0.3) return "Effective Diversifier";
+    if (val > -0.7) return "Strong Counter-Cyclical";
+    return "Inversely Correlated Alpha";
   };
   return (
-    <Card className="rounded-4xl border-none shadow-soft bg-card h-full">
-      <CardHeader>
-        <CardTitle className="text-lg font-semibold">Asset Correlation</CardTitle>
-        <p className="text-sm text-muted-foreground">Inter-asset price movement affinity</p>
+    <Card className="rounded-4xl border-none shadow-soft bg-card h-full flex flex-col overflow-hidden">
+      <CardHeader className="p-8 pb-4">
+        <CardTitle className="text-xl font-bold font-display tracking-tight text-foreground">Correlation Matrix</CardTitle>
+        <p className="text-sm text-muted-foreground font-medium">Inter-asset move affinity (-1 Blue to +1 Red)</p>
       </CardHeader>
-      <CardContent className="pt-2">
+      <CardContent className="flex-1 p-8 pt-2">
         <div className="overflow-x-auto scrollbar-hide -mx-4 px-4">
           <table className="min-w-max w-full border-separate border-spacing-1.5">
             <thead>
               <tr>
                 <th className="p-2"></th>
                 {symbols.map(s => (
-                  <th key={s} className="p-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest text-center font-display">
+                  <th key={s} className="p-2 text-[10px] font-black text-muted-foreground uppercase tracking-widest text-center font-display">
                     {s}
                   </th>
                 ))}
@@ -50,7 +51,7 @@ export function CorrelationMatrixCard({ data }: CorrelationMatrixCardProps) {
             <tbody>
               {symbols.map(s1 => (
                 <tr key={s1}>
-                  <td className="p-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest text-right align-middle font-display">
+                  <td className="p-2 text-[10px] font-black text-muted-foreground uppercase tracking-widest text-right align-middle font-display">
                     {s1}
                   </td>
                   {symbols.map(s2 => {
@@ -61,17 +62,23 @@ export function CorrelationMatrixCard({ data }: CorrelationMatrixCardProps) {
                           <Tooltip delayDuration={0}>
                             <TooltipTrigger asChild>
                               <div className={cn(
-                                "aspect-square w-12 flex items-center justify-center rounded-xl text-[10px] font-bold transition-all duration-300 cursor-default hover:scale-110 hover:shadow-lg hover:z-10",
+                                "aspect-square w-14 flex items-center justify-center rounded-xl text-[11px] font-extrabold transition-all duration-300 cursor-help hover:scale-105 hover:shadow-lg hover:z-10",
                                 getCellColor(val)
                               )}>
-                                {val.toFixed(2)}
+                                {val === 1 ? '1.0' : val.toFixed(2)}
                               </div>
                             </TooltipTrigger>
-                            <TooltipContent className="bg-card/95 backdrop-blur-2xl border border-white/20 shadow-premium text-foreground p-4 rounded-2xl min-w-[160px]">
-                              <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1">{s1} × {s2}</p>
-                              <p className="text-xs font-bold text-foreground mb-2">{getLabel(val)}</p>
-                              <div className="text-2xl font-display font-bold text-brand-blue tabular-nums">
-                                {val.toFixed(3)}
+                            <TooltipContent className="glass-premium border-white/20 p-5 rounded-2xl min-w-[200px] shadow-premium">
+                              <div className="space-y-3">
+                                <div className="flex items-center justify-between border-b border-muted/20 pb-2">
+                                  <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">{s1} × {s2}</p>
+                                  <span className="text-lg font-black text-foreground tabular-nums">{val.toFixed(3)}</span>
+                                </div>
+                                <p className="text-xs font-bold text-foreground leading-snug">{getLabel(val)}</p>
+                                <div className="pt-1 flex items-center gap-2 text-[10px] text-muted-foreground italic">
+                                  <Info className="size-3" />
+                                  Values near 0 indicate independence.
+                                </div>
                               </div>
                             </TooltipContent>
                           </Tooltip>
@@ -84,20 +91,13 @@ export function CorrelationMatrixCard({ data }: CorrelationMatrixCardProps) {
             </tbody>
           </table>
         </div>
-        <div className="mt-8 flex items-center justify-between px-2">
-          <div className="flex items-center gap-6">
-            <div className="flex items-center gap-2">
-              <div className="size-2 rounded-full bg-rose-500 shadow-sm" />
-              <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-tighter">Correlation</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="size-2 rounded-full bg-brand-teal shadow-sm" />
-              <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-tighter">Alpha Edge</span>
-            </div>
+        <div className="mt-auto pt-8 flex flex-col gap-4">
+          <div className="h-2 w-full rounded-full bg-gradient-to-r from-blue-600 via-slate-100 to-rose-600 shadow-inner" />
+          <div className="flex justify-between text-[10px] font-black text-muted-foreground uppercase tracking-widest px-1">
+            <span className="text-blue-600">Diversification (-1.0)</span>
+            <span>Neutral (0.0)</span>
+            <span className="text-rose-600">Synchronization (+1.0)</span>
           </div>
-          <p className="text-[10px] font-mono font-bold text-brand-blue bg-brand-blue/5 border border-brand-blue/10 px-3 py-1 rounded-full uppercase tracking-widest">
-            Portfolio ρ: 0.42
-          </p>
         </div>
       </CardContent>
     </Card>
