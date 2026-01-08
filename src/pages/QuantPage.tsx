@@ -11,9 +11,9 @@ import { RiskRewardScatterCard } from '@/components/finance/RiskRewardScatterCar
 import { DrawdownChartCard } from '@/components/finance/DrawdownChartCard';
 import { CorrelationMatrixCard } from '@/components/finance/CorrelationMatrixCard';
 import { ChartSkeleton } from '@/components/finance/PremiumSkeleton';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, Variants } from 'framer-motion';
 import { toast } from 'sonner';
-const containerVariants = {
+const containerVariants: Variants = {
   hidden: { opacity: 0 },
   show: {
     opacity: 1,
@@ -22,12 +22,15 @@ const containerVariants = {
     }
   }
 };
-const itemVariants = {
+const itemVariants: Variants = {
   hidden: { opacity: 0, y: 30 },
-  show: { 
-    opacity: 1, 
-    y: 0, 
-    transition: { duration: 0.7, ease: [0.16, 1, 0.3, 1] } 
+  show: {
+    opacity: 1,
+    y: 0,
+    transition: { 
+      duration: 0.7, 
+      ease: [0.16, 1, 0.3, 1] as [number, number, number, number] 
+    }
   }
 };
 export function QuantPage() {
@@ -60,14 +63,16 @@ export function QuantPage() {
           />
           <AnimatePresence mode="wait">
             {isLoading ? (
-              <motion.div 
+              <motion.div
                 key="skeletons"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 className="grid grid-cols-1 lg:grid-cols-2 gap-6"
               >
-                <ChartSkeleton className="lg:col-span-2" />
+                <div className="lg:col-span-2">
+                  <ChartSkeleton />
+                </div>
                 <ChartSkeleton />
                 <ChartSkeleton />
               </motion.div>

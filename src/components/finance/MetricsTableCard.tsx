@@ -145,7 +145,7 @@ export function MetricsTableCard({ rows }: MetricsTableCardProps) {
                                     <Progress 
                                       value={row.sentiment} 
                                       className="h-2 bg-white/50 shadow-inner" 
-                                      // @ts-ignore - shadcn progress supports custom indicator colors
+                                      // @ts-expect-error - shadcn progress indicator styling requires non-standard prop
                                       indicatorClassName={row.sentiment > 70 ? "bg-gain-500" : row.sentiment < 30 ? "bg-loss-500" : "bg-brand-blue"}
                                     />
                                   </div>
