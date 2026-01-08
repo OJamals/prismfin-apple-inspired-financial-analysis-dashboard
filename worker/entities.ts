@@ -33,10 +33,10 @@ export class DashboardEntity extends Entity<DashboardState> {
     const state = await this.ensureState();
     let data = state.dataByRange[range] || generateDashboard(range, filter);
     // Server-side filtering logic
-    const allRows = data.rows;
+    const allRows = data?.rows ?? [];
     const filteredRows = filter === 'all' ? allRows : allRows.filter(r => r.class === filter);
     // Filter alerts based on dismissed state
-    const alerts = data.alerts.filter(a => !state.dismissedAlertIds.includes(a.id));
+    const alerts = (data?.alerts ?? []).filter(a => !state.dismissedAlertIds.includes(a.id));
     return {
       ...data,
       filter,
@@ -59,7 +59,7 @@ export class DashboardEntity extends Entity<DashboardState> {
   async refreshRange(range: TimeRange): Promise<DashboardData> {
     return this.mutate(state => {
       const current = state.dataByRange[range] || generateDashboard(range);
-      const updatedRows = current.rows.map(r => ({
+      const updatedRows = (current?.rows ?? []).map(r => ({
         ...r,
         price: r.price * (1 + (Math.random() - 0.5) * 0.02),
         changePct: r.changePct + (Math.random() - 0.5) * 0.4,
@@ -71,12 +71,12 @@ export class DashboardEntity extends Entity<DashboardState> {
         updatedAt: Date.now()
       };
       return state;
-    }).then(s => JSON.parse(JSON.stringify(s.dataByRange[range])));
+    }).then(s => JSON.parse(JSON.stringify(s.dataByRange[range] || generateDashboard(range))));
   }
   async refreshQuant(range: TimeRange): Promise<QuantData> {
     return this.mutate(state => {
       state.quantByRange[range] = generateQuantData(range);
       return state;
-    }).then(s => JSON.parse(JSON.stringify(s.quantByRange[range])));
+    }).then(s => JSON.parse(JSON.stringify(s.quantByRange[range] || generateQuantData(range))));
   }
 }
