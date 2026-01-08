@@ -15,7 +15,8 @@ import {
   DrawdownData,
   CorrelationData,
   MonteCarloSeriesPoint,
-  SentimentCategory
+  SentimentCategory,
+  QuantInsight
 } from './types';
 const SYMBOLS = [
   'AAPL', 'MSFT', 'GOOGL', 'AMZN', 'NVDA', 'META', 'TSLA', 'V', 'JPM', 'UNH',
@@ -28,7 +29,6 @@ const SECTORS = ['Technology', 'Financials', 'Healthcare', 'Energy', 'Consumer S
 export function getMockScreenerData(): ScreenerStock[] {
   return SYMBOLS.map((symbol, i) => {
     const sector = SECTORS[i % SECTORS.length];
-    // Deterministic bias based on sector
     let peBase = 15;
     let yieldBase = 1.5;
     let pegBase = 1.2;
@@ -86,7 +86,7 @@ export function getMockAcademyTopics(): AcademyTopic[] {
       category: 'Risk',
       difficulty: 'Beginner',
       readingTimeMin: 5,
-      content: 'The Sharpe ratio measures the performance of an investment compared to a risk-free asset, after adjusting for its risk. It is the gold standard for institutional portfolio evaluation.',
+      content: 'The Sharpe ratio measures the performance of an investment compared to a risk-free asset, after adjusting for its risk.',
       interactiveType: 'sharpe-calc'
     },
     {
@@ -112,22 +112,28 @@ export function generateFactors(): FactorAttribution[] {
 }
 export function generateMonteCarloStats(horizon: '1Y' | '5Y' | '10Y'): MonteCarloStats {
   const steps = horizon === '1Y' ? 12 : horizon === '5Y' ? 60 : 120;
-  const series: MonteCarloSeriesPoint[] = Array.from({ length: steps }).map((_, i) => ({
-    label: `Step ${i}`,
-    p10: 100000 * Math.pow(1.002, i) * (1 - 0.05 * Math.random()),
-    median: 100000 * Math.pow(1.006, i),
-    p90: 100000 * Math.pow(1.01, i) * (1 + 0.05 * Math.random())
-  }));
+  const series: MonteCarloSeriesPoint[] = Array.from({ length: steps }).map((_, i) => {
+    const base = 100000 * Math.pow(1.006, i);
+    return {
+      label: `Step ${i}`,
+      p10: base * (1 - 0.08 * Math.random()),
+      median: base,
+      p90: base * (1 + 0.08 * Math.random())
+    };
+  });
   const last = series[series.length - 1];
   return { horizon, p10: last.p10, median: last.median, p90: last.p90, series };
 }
 export function generateRiskReward(): RiskRewardPoint[] {
-  return ['AAPL', 'MSFT', 'BTC', 'GLD', 'SPY', 'TSLA', 'AMZN', 'GOOG', 'JPM', 'XOM'].map(s => ({
+  const assets = ['AAPL', 'MSFT', 'BTC', 'GLD', 'SPY', 'TSLA', 'AMZN', 'GOOG', 'JPM', 'XOM'];
+  const baseWeights = assets.map(() => Math.random());
+  const sumWeights = baseWeights.reduce((a, b) => a + b, 0);
+  return assets.map((s, i) => ({
     symbol: s,
     returns: 5 + Math.random() * 20,
     volatility: 10 + Math.random() * 30,
-    sharpe: 0.5 + Math.random() * 2,
-    weight: Math.random() * 25
+    sharpe: 0.2 + Math.random() * 2.2,
+    weight: (baseWeights[i] / sumWeights) * 100
   }));
 }
 export function generateDrawdown(): DrawdownData {
@@ -146,15 +152,25 @@ export function generateCorrelationMatrix(): CorrelationData {
   symbols.forEach(s1 => {
     matrix[s1] = {};
     symbols.forEach(s2 => {
-      matrix[s1][s2] = s1 === s2 ? 1 : (Math.random() * 2 - 1);
+      if (s1 === s2) matrix[s1][s2] = 1;
+      else matrix[s1][s2] = (Math.random() * 2 - 1); // Full spectrum -1 to 1
     });
   });
   return { symbols, matrix };
+}
+export function generateQuantInsight(): QuantInsight {
+  return {
+    summary: "Portfolio risk has escalated by 12% due to increased correlation between Technology holdings and Crypto assets.",
+    attribution: "Alpha generation is currently driven by Quality factors (35%), while Momentum has stagnated in the mid-cap segment.",
+    riskExposure: "Exposure to interest-rate sensitive sectors is at a 6-month high. Recommend hedging via fixed-income overlay.",
+    recommendation: "Neutralize Beta by trimming TSLA and NVDA positions in favor of Consumer Staples for the Q1 horizon."
+  };
 }
 export function generateQuantData(range: TimeRange): QuantData {
   return {
     range,
     updatedAt: Date.now(),
+    insight: generateQuantInsight(),
     portfolio: Array.from({ length: 20 }).map((_, i) => ({ label: `D${i}`, value: 100000 + i * 800 })),
     benchmark: Array.from({ length: 20 }).map((_, i) => ({ label: `D${i}`, value: 100000 + i * 600 })),
     factors: generateFactors(),
