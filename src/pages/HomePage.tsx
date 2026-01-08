@@ -26,7 +26,7 @@ export function HomePage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['dashboard'] });
       toast.success(`${mode === 'live' ? 'Market' : 'Simulation'} state refreshed`, {
-        icon: <div className="size-2 rounded-full bg-brand-blue animate-pulse" />
+        icon: <div className="size-3 rounded-full bg-gradient-to-tr from-brand-teal to-brand-blue animate-pulse" />
       });
     },
     onError: () => toast.error('Market synchronization failed'),
@@ -62,14 +62,14 @@ export function HomePage() {
                 key="error"
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="py-32 text-center rounded-[3rem] bg-white border border-dashed border-muted-foreground/20 flex flex-col items-center justify-center space-y-4"
+                className="py-40 text-center rounded-[3rem] bg-white border border-dashed border-muted-foreground/20 flex flex-col items-center justify-center space-y-6"
               >
-                <div className="size-16 rounded-full bg-loss-50 flex items-center justify-center">
-                  <div className="size-8 rounded-full bg-loss-500 animate-pulse opacity-50" />
+                <div className="size-20 rounded-full bg-loss-50 flex items-center justify-center shadow-inner">
+                  <div className="size-10 rounded-full bg-loss-500 animate-pulse opacity-40 blur-sm" />
                 </div>
-                <div className="space-y-1">
-                  <p className="text-xl font-bold font-display">Data Link Failed</p>
-                  <p className="text-muted-foreground font-medium max-w-xs mx-auto">PrismFin could not reconcile the current {mode} holdings feed.</p>
+                <div className="space-y-2">
+                  <p className="text-2xl font-bold font-display tracking-tight text-foreground">Data Link Failed</p>
+                  <p className="text-muted-foreground font-medium max-w-xs mx-auto leading-relaxed">PrismFin could not reconcile the current {mode} holdings feed. Please check your connectivity.</p>
                 </div>
               </motion.div>
             ) : (
@@ -83,7 +83,9 @@ export function HomePage() {
                 )}
               >
                 {data?.holdingsMetrics && (
-                  <HoldingsMetricsGrid metrics={data.holdingsMetrics} />
+                  <div className="grid grid-cols-1 xl:gap-10">
+                    <HoldingsMetricsGrid metrics={data.holdingsMetrics} />
+                  </div>
                 )}
                 <div className="pb-12">
                   <MetricsTableCard rows={data?.rows ?? []} />

@@ -74,9 +74,9 @@ export function BenchmarkingChart({ portfolio, benchmark, range }: BenchmarkingC
                 borderRadius: '20px',
                 border: '1px solid rgba(226, 232, 240, 0.4)',
                 boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05)',
-                backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                backgroundColor: 'rgba(255, 255, 255, 0.98)',
                 backdropFilter: 'blur(12px)',
-                padding: '166x'
+                padding: '16px'
               }}
               formatter={(val: number) => [formatCurrencyUSD(val), 'Market Value']}
             />
