@@ -3,22 +3,30 @@ export interface ApiResponse<T = unknown> {
   data?: T;
   error?: string;
 }
-
-// Minimal real-world chat example types (shared by frontend and worker)
-export interface User {
+export type TimeRange = '1M' | '3M' | '6M' | '1Y';
+export interface SeriesPoint {
+  label: string;
+  value: number;
+}
+export interface Kpi {
   id: string;
+  label: string;
+  value: number;
+  deltaPct: number;
+}
+export interface MetricsRow {
   name: string;
+  symbol: string;
+  price: number;
+  changePct: number;
+  ytdPct: number;
+  volume: string;
 }
-
-export interface Chat {
-  id: string;
-  title: string;
-}
-
-export interface ChatMessage {
-  id: string;
-  chatId: string;
-  userId: string;
-  text: string;
-  ts: number; // epoch millis
+export interface DashboardData {
+  range: TimeRange;
+  updatedAt: number;
+  kpis: Kpi[];
+  performance: SeriesPoint[];
+  cashflow: SeriesPoint[];
+  rows: MetricsRow[];
 }
