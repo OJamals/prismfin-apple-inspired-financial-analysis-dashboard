@@ -13,7 +13,6 @@ import {
   ReferenceLine
 } from 'recharts';
 import { motion } from 'framer-motion';
-import { cn } from '@/lib/utils';
 export function InteractiveAcademyChart() {
   const [volatility, setVolatility] = useState([15]); // Initial volatility 15%
   const [returnExpectation, setReturnExpectation] = useState([12]); // Initial return 12%

@@ -69,19 +69,13 @@ export function getMockPerformance(range: TimeRange, mode: TradingMode): SeriesP
   let current = 100000 + (Math.random() * 5000);
   for (let i = 0; i < points; i += skip) {
     current += (Math.random() + bias) * volatility;
-    results.push({
-      label: `Day ${i}`,
-      value: parseFloat(current.toFixed(2))
-    });
+    results.push({ label: `Day ${i}`, value: parseFloat(current.toFixed(2)) });
   }
   return results;
 }
 export function getMockCashflow(): SeriesPoint[] {
   const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
-  return months.map(m => ({
-    label: m,
-    value: 4000 + Math.random() * 3000
-  }));
+  return months.map(m => ({ label: m, value: 4000 + Math.random() * 3000 }));
 }
 function generateMiniSeries(base: number): SeriesPoint[] {
   return Array.from({ length: 7 }).map((_, i) => ({
@@ -100,23 +94,24 @@ export function getMockRows(): MetricsRow[] {
     { name: 'US 10Y Treasury', symbol: 'US10Y', price: jitter(98.42, 0.01), changePct: jitter(0.1, 0.1), ytdPct: -2.4, volume: 'N/A', class: 'fixed-income', sentiment: Math.floor(jitter(45, 0.1)), rsi: 42, miniSeries: generateMiniSeries(98) },
   ];
 }
-export function generateScreenerStocks(): ScreenerStock[] {
-  const symbols = ['AAPL', 'MSFT', 'NVDA', 'TSLA', 'GOOGL', 'AMZN', 'META', 'BRK.B', 'LLY', 'AVGO', 'V', 'JPM', 'UNH', 'MA', 'COST', 'PG', 'HD', 'NFLX', 'ABBV', 'KO', 'PEP', 'ADBE', 'CRM', 'AMD', 'BAC'];
-  return symbols.map(s => ({
+export function generateScreenerStocks(): (ScreenerStock & { volatility: number })[] {
+  const baseSymbols = ['AAPL', 'MSFT', 'NVDA', 'TSLA', 'GOOGL', 'AMZN', 'META', 'BRK.B', 'LLY', 'AVGO', 'V', 'JPM', 'UNH', 'MA', 'COST', 'PG', 'HD', 'NFLX', 'ABBV', 'KO', 'PEP', 'ADBE', 'CRM', 'AMD', 'BAC', 'CVX', 'XOM', 'CAT', 'HON', 'GE', 'DE', 'NKE', 'DIS', 'SBUX', 'T', 'VZ', 'PFE', 'MRK', 'JNJ', 'WMT', 'TGT', 'ORCL', 'INTC', 'MU', 'LRCX', 'AMAT', 'QCOM', 'TXN', 'CSCO', 'IBM'];
+  return baseSymbols.map((s, idx) => ({
     symbol: s,
-    name: `${s} Corporation`,
+    name: `${s} ${idx % 2 === 0 ? 'Corp.' : 'Inc.'}`,
     price: 50 + Math.random() * 950,
     changePct: (Math.random() - 0.4) * 8,
     peRatio: 10 + Math.random() * 60,
     divYield: Math.random() * 5,
     rsi: 20 + Math.random() * 60,
-    score: 30 + Math.random() * 65
+    score: 30 + Math.random() * 65,
+    volatility: 15 + Math.random() * 70, // New field for Phase 12
   }));
 }
 export function generateMarketIntelligence(symbol: string): MarketIntelligence {
   const articles: NewsArticle[] = [
     {
-      id: `art-1-${symbol}`,
+      id: `art-1-${symbol}-${Date.now()}`,
       title: `${symbol} Resilience Noted in Recent Institutional Audits`,
       source: 'Wall Street Intel',
       timestamp: Date.now() - 3600000,
@@ -125,7 +120,7 @@ export function generateMarketIntelligence(symbol: string): MarketIntelligence {
       sentiment: 'positive'
     },
     {
-      id: `art-2-${symbol}`,
+      id: `art-2-${symbol}-${Date.now()}`,
       title: `Regulatory Headwinds May Impact ${symbol} Logistics`,
       source: 'Global Market Wire',
       timestamp: Date.now() - 7200000,
@@ -134,7 +129,7 @@ export function generateMarketIntelligence(symbol: string): MarketIntelligence {
       sentiment: 'negative'
     },
     {
-      id: `art-3-${symbol}`,
+      id: `art-3-${symbol}-${Date.now()}`,
       title: `Retail Sentiment for ${symbol} Remains Stable`,
       source: 'PrismFin Analytics',
       timestamp: Date.now() - 14400000,
@@ -154,6 +149,15 @@ export function generateMarketIntelligence(symbol: string): MarketIntelligence {
       outlook: score > 70 ? 'The overall sentiment remains highly constructive, driven by institutional adoption.' : 'Current market mood is cautious, balancing growth prospects against macro volatility.'
     }
   };
+}
+export function generatePortfolioSentiment() {
+  return [
+    { category: 'Social', score: 65 },
+    { category: 'News', score: 78 },
+    { category: 'Technical', score: 54 },
+    { category: 'Fundamental', score: 82 },
+    { category: 'Institutional', score: 71 },
+  ];
 }
 export function generateAlerts(rows: MetricsRow[], mode: TradingMode): Alert[] {
   const alerts: Alert[] = [];
@@ -214,13 +218,7 @@ function generateMonteCarlo(horizon: '1Y' | '5Y' | '10Y', mode: TradingMode): Mo
     currentMedian *= (1 + drift);
   }
   const last = series[series.length - 1];
-  return {
-    horizon,
-    median: last.median,
-    p10: last.p10,
-    p90: last.p90,
-    series
-  };
+  return { horizon, median: last.median, p10: last.p10, p90: last.p90, series };
 }
 function generateRiskRewardData(): RiskRewardPoint[] {
   const symbols = ['AAPL', 'MSFT', 'NVDA', 'TSLA', 'GOOGL', 'AMZN', 'META', 'BRK.B'];
@@ -243,16 +241,9 @@ function generateDrawdownData(performance: SeriesPoint[]): DrawdownData {
     if (p.value > peak) peak = p.value;
     const ddPct = peak === 0 ? 0 : ((p.value - peak) / peak) * 100;
     if (ddPct < maxDD) maxDD = ddPct;
-    return {
-      label: p.label,
-      value: p.value,
-      drawdownPct: parseFloat(ddPct.toFixed(2))
-    };
+    return { label: p.label, value: p.value, drawdownPct: parseFloat(ddPct.toFixed(2)) };
   });
-  return {
-    maxDrawdown: parseFloat(maxDD.toFixed(2)),
-    series
-  };
+  return { maxDrawdown: parseFloat(maxDD.toFixed(2)), series };
 }
 function generateCorrelationMatrix(): CorrelationData {
   const symbols = ['AAPL', 'MSFT', 'NVDA', 'TSLA', 'GOOGL'];
