@@ -10,9 +10,9 @@ import { PerformanceAreaCard } from '@/components/finance/PerformanceAreaCard';
 import { CashflowBarCard } from '@/components/finance/CashflowBarCard';
 import { MetricsTableCard } from '@/components/finance/MetricsTableCard';
 import { KpiSkeleton, ChartSkeleton, TableSkeleton } from '@/components/finance/PremiumSkeleton';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, Variants } from 'framer-motion';
 import { toast } from 'sonner';
-const containerVariants = {
+const containerVariants: Variants = {
   hidden: { opacity: 0 },
   show: {
     opacity: 1,
@@ -21,9 +21,16 @@ const containerVariants = {
     }
   }
 };
-const itemVariants = {
+const itemVariants: Variants = {
   hidden: { opacity: 0, y: 20 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.16, 1, 0.3, 1] } }
+  show: { 
+    opacity: 1, 
+    y: 0, 
+    transition: { 
+      duration: 0.5, 
+      ease: [0.16, 1, 0.3, 1] as [number, number, number, number] 
+    } 
+  }
 };
 export function HomePage() {
   const [range, setRange] = useState<TimeRange>('6M');
@@ -59,7 +66,7 @@ export function HomePage() {
           />
           <AnimatePresence mode="wait">
             {isLoading ? (
-              <motion.div 
+              <motion.div
                 key="skeletons"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -76,11 +83,11 @@ export function HomePage() {
                 <TableSkeleton />
               </motion.div>
             ) : isError ? (
-              <motion.div 
+              <motion.div
                 key="error"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                className="py-20 text-center glass-premium rounded-4xl"
+                className="py-20 text-center rounded-4xl bg-white border border-dashed"
               >
                 <p className="text-muted-foreground font-semibold">Failed to reconcile market data. Please check your connection.</p>
               </motion.div>
@@ -92,7 +99,6 @@ export function HomePage() {
                 animate="show"
                 className="space-y-10"
               >
-                {/* KPI Strip */}
                 <motion.div variants={itemVariants} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                   {data?.kpis.map((kpi) => (
                     <KpiCard
@@ -103,7 +109,6 @@ export function HomePage() {
                     />
                   ))}
                 </motion.div>
-                {/* Charts Row */}
                 <motion.div variants={itemVariants} className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                   <div className="lg:col-span-8">
                     <PerformanceAreaCard data={data?.performance ?? []} range={range} />
@@ -112,7 +117,6 @@ export function HomePage() {
                     <CashflowBarCard data={data?.cashflow ?? []} />
                   </div>
                 </motion.div>
-                {/* Metrics Table */}
                 <motion.div variants={itemVariants} className="grid grid-cols-1 gap-6 pb-8">
                   <MetricsTableCard rows={data?.rows ?? []} />
                 </motion.div>

@@ -11,6 +11,7 @@ import {
 } from 'recharts';
 import { SeriesPoint } from '@shared/types';
 import { formatCurrencyUSD } from '@/lib/format';
+import { cn } from "@/lib/utils";
 import { motion } from 'framer-motion';
 interface PerformanceAreaCardProps {
   data: SeriesPoint[];
@@ -63,7 +64,7 @@ export function PerformanceAreaCard({ data, range }: PerformanceAreaCardProps) {
                   padding: '16px'
                 }}
                 formatter={(val: number) => [
-                  <span className="font-bold tabular-nums text-foreground">{formatCurrencyUSD(val)}</span>, 
+                  <span className="font-bold tabular-nums text-foreground">{formatCurrencyUSD(val)}</span>,
                   <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Portfolio Value</span>
                 ]}
                 labelStyle={{ display: 'none' }}
