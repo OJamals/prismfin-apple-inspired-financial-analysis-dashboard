@@ -107,34 +107,3 @@ export interface QuantData {
   drawdown: DrawdownData;
   correlation: CorrelationData;
 }
-/** Phase 11 Types **/
-export interface ScreenerStock {
-  symbol: string;
-  name: string;
-  price: number;
-  changePct: number;
-  peRatio: number;
-  divYield: number;
-  rsi: number;
-  score: number; // 0-100
-}
-export interface NewsArticle {
-  id: string;
-  title: string;
-  source: string;
-  timestamp: number;
-  url: string;
-  summary: string;
-  sentiment: 'positive' | 'negative' | 'neutral';
-}
-export interface SentimentData {
-  symbol: string;
-  score: number; // 0-100
-  bullishPct: number;
-  bearishPct: number;
-  outlook: string;
-}
-export interface MarketIntelligence {
-  articles: NewsArticle[];
-  sentiment: SentimentData;
-}
