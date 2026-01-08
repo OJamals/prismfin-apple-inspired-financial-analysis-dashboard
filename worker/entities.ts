@@ -1,5 +1,5 @@
 import { Entity, Env } from "./core-utils";
-import { DashboardData, TimeRange, QuantData, Alert, MetricsRow } from "@shared/types";
+import { DashboardData, TimeRange, QuantData, Alert, MetricsRow, TradingMode } from "@shared/types";
 import { generateDashboard, generateQuantData, getMockRows } from "@shared/mock-data";
 export interface DashboardState {
   dataByRange: Record<TimeRange, DashboardData>;
@@ -7,7 +7,7 @@ export interface DashboardState {
   dismissedAlertIds: string[];
 }
 export class DashboardEntity extends Entity<DashboardState> {
-  static readonly entityName = "dashboard";
+  static readonly entityName = "dashboard_v2";
   static readonly initialState: DashboardState = {
     dataByRange: {
       '1M': generateDashboard('1M'),
@@ -30,102 +30,65 @@ export class DashboardEntity extends Entity<DashboardState> {
       await inst.save(seed);
     }
   }
-  async getRange(range: TimeRange): Promise<DashboardData> {
+  async getRange(range: TimeRange, mode: TradingMode = 'paper'): Promise<DashboardData> {
     const state = await this.ensureState();
-    const rangeData = state?.dataByRange ?? DashboardEntity.initialState.dataByRange;
-    const dismissedAlertIds = state?.dismissedAlertIds ?? [];
-    let data = rangeData[range];
-    // Seed/Hydrate missing fields in legacy or incomplete state
-    if (!data) {
-      data = generateDashboard(range);
+    let data = state.dataByRange[range] ?? generateDashboard(range);
+    // Apply mode-specific jitter
+    const modeData = JSON.parse(JSON.stringify(data)) as DashboardData;
+    modeData.mode = mode;
+    if (mode === 'paper') {
+      // Simulate slightly more volatility or offset for paper mode
+      modeData.kpis = modeData.kpis.map(k => ({
+        ...k,
+        value: k.value * 1.05,
+        deltaPct: k.deltaPct * 0.8
+      }));
     }
-    // Ensure 'pulse' exists (Critical for UI rendering)
-    if (!data.pulse) {
-      data.pulse = generateDashboard(range).pulse;
+    const dismissed = state.dismissedAlertIds ?? [];
+    modeData.alerts = (modeData.alerts ?? []).filter(a => !dismissed.includes(a.id));
+    return modeData;
+  }
+  async getQuant(range: TimeRange, mode: TradingMode = 'paper'): Promise<QuantData> {
+    const state = await this.ensureState();
+    let data = state.quantByRange[range] ?? generateQuantData(range);
+    const modeData = JSON.parse(JSON.stringify(data)) as QuantData;
+    modeData.mode = mode;
+    if (mode === 'paper') {
+      // Paper mode offsets
+      if (modeData.monteCarlo['10Y']) {
+        modeData.monteCarlo['10Y'].median *= 1.1;
+      }
     }
-    if (!data.sectors) {
-      data.sectors = generateDashboard(range).sectors;
-    }
-    if (!data.monthlyReturns || !data.topMovers) {
-      const fresh = generateDashboard(range);
-      data.monthlyReturns = fresh.monthlyReturns;
-      data.topMovers = fresh.topMovers;
-    }
-    if (!data.benchmarkPerformance) {
-      data.benchmarkPerformance = generateDashboard(range).benchmarkPerformance;
-    }
-    if (!data.riskReward) {
-      data.riskReward = generateDashboard(range).riskReward;
-    }
-    // Ensure rows are fully hydrated with metadata
-    data.rows = (data.rows ?? []).map(row => {
-      const fullRows = getMockRows();
-      const match = fullRows.find(r => r.symbol === row.symbol);
+    return modeData;
+  }
+  async refreshRange(range: TimeRange, mode: TradingMode): Promise<DashboardData> {
+    await this.mutate(state => {
       return {
-        ...row,
-        news: row.news && row.news.length > 0 ? row.news : (match?.news ?? []),
-        sentiment: row.sentiment !== undefined ? row.sentiment : (match?.sentiment ?? 50),
-        miniSeries: row.miniSeries && row.miniSeries.length > 0 ? row.miniSeries : (match?.miniSeries ?? []),
-        class: row.class || (match?.class ?? 'equity'),
-        price: row.price || (match?.price ?? 0),
-        changePct: row.changePct || (match?.changePct ?? 0),
-        ytdPct: row.ytdPct || (match?.ytdPct ?? 0),
-      } as MetricsRow;
+        ...state,
+        dataByRange: {
+          ...state.dataByRange,
+          [range]: { ...generateDashboard(range), updatedAt: Date.now() }
+        }
+      };
     });
-    const clonedData = JSON.parse(JSON.stringify(data)) as DashboardData;
-    clonedData.alerts = (clonedData.alerts ?? []).filter(a => !dismissedAlertIds.includes(a.id));
-    return clonedData;
+    return this.getRange(range, mode);
+  }
+  async refreshQuant(range: TimeRange, mode: TradingMode): Promise<QuantData> {
+    await this.mutate(state => {
+      return {
+        ...state,
+        quantByRange: {
+          ...state.quantByRange,
+          [range]: { ...generateQuantData(range), updatedAt: Date.now() }
+        }
+      };
+    });
+    return this.getQuant(range, mode);
   }
   async dismissAlert(alertId: string): Promise<void> {
-    await this.mutate(state => {
-      const dismissed = state.dismissedAlertIds ?? [];
-      if (!dismissed.includes(alertId)) {
-        return {
-          ...state,
-          dismissedAlertIds: [...dismissed, alertId]
-        };
-      }
-      return state;
-    });
-  }
-  async getQuant(range: TimeRange): Promise<QuantData> {
-    const state = await this.ensureState();
-    const rangeQuant = state?.quantByRange ?? DashboardEntity.initialState.quantByRange;
-    let data = rangeQuant[range] ?? generateQuantData(range);
-    // Ensure pulse hydration
-    if (!data.pulse) {
-      data.pulse = generateQuantData(range).pulse;
-    }
-    // Defensive check for Monte Carlo structure
-    if (!data.monteCarlo || !data.monteCarlo['10Y']) {
-      data = generateQuantData(range);
-    }
-    return JSON.parse(JSON.stringify(data)) as QuantData;
-  }
-  async refreshRange(range: TimeRange): Promise<DashboardData> {
-    const updatedState = await this.mutate(state => {
-      const newDataByRange = {
-        ...state.dataByRange,
-        [range]: {
-          ...generateDashboard(range),
-          updatedAt: Date.now()
-        }
-      };
-      return { ...state, dataByRange: newDataByRange };
-    });
-    return JSON.parse(JSON.stringify(updatedState.dataByRange[range]));
-  }
-  async refreshQuant(range: TimeRange): Promise<QuantData> {
-    const updatedState = await this.mutate(state => {
-      const newQuantByRange = {
-        ...state.quantByRange,
-        [range]: {
-          ...generateQuantData(range),
-          updatedAt: Date.now()
-        }
-      };
-      return { ...state, quantByRange: newQuantByRange };
-    });
-    return JSON.parse(JSON.stringify(updatedState.quantByRange[range]));
+    await this.mutate(state => ({
+      ...state,
+      dismissedAlertIds: [...(state.dismissedAlertIds ?? []), alertId]
+    }));
   }
 }

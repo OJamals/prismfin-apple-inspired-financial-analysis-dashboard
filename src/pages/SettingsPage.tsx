@@ -4,111 +4,168 @@ import { DashboardHeader } from '@/components/finance/DashboardHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { ThemeToggle } from '@/components/ThemeToggle';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { toast } from 'sonner';
-import { Database, Shield, User, GraduationCap, Target } from 'lucide-react';
+import { Slider } from "@/components/ui/slider";
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { 
+  Database, Shield, User, GraduationCap, Target, 
+  Layers, Layout, LayoutPanelLeft, Bell, Zap, Activity
+} from 'lucide-react';
 import { useUserSettings } from '@/hooks/use-user-settings';
-import { SkillLevel } from '@shared/types';
+import { SkillLevel, TradingMode, DensityMode } from '@shared/types';
+import { cn } from '@/lib/utils';
 export function SettingsPage() {
-  const { skillLevel, setSkillLevel } = useUserSettings();
+  const { 
+    skillLevel, setSkillLevel, 
+    tradingMode, setTradingMode,
+    density, setDensity,
+    showTooltips, setShowTooltips,
+    alertThresholds, setAlertThresholds
+  } = useUserSettings();
   return (
     <AppLayout>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="py-8 md:py-10 lg:py-12 space-y-10">
           <DashboardHeader
-            title="Settings"
-            subtitle="Manage your institutional preferences and security protocols."
+            title="Institutional Control"
+            subtitle="Manage your terminal environment, risk thresholds, and analytical complexity."
           />
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
             <div className="lg:col-span-8 space-y-8">
+              {/* Adaptive Intelligence */}
               <Card className="rounded-4xl border-none shadow-soft bg-card overflow-hidden">
                 <CardHeader className="p-8 border-b border-border/5">
                   <div className="flex items-center gap-3">
                     <GraduationCap className="size-5 text-brand-blue" />
-                    <CardTitle className="text-xl font-bold font-display">Adaptive Intelligence</CardTitle>
+                    <CardTitle className="text-xl font-bold font-display text-foreground">Adaptive Intelligence</CardTitle>
                   </div>
                 </CardHeader>
                 <CardContent className="p-8">
-                  <RadioGroup 
-                    value={skillLevel} 
+                  <RadioGroup
+                    value={skillLevel}
                     onValueChange={(v) => setSkillLevel(v as SkillLevel)}
-                    className="grid grid-cols-1 md:grid-cols-2 gap-6"
+                    className="grid grid-cols-1 md:grid-cols-3 gap-6"
                   >
-                    <div className="relative">
-                      <RadioGroupItem value="beginner" id="beginner" className="peer sr-only" />
-                      <Label
-                        htmlFor="beginner"
-                        className="flex flex-col items-center justify-between rounded-3xl border-2 border-muted bg-popover p-8 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-brand-blue [&:has([data-state=checked])]:border-brand-blue cursor-pointer transition-all"
-                      >
-                        <Target className="mb-4 size-8 text-muted-foreground" />
-                        <span className="font-bold text-lg mb-2">Beginner</span>
-                        <p className="text-center text-xs text-muted-foreground leading-relaxed">
-                          Focused on plain-English summaries, core health metrics, and educational guides.
-                        </p>
-                      </Label>
-                    </div>
-                    <div className="relative">
-                      <RadioGroupItem value="advanced" id="advanced" className="peer sr-only" />
-                      <Label
-                        htmlFor="advanced"
-                        className="flex flex-col items-center justify-between rounded-3xl border-2 border-muted bg-popover p-8 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-brand-blue [&:has([data-state=checked])]:border-brand-blue cursor-pointer transition-all"
-                      >
-                        <GraduationCap className="mb-4 size-8 text-muted-foreground" />
-                        <span className="font-bold text-lg mb-2">Advanced</span>
-                        <p className="text-center text-xs text-muted-foreground leading-relaxed">
-                          Full institutional grid access including risk models, factor attribution, and Monte Carlo.
-                        </p>
-                      </Label>
-                    </div>
+                    {[
+                      { id: 'novice', label: 'Novice', icon: Target, desc: 'Plain-English summaries and core health metrics.' },
+                      { id: 'pro', label: 'Pro', icon: Activity, desc: 'Institutional grid access and factor attribution models.' },
+                      { id: 'institutional', label: 'Institutional', icon: Shield, desc: 'Unrestricted access to all risk and quantitative simulation labs.' }
+                    ].map((tier) => (
+                      <div key={tier.id} className="relative">
+                        <RadioGroupItem value={tier.id} id={tier.id} className="peer sr-only" />
+                        <Label
+                          htmlFor={tier.id}
+                          className="flex flex-col items-center justify-between rounded-3xl border-2 border-muted bg-popover p-6 h-full hover:bg-accent/50 peer-data-[state=checked]:border-brand-blue peer-data-[state=checked]:bg-brand-blue/5 cursor-pointer transition-all text-center"
+                        >
+                          <tier.icon className={cn("mb-4 size-8", skillLevel === tier.id ? "text-brand-blue" : "text-muted-foreground")} />
+                          <span className="font-bold text-base mb-2">{tier.label}</span>
+                          <p className="text-[10px] text-muted-foreground leading-relaxed">
+                            {tier.desc}
+                          </p>
+                        </Label>
+                      </div>
+                    ))}
                   </RadioGroup>
                 </CardContent>
               </Card>
+              {/* Alert Intelligence */}
               <Card className="rounded-4xl border-none shadow-soft bg-card overflow-hidden">
                 <CardHeader className="p-8 border-b border-border/5">
                   <div className="flex items-center gap-3">
-                    <User className="size-5 text-brand-blue" />
-                    <CardTitle className="text-xl font-bold font-display">Profile Intelligence</CardTitle>
+                    <Bell className="size-5 text-brand-blue" />
+                    <CardTitle className="text-xl font-bold font-display text-foreground">Alert Intelligence</CardTitle>
                   </div>
                 </CardHeader>
-                <CardContent className="p-8">
-                  <div className="flex flex-col sm:flex-row items-center gap-8">
-                    <Avatar className="size-24 rounded-3xl border-4 border-white shadow-soft">
-                      <AvatarImage src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&h=200&fit=crop" />
-                      <AvatarFallback>PF</AvatarFallback>
-                    </Avatar>
-                    <div className="space-y-4 flex-1 w-full">
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Legal Name</Label>
-                          <Input defaultValue="Institutional Trader" className="rounded-xl bg-secondary/30 border-none" />
-                        </div>
-                        <div className="space-y-2">
-                          <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Email</Label>
-                          <Input defaultValue="terminal@prismfin.io" className="rounded-xl bg-secondary/30 border-none" />
-                        </div>
+                <CardContent className="p-8 space-y-12">
+                  <div className="space-y-6">
+                    <div className="flex justify-between items-end">
+                      <div className="space-y-1">
+                        <Label className="text-sm font-bold">Volatility Sensitivity</Label>
+                        <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest">Trigger on price swings</p>
                       </div>
-                      <Button className="rounded-xl h-10 px-6 font-bold bg-brand-blue text-white hover:bg-brand-blue/90">Save Profile</Button>
+                      <Badge className="bg-brand-blue/10 text-brand-blue border-none font-black">{alertThresholds.volatility}%</Badge>
                     </div>
+                    <Slider 
+                      value={[alertThresholds.volatility]} 
+                      onValueChange={([v]) => setAlertThresholds({ volatility: v })}
+                      min={1} max={15} step={0.5} 
+                    />
+                  </div>
+                  <div className="space-y-6">
+                    <div className="flex justify-between items-end">
+                      <div className="space-y-1">
+                        <Label className="text-sm font-bold">Crossover Threshold</Label>
+                        <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest">Signal on MA deviations</p>
+                      </div>
+                      <Badge className="bg-brand-teal/10 text-brand-teal border-none font-black">{alertThresholds.crossover}%</Badge>
+                    </div>
+                    <Slider 
+                      value={[alertThresholds.crossover]} 
+                      onValueChange={([v]) => setAlertThresholds({ crossover: v })}
+                      min={0.5} max={5} step={0.1} 
+                    />
                   </div>
                 </CardContent>
               </Card>
             </div>
-            <div className="lg:col-span-4">
-              <Card className="rounded-4xl border-none shadow-soft bg-loss-50/20 overflow-hidden">
-                <CardHeader className="p-8 border-b border-loss-500/10">
+            <div className="lg:col-span-4 space-y-8">
+              {/* System Environment */}
+              <Card className="rounded-4xl border-none shadow-soft bg-card overflow-hidden">
+                <CardHeader className="p-8 border-b border-border/5">
                   <div className="flex items-center gap-3">
-                    <Database className="size-5 text-loss-500" />
-                    <CardTitle className="text-xl font-bold font-display text-loss-700">Data Controls</CardTitle>
+                    <Database className="size-5 text-brand-blue" />
+                    <CardTitle className="text-lg font-bold font-display text-foreground">Environment</CardTitle>
+                  </div>
+                </CardHeader>
+                <CardContent className="p-8 space-y-6">
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-1">
+                      <p className="text-sm font-bold">Trading Mode</p>
+                      <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest">{tradingMode === 'live' ? 'Live Execution' : 'Paper Simulation'}</p>
+                    </div>
+                    <Switch 
+                      checked={tradingMode === 'live'} 
+                      onCheckedChange={(c) => setTradingMode(c ? 'live' : 'paper')}
+                      className="data-[state=checked]:bg-loss-500"
+                    />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-1">
+                      <p className="text-sm font-bold">UI Density</p>
+                      <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest">{density === 'comfortable' ? 'Airy (Apple)' : 'Compact (Bloomberg)'}</p>
+                    </div>
+                    <div className="flex gap-1 bg-secondary/50 p-1 rounded-xl">
+                      <Button 
+                        variant="ghost" size="icon" className={cn("h-8 w-8 rounded-lg", density === 'comfortable' && "bg-card shadow-sm")}
+                        onClick={() => setDensity('comfortable')}
+                      ><Layout className="size-4" /></Button>
+                      <Button 
+                        variant="ghost" size="icon" className={cn("h-8 w-8 rounded-lg", density === 'compact' && "bg-card shadow-sm")}
+                        onClick={() => setDensity('compact')}
+                      ><LayoutPanelLeft className="size-4" /></Button>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-1">
+                      <p className="text-sm font-bold">Tooltips</p>
+                      <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest">Educational Overlays</p>
+                    </div>
+                    <Switch checked={showTooltips} onCheckedChange={setShowTooltips} />
+                  </div>
+                </CardContent>
+              </Card>
+              {/* Data Safety */}
+              <Card className="rounded-4xl border-none shadow-soft bg-loss-50/20 overflow-hidden">
+                <CardHeader className="p-8">
+                  <div className="flex items-center gap-3">
+                    <Shield className="size-5 text-loss-500" />
+                    <CardTitle className="text-lg font-bold font-display text-loss-700">Data Safety</CardTitle>
                   </div>
                 </CardHeader>
                 <CardContent className="p-8 space-y-4">
-                  <p className="text-xs text-loss-600/70 font-medium leading-relaxed">Danger Zone: IRREVERSIBLE terminal actions.</p>
-                  <Button variant="outline" className="w-full rounded-xl border-loss-200 text-loss-600">Reset Local Cache</Button>
-                  <Button variant="destructive" className="w-full rounded-xl bg-loss-500 text-white font-bold">Purge Cloud State</Button>
+                  <Button variant="outline" className="w-full rounded-xl border-loss-200 text-loss-600 font-bold" onClick={() => { localStorage.clear(); window.location.reload(); }}>Purge Terminal Cache</Button>
+                  <p className="text-[10px] text-loss-600/70 font-medium leading-relaxed text-center">Resets all institutional preferences to system defaults.</p>
                 </CardContent>
               </Card>
             </div>

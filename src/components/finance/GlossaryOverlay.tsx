@@ -7,14 +7,16 @@ import {
 } from "@/components/ui/hover-card";
 import { BookOpen, Info } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useUserSettings } from '@/hooks/use-user-settings';
 interface GlossaryTermProps {
   term: string;
   children?: React.ReactNode;
   className?: string;
 }
 export function GlossaryTerm({ term, children, className }: GlossaryTermProps) {
+  const { showTooltips } = useUserSettings();
   const definition = GLOSSARY_TERMS.find(t => t.term.toLowerCase() === term.toLowerCase());
-  if (!definition) {
+  if (!definition || !showTooltips) {
     return <span className={className}>{children || term}</span>;
   }
   return (
