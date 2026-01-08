@@ -15,9 +15,8 @@ import { HomePage } from '@/pages/HomePage'
 import { SettingsPage } from '@/pages/SettingsPage'
 import { QuantPage } from '@/pages/QuantPage'
 import { ScreenerPage } from '@/pages/ScreenerPage';
-// Placeholder stubs for the other intelligence hub pages
-const SentimentPage = () => <HomePage />; 
-const AcademyPage = () => <HomePage />;
+import { SentimentPage } from '@/pages/SentimentPage';
+import { AcademyPage } from '@/pages/AcademyPage';
 const queryClient = new QueryClient();
 const router = createBrowserRouter([
   {

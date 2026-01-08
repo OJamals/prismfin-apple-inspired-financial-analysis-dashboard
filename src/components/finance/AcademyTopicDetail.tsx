@@ -2,12 +2,10 @@ import React, { useState } from 'react';
 import { AcademyTopic } from '@shared/types';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { Card } from '@/components/ui/card';
-import { CheckCircle2, BookOpen, Clock, PlayCircle, RotateCcw, BarChart } from 'lucide-react';
+import { CheckCircle2, BookOpen, Clock, PlayCircle, RotateCcw } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { cn } from '@/lib/utils';
 interface AcademyTopicDetailProps {
   topic: AcademyTopic;
 }
@@ -15,8 +13,7 @@ export function AcademyTopicDetail({ topic }: AcademyTopicDetailProps) {
   const [isCompleted, setIsCompleted] = useState(false);
   const [sharpeInputs, setSharpeInputs] = useState({ return: 12, riskFree: 3, vol: 15 });
   const calculateSharpe = () => {
-    const sharpe = sharpeInputs.vol > 0 ? (sharpeInputs.return - sharpeInputs.riskFree) / sharpeInputs.vol : 0;
-    return sharpe.toFixed(2);
+    return ((sharpeInputs.return - sharpeInputs.riskFree) / sharpeInputs.vol).toFixed(2);
   };
   return (
     <div className="p-8 md:p-12 space-y-12 pb-24">
