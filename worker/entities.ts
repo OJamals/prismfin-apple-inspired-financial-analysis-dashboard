@@ -28,26 +28,33 @@ export class DashboardEntity extends Entity<DashboardState> {
     }
   }
   async getRange(range: TimeRange): Promise<DashboardData> {
-    const state = await this.getState();
-    return state.dataByRange[range] || generateDashboard(range);
+    const state = await this.ensureState();
+    if (!state.dataByRange || !state.dataByRange[range]) {
+      // Fallback for missing range data
+      return generateDashboard(range);
+    }
+    return state.dataByRange[range];
   }
   async getQuant(range: TimeRange): Promise<QuantData> {
-    const state = await this.getState();
-    return state.quantByRange[range] || generateQuantData(range);
+    const state = await this.ensureState();
+    if (!state.quantByRange || !state.quantByRange[range]) {
+      // Fallback for missing quant data
+      return generateQuantData(range);
+    }
+    return state.quantByRange[range];
   }
   async refreshRange(range: TimeRange): Promise<DashboardData> {
     return this.mutate(state => {
-      const current = state.dataByRange[range];
-      if (!current) return state;
+      const current = state.dataByRange[range] || generateDashboard(range);
       const updatedKpis = current.kpis.map(k => ({
         ...k,
-        value: k.value * (1 + (Math.random() - 0.5) * 0.01),
-        deltaPct: k.deltaPct + (Math.random() - 0.5) * 0.2
+        value: k.value * (1 + (Math.random() - 0.5) * 0.015),
+        deltaPct: k.deltaPct + (Math.random() - 0.5) * 0.25
       }));
       const updatedRows = current.rows.map(r => ({
         ...r,
-        price: r.price * (1 + (Math.random() - 0.5) * 0.005),
-        changePct: r.changePct + (Math.random() - 0.5) * 0.1
+        price: r.price * (1 + (Math.random() - 0.5) * 0.008),
+        changePct: r.changePct + (Math.random() - 0.5) * 0.15
       }));
       state.dataByRange[range] = {
         ...current,

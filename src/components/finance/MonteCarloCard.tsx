@@ -12,12 +12,23 @@ import {
 import { MonteCarloStats } from '@shared/types';
 import { formatCurrencyUSD } from '@/lib/format';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Skeleton } from '@/components/ui/skeleton';
 interface MonteCarloCardProps {
   data: Record<'1Y' | '5Y' | '10Y', MonteCarloStats>;
 }
 export function MonteCarloCard({ data }: MonteCarloCardProps) {
   const [horizon, setHorizon] = useState<'1Y' | '5Y' | '10Y'>('5Y');
-  const stats = data[horizon];
+  const stats = data?.[horizon];
+  if (!stats || !stats.series) {
+    return (
+      <Card className="rounded-4xl border-none shadow-soft bg-card h-full min-h-[400px]">
+        <div className="p-8 space-y-4">
+          <Skeleton className="h-6 w-1/3" />
+          <Skeleton className="h-[250px] w-full" />
+        </div>
+      </Card>
+    );
+  }
   return (
     <Card className="rounded-4xl border-none shadow-soft bg-card h-full">
       <CardHeader className="flex flex-row items-center justify-between">
@@ -65,20 +76,25 @@ export function MonteCarloCard({ data }: MonteCarloCardProps) {
                 }}
                 formatter={(val: number) => [formatCurrencyUSD(val)]}
               />
+              {/* Outer band */}
               <Area
                 type="monotone"
                 dataKey="p90"
                 stroke="none"
                 fill="#14B8A6"
                 fillOpacity={0.05}
+                isAnimationActive={false}
               />
+              {/* Inner band */}
               <Area
                 type="monotone"
                 dataKey="p10"
                 stroke="none"
                 fill="#14B8A6"
                 fillOpacity={0.1}
+                isAnimationActive={false}
               />
+              {/* Median Line last to be on top */}
               <Area
                 type="monotone"
                 dataKey="median"
