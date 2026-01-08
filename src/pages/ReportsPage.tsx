@@ -23,20 +23,39 @@ function MonthlyActivityChart() {
       <CardContent className="h-[220px]">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={data}>
-            <XAxis 
-              dataKey="name" 
-              axisLine={false} 
-              tickLine={false} 
+            <defs>
+              <linearGradient id="barGradientTeal" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#14B8A6" stopOpacity={1} />
+                <stop offset="100%" stopColor="#14B8A6" stopOpacity={0.6} />
+              </linearGradient>
+              <linearGradient id="barGradientBlue" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#0EA5E9" stopOpacity={1} />
+                <stop offset="100%" stopColor="#0EA5E9" stopOpacity={0.6} />
+              </linearGradient>
+            </defs>
+            <XAxis
+              dataKey="name"
+              axisLine={false}
+              tickLine={false}
               tick={{ fontSize: 10, fill: '#94a3b8', fontWeight: 600 }}
             />
             <YAxis hide />
-            <Tooltip 
-              cursor={{ fill: 'transparent' }}
-              contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}
+            <Tooltip
+              cursor={{ fill: 'rgba(0,0,0,0.02)' }}
+              contentStyle={{ 
+                borderRadius: '16px', 
+                border: 'none', 
+                boxShadow: '0 10px 25px -5px rgba(0,0,0,0.05)',
+                backgroundColor: 'rgba(255,255,255,0.95)',
+                backdropFilter: 'blur(8px)'
+              }}
             />
-            <Bar dataKey="value" radius={[10, 10, 10, 10]}>
+            <Bar dataKey="value" radius={[6, 6, 0, 0]}>
               {data.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={index % 2 === 0 ? '#14B8A6' : '#0EA5E9'} />
+                <Cell 
+                  key={`cell-${index}`} 
+                  fill={index % 2 === 0 ? 'url(#barGradientTeal)' : 'url(#barGradientBlue)'} 
+                />
               ))}
             </Bar>
           </BarChart>
