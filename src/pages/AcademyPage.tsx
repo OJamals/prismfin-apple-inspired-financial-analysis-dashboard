@@ -43,15 +43,14 @@ export function AcademyPage() {
           <DashboardHeader
             title="Learning Academy"
             subtitle="Bridging the gap between raw data and actionable investment intelligence."
-            subtitleClassName="text-xs text-background/60 font-black uppercase tracking-widest"
           />
           {/* Global Progress Dashboard */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <Card className="lg:col-span-2 rounded-4xl border-none shadow-premium bg-foreground text-foreground overflow-hidden p-8 flex flex-col justify-between">
+            <Card className="lg:col-span-2 rounded-4xl border-none shadow-premium bg-card text-card-foreground overflow-hidden p-8 flex flex-col justify-between">
               <div className="flex items-center justify-between mb-8">
                 <div className="space-y-1">
                   <h3 className="text-2xl font-bold font-display tracking-tight">Certification Pathway</h3>
-                  <p className="text-xs text-foreground/60 font-black uppercase tracking-widest">Master Quantitative Analysis</p>
+                  <p className="text-xs text-muted-foreground font-black uppercase tracking-widest">Master Quantitative Analysis</p>
                 </div>
                 <GraduationCap className="size-12 text-brand-teal opacity-80" />
               </div>
