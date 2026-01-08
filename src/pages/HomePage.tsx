@@ -16,13 +16,14 @@ export function HomePage() {
   const [searchParams] = useSearchParams();
   const filter = (searchParams.get('filter') as AssetClass) || 'all';
   const queryClient = useQueryClient();
-  const { data, isLoading } = useQuery<DashboardData>({
+  const { data, isLoading, isError } = useQuery<DashboardData>({
     queryKey: ['dashboard', range, filter],
     queryFn: () => api<DashboardData>(`/api/dashboard?range=${range}&filter=${filter}`),
+    retry: 1,
   });
   const refreshMutation = useMutation({
     mutationFn: () => api<DashboardData>(`/api/dashboard/refresh?range=${range}`, { method: 'POST' }),
-    onSuccess: (updated) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['dashboard'] });
       queryClient.invalidateQueries({ queryKey: ['alerts'] });
       toast.success('Market data updated');
@@ -33,7 +34,7 @@ export function HomePage() {
   return (
     <AppLayout>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="py-6 md:py-8 lg:py-10 space-y-8">
+        <div className="py-8 md:py-10 lg:py-12 space-y-8">
           <DashboardHeader
             title="Dashboard"
             subtitle={`Real-time ${filter === 'all' ? 'portfolio' : filter} analytics and insights.`}
@@ -46,8 +47,12 @@ export function HomePage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {isLoading ? (
               Array.from({ length: 4 }).map((_, i) => (
-                <Skeleton key={i} className="h-32 rounded-4xl" />
+                <Skeleton key={`kpi-skeleton-${i}`} className="h-32 rounded-4xl" />
               ))
+            ) : isError ? (
+              <div className="col-span-full py-10 text-center bg-muted/20 rounded-4xl">
+                <p className="text-muted-foreground text-sm">Failed to load market metrics.</p>
+              </div>
             ) : (
               data?.kpis.map((kpi) => (
                 <KpiCard
