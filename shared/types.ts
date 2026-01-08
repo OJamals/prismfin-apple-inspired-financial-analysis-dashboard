@@ -48,6 +48,26 @@ export interface FactorAttribution {
   value: number;
   color: string;
 }
+export interface RiskRewardPoint {
+  symbol: string;
+  returns: number;
+  volatility: number;
+  sharpe: number;
+  weight: number;
+}
+export interface DrawdownPoint {
+  label: string;
+  value: number;
+  drawdownPct: number;
+}
+export interface DrawdownData {
+  maxDrawdown: number;
+  series: DrawdownPoint[];
+}
+export interface CorrelationData {
+  symbols: string[];
+  matrix: Record<string, Record<string, number>>;
+}
 export interface QuantData {
   range: TimeRange;
   updatedAt: number;
@@ -55,4 +75,7 @@ export interface QuantData {
   benchmark: SeriesPoint[];
   factors: FactorAttribution[];
   monteCarlo: Record<'1Y' | '5Y' | '10Y', MonteCarloStats>;
+  riskReward: RiskRewardPoint[];
+  drawdown: DrawdownData;
+  correlation: CorrelationData;
 }

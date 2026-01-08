@@ -1,105 +1,73 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
-  CartesianGrid,
-  Cell,
-  ComposedChart,
-  Line,
-  ResponsiveContainer,
-  Scatter,
   ScatterChart,
-  Tooltip,
+  Scatter,
   XAxis,
-  YAxis
+  YAxis,
+  ZAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Cell
 } from 'recharts';
 import { RiskRewardPoint } from '@shared/types';
-import { cn } from '@/lib/utils';
 interface RiskRewardScatterCardProps {
   data: RiskRewardPoint[];
 }
 export function RiskRewardScatterCard({ data }: RiskRewardScatterCardProps) {
-  const getSharpeColor = (sharpe: number) => {
-    if (sharpe > 1.5) return '#10b981'; // Emerald-500
-    if (sharpe >= 0.5) return '#14B8A6'; // Brand-Teal
-    return '#0ea5e9'; // Brand-Blue (Lower but positive)
-  };
-  // Static efficiency frontier points
-  const frontier = [
-    { volatility: 5, returns: 4 },
-    { volatility: 10, returns: 12 },
-    { volatility: 15, returns: 18 },
-    { volatility: 25, returns: 25 },
-    { volatility: 40, returns: 32 },
-  ];
   return (
-    <Card className="rounded-4xl border-none shadow-soft bg-card h-full overflow-hidden">
-      <CardHeader className="pb-2 px-8 pt-8">
-        <CardTitle className="text-xl font-bold font-display tracking-tight">Efficiency Frontier</CardTitle>
-        <p className="text-sm text-muted-foreground font-medium">Risk-adjusted asset efficiency mapping</p>
+    <Card className="rounded-4xl border-none shadow-soft bg-card h-full">
+      <CardHeader>
+        <CardTitle className="text-lg font-semibold">Risk vs. Reward</CardTitle>
+        <p className="text-sm text-muted-foreground">Efficiency frontier & asset positioning</p>
       </CardHeader>
-      <CardContent className="h-[400px] px-4 pb-8">
+      <CardContent className="h-[350px] pt-2">
         <ResponsiveContainer width="100%" height="100%">
-          <ComposedChart margin={{ top: 20, right: 30, bottom: 40, left: 10 }}>
-            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" opacity={0.6} />
-            <XAxis
-              type="number"
-              dataKey="volatility"
-              name="Volatility"
-              unit="%"
-              domain={[0, 'auto']}
+          <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: 0 }}>
+            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+            <XAxis 
+              type="number" 
+              dataKey="volatility" 
+              name="Volatility" 
+              unit="%" 
               axisLine={false}
               tickLine={false}
-              tick={{ fontSize: 11, fill: '#94a3b8', fontWeight: 600 }}
-              label={{ value: 'Volatility (%)', position: 'bottom', offset: 20, fontSize: 10, fill: '#64748b', fontWeight: 700 }}
+              tick={{ fontSize: 12, fill: '#94a3b8' }}
+              label={{ value: 'Volatility (SD)', position: 'bottom', offset: 0, fontSize: 10, fill: '#94a3b8' }}
             />
-            <YAxis
-              type="number"
-              dataKey="returns"
-              name="Returns"
-              unit="%"
-              domain={[0, 'auto']}
+            <YAxis 
+              type="number" 
+              dataKey="returns" 
+              name="Returns" 
+              unit="%" 
               axisLine={false}
               tickLine={false}
-              tick={{ fontSize: 11, fill: '#94a3b8', fontWeight: 600 }}
-              label={{ value: 'Return', angle: -90, position: 'left', offset: 0, fontSize: 10, fill: '#64748b', fontWeight: 700 }}
+              tick={{ fontSize: 12, fill: '#94a3b8' }}
+              label={{ value: 'Expected Returns', angle: -90, position: 'left', fontSize: 10, fill: '#94a3b8' }}
             />
-            <Line
-              data={frontier}
-              type="monotone"
-              dataKey="returns"
-              stroke="#cbd5e1"
-              strokeWidth={1}
-              strokeDasharray="5 5"
-              dot={false}
-              activeDot={false}
-              isAnimationActive={false}
-            />
-            <Tooltip
-              cursor={{ strokeDasharray: '3 3', stroke: '#cbd5e1' }}
+            <ZAxis type="number" dataKey="weight" range={[100, 1000]} name="Weight" unit="%" />
+            <Tooltip 
+              cursor={{ strokeDasharray: '3 3' }}
+              contentStyle={{
+                borderRadius: '16px',
+                border: 'none',
+                boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.07)',
+                backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                backdropFilter: 'blur(8px)',
+                padding: '12px'
+              }}
               content={({ active, payload }) => {
                 if (active && payload && payload.length) {
-                  const d = payload[0].payload as RiskRewardPoint;
-                  if (!d.symbol) return null; // Ignore frontier line tooltip
+                  const data = payload[0].payload as RiskRewardPoint;
                   return (
-                    <div className="bg-card/95 backdrop-blur-xl p-4 rounded-2xl border border-white/40 shadow-premium min-w-[200px]">
-                      <div className="flex items-center justify-between mb-3">
-                        <p className="font-extrabold text-foreground">{d.symbol}</p>
-                        <div className={cn(
-                          "px-2 py-0.5 rounded-lg text-[9px] font-black uppercase tracking-widest",
-                          d.sharpe > 1.5 ? "bg-emerald-50 text-emerald-700" : "bg-brand-blue/10 text-brand-blue"
-                        )}>
-                          Allocation: {d.weight?.toFixed(1)}%
-                        </div>
-                      </div>
-                      <div className="space-y-2">
-                        <div className="flex justify-between items-center text-xs">
-                          <span className="text-muted-foreground font-medium">Sharpe Ratio</span>
-                          <span className="text-foreground font-black tabular-nums">{d.sharpe?.toFixed(2)}</span>
-                        </div>
-                        <div className="flex justify-between items-center text-xs">
-                          <span className="text-muted-foreground font-medium">Vol / Ret</span>
-                          <span className="text-foreground font-bold tabular-nums">{d.volatility?.toFixed(1)}% / {d.returns?.toFixed(1)}%</span>
-                        </div>
+                    <div className="space-y-1">
+                      <p className="font-bold text-foreground">{data.symbol}</p>
+                      <div className="text-xs text-muted-foreground grid grid-cols-2 gap-x-4">
+                        <span>Returns:</span> <span className="text-foreground font-medium">{data.returns}%</span>
+                        <span>Volatility:</span> <span className="text-foreground font-medium">{data.volatility}%</span>
+                        <span>Sharpe:</span> <span className="text-brand-blue font-bold">{data.sharpe}</span>
+                        <span>Weight:</span> <span className="text-foreground font-medium">{data.weight}%</span>
                       </div>
                     </div>
                   );
@@ -109,17 +77,16 @@ export function RiskRewardScatterCard({ data }: RiskRewardScatterCardProps) {
             />
             <Scatter name="Assets" data={data}>
               {data.map((entry, index) => (
-                <Cell
-                  key={`cell-${index}`}
-                  fill={entry.sharpe != null ? getSharpeColor(entry.sharpe) : '#0ea5e9'}
-                  fillOpacity={0.8}
-                  stroke={entry.sharpe != null ? getSharpeColor(entry.sharpe) : '#0ea5e9'}
-                  strokeWidth={1.5}
-                  className="transition-all duration-300 hover:fill-opacity-100 cursor-pointer"
+                <Cell 
+                  key={`cell-${index}`} 
+                  fill={entry.sharpe > 1.0 ? '#14B8A6' : '#0EA5E9'} 
+                  fillOpacity={0.6}
+                  stroke={entry.sharpe > 1.0 ? '#14B8A6' : '#0EA5E9'}
+                  strokeWidth={2}
                 />
               ))}
             </Scatter>
-          </ComposedChart>
+          </ScatterChart>
         </ResponsiveContainer>
       </CardContent>
     </Card>
