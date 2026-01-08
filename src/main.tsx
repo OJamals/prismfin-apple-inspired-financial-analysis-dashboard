@@ -1,7 +1,7 @@
+import React from 'react';
 import '@/lib/errorReporter';
 import { enableMapSet } from "immer";
 enableMapSet();
-
 import { createRoot } from 'react-dom/client'
 import {
   createBrowserRouter,
@@ -17,7 +17,14 @@ import { QuantPage } from '@/pages/QuantPage'
 import { ScreenerPage } from '@/pages/ScreenerPage';
 import { SentimentPage } from '@/pages/SentimentPage';
 import { AcademyPage } from '@/pages/AcademyPage';
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60 * 5,
+      retry: 1,
+    },
+  },
+});
 const router = createBrowserRouter([
   {
     path: "/",
@@ -51,9 +58,11 @@ const router = createBrowserRouter([
   },
 ]);
 createRoot(document.getElementById('root')!).render(
-  <QueryClientProvider client={queryClient}>
-    <ErrorBoundary>
-      <RouterProvider router={router} />
-    </ErrorBoundary>
-  </QueryClientProvider>
+  <React.StrictMode>
+    <QueryClientProvider client={queryClient}>
+      <ErrorBoundary>
+        <RouterProvider router={router} />
+      </ErrorBoundary>
+    </QueryClientProvider>
+  </React.StrictMode>
 )

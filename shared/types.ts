@@ -5,6 +5,7 @@ export interface ApiResponse<T = unknown> {
 }
 export type TimeRange = '1M' | '3M' | '6M' | '1Y';
 export type AssetClass = 'all' | 'equity' | 'crypto' | 'fixed-income';
+export type DensityMode = 'comfortable' | 'compact';
 export interface SeriesPoint {
   label: string;
   value: number;
@@ -61,6 +62,12 @@ export interface DashboardData {
   rows: MetricsRow[];
   alerts: Alert[];
 }
+export interface QuantInsight {
+  summary: string;
+  attribution: string;
+  riskExposure: string;
+  recommendation: string;
+}
 export interface MonteCarloSeriesPoint {
   label: string;
   p10: number;
@@ -102,6 +109,7 @@ export interface CorrelationData {
 export interface QuantData {
   range: TimeRange;
   updatedAt: number;
+  insight: QuantInsight;
   portfolio: SeriesPoint[];
   benchmark: SeriesPoint[];
   factors: FactorAttribution[];
@@ -110,7 +118,6 @@ export interface QuantData {
   drawdown: DrawdownData;
   correlation: CorrelationData;
 }
-/** New Intelligence Hub Types **/
 export type SentimentCategory = 'Bullish' | 'Neutral' | 'Bearish';
 export interface ScreenerStock {
   symbol: string;
