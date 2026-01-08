@@ -151,18 +151,84 @@ export function generateDashboard(range: TimeRange): DashboardData {
     riskReward: []
   };
 }
+function generateMCSim(horizon: '1Y' | '5Y' | '10Y'): MonteCarloStats {
+  const steps = 30;
+  const startValue = 100000;
+  const drift = horizon === '1Y' ? 0.08 : horizon === '5Y' ? 0.12 : 0.15;
+  const vol = 0.15;
+  const series: MonteCarloSeriesPoint[] = [];
+  for (let i = 0; i <= steps; i++) {
+    const t = i / steps;
+    const timeFactor = horizon === '1Y' ? 1 : horizon === '5Y' ? 5 : 10;
+    const actualT = t * timeFactor;
+    // Geometric drift and widening dispersion
+    const median = startValue * Math.exp(drift * actualT);
+    const dispersion = startValue * vol * Math.sqrt(actualT);
+    series.push({
+      label: `T+${i}`,
+      median: median,
+      p10: median - (dispersion * 1.28), // ~10th percentile
+      p90: median + (dispersion * 1.28), // ~90th percentile
+    });
+  }
+  const last = series[series.length - 1];
+  return {
+    horizon,
+    median: last.median,
+    p10: last.p10,
+    p90: last.p90,
+    series
+  };
+}
 export function generateQuantData(range: TimeRange): QuantData {
   return {
     range,
     updatedAt: Date.now(),
-    insight: { summary: 'Insight', attribution: 'Attr', riskExposure: 'Risk', recommendation: 'Rec' },
-    portfolio: [],
-    benchmark: [],
-    factors: [],
-    monteCarlo: {} as any,
-    riskReward: [],
-    drawdown: { maxDrawdown: 10, series: [] },
-    correlation: { symbols: [], matrix: {} }
+    insight: { 
+      summary: 'The portfolio demonstrates robust alpha generation against the S&P 500 benchmark, primarily driven by core technology exposure and disciplined risk hedging.', 
+      attribution: '65% of excess returns are attributed to Sector Momentum and Quality factors.', 
+      riskExposure: 'Current tracking error is 4.2%, with a slight overweight in High-Beta tech names.', 
+      recommendation: 'Maintain current positioning but monitor macro volatility for potential defensive rotation.' 
+    },
+    portfolio: Array.from({ length: 30 }).map((_, i) => ({ label: `T-${29-i}`, value: 110000 + (Math.sin(i * 0.4) * 5000) + (i * 800) })),
+    benchmark: Array.from({ length: 30 }).map((_, i) => ({ label: `T-${29-i}`, value: 105000 + (i * 600) })),
+    factors: [
+      { label: 'Momentum', value: 35, color: '#14B8A6' },
+      { label: 'Quality', value: 30, color: '#0EA5E9' },
+      { label: 'Value', value: 15, color: '#6366F1' },
+      { label: 'Volatility', value: 10, color: '#F59E0B' },
+      { label: 'Size', value: 10, color: '#94A3B8' }
+    ],
+    monteCarlo: {
+      '1Y': generateMCSim('1Y'),
+      '5Y': generateMCSim('5Y'),
+      '10Y': generateMCSim('10Y'),
+    },
+    riskReward: SYMBOLS.map(s => ({
+      symbol: s,
+      returns: 10 + Math.random() * 20,
+      volatility: 15 + Math.random() * 15,
+      sharpe: 0.8 + Math.random() * 1.5,
+      weight: 5 + Math.random() * 15
+    })),
+    drawdown: { 
+      maxDrawdown: 12.4, 
+      series: Array.from({ length: 30 }).map((_, i) => ({ 
+        label: `T-${29-i}`, 
+        value: 100000 - (Math.random() * 5000), 
+        drawdownPct: -(Math.random() * 12.4) 
+      }))
+    },
+    correlation: { 
+      symbols: ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'NVDA'], 
+      matrix: {
+        'AAPL': { 'AAPL': 1, 'MSFT': 0.82, 'GOOGL': 0.75, 'AMZN': 0.68, 'NVDA': 0.55 },
+        'MSFT': { 'AAPL': 0.82, 'MSFT': 1, 'GOOGL': 0.79, 'AMZN': 0.72, 'NVDA': 0.58 },
+        'GOOGL': { 'AAPL': 0.75, 'MSFT': 0.79, 'GOOGL': 1, 'AMZN': 0.84, 'NVDA': 0.49 },
+        'AMZN': { 'AAPL': 0.68, 'MSFT': 0.72, 'GOOGL': 0.84, 'AMZN': 1, 'NVDA': 0.42 },
+        'NVDA': { 'AAPL': 0.55, 'MSFT': 0.58, 'GOOGL': 0.49, 'AMZN': 0.42, 'NVDA': 1 }
+      } 
+    }
   };
 }
 export function getMockRows(): MetricsRow[] {

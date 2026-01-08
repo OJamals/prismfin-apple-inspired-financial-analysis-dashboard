@@ -87,7 +87,11 @@ export class DashboardEntity extends Entity<DashboardState> {
   async getQuant(range: TimeRange): Promise<QuantData> {
     const state = await this.ensureState();
     const rangeQuant = state?.quantByRange ?? DashboardEntity.initialState.quantByRange;
-    const data = rangeQuant[range] ?? generateQuantData(range);
+    let data = rangeQuant[range] ?? generateQuantData(range);
+    // Defensive check for Monte Carlo structure (if legacy data exists)
+    if (!data.monteCarlo || !data.monteCarlo['10Y']) {
+      data = generateQuantData(range);
+    }
     return JSON.parse(JSON.stringify(data)) as QuantData;
   }
   async refreshRange(range: TimeRange): Promise<DashboardData> {
