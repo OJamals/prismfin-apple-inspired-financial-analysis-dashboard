@@ -3,7 +3,7 @@ import { useLocation } from "react-router-dom";
 import { AppSidebar } from "@/components/app-sidebar";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetDescription } from "@/components/ui/sheet";
 import { PanelLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { GlobalFilter } from "@/components/finance/GlobalFilter";
@@ -80,6 +80,7 @@ export function AppLayout({ children, container = false, className, contentClass
       </div>
       <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
         <SheetContent side='left' className={cn('p-0 w-[18rem] border-r-0', sidebarClass)}>
+          <SheetDescription className="sr-only">Primary navigation drawer with dashboard tools and settings.</SheetDescription>
           <AppSidebar />
         </SheetContent>
       </Sheet>

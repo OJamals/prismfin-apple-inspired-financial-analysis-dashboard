@@ -10,6 +10,7 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
+  SheetDescription,
 } from "@/components/ui/sheet";
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -65,7 +66,7 @@ export function AlertCenter() {
           <div className="flex items-center justify-between">
             <div className="space-y-1">
               <SheetTitle className="text-2xl font-bold font-display tracking-tight">Alerts</SheetTitle>
-              <p className="text-xs text-muted-foreground font-medium uppercase tracking-widest">{mode} environment</p>
+              <SheetDescription className="text-xs text-muted-foreground font-medium uppercase tracking-widest">{mode} environment</SheetDescription>
             </div>
             <Badge variant="secondary" className="rounded-xl px-3 py-1 bg-secondary/80 text-foreground font-bold">
               {unreadCount} Active
