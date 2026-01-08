@@ -41,11 +41,11 @@ export function ScreenerPage() {
   const [search, setSearch] = useState('');
   const [filters, setFilters] = useState<ScreenerFilters>(INITIAL_FILTERS);
   const [selectedSymbols, setSelectedSymbols] = useState<string[]>([]);
+  // Ref for checking filter changes without triggering dependency loops
   const filtersRef = useRef(filters);
   useEffect(() => {
     filtersRef.current = filters;
   }, [filters]);
-  
   useEffect(() => {
     const sector = searchParams.get('sector') || 'all';
     const sentiment = searchParams.get('sentiment') || 'all';
@@ -70,7 +70,7 @@ export function ScreenerPage() {
     if (JSON.stringify(filtersRef.current) !== JSON.stringify(newFilters)) {
       setFilters(newFilters);
     }
-  }, [searchParams, filtersRef]);
+  }, [searchParams]);
   const { data: stocks = [], isLoading } = useQuery<ScreenerStock[]>({
     queryKey: ['screener'],
     queryFn: () => api<ScreenerStock[]>('/api/screener'),
@@ -183,7 +183,7 @@ export function ScreenerPage() {
                                 <Checkbox
                                   checked={selectedSymbols.includes(stock.symbol)}
                                   onCheckedChange={(checked) => {
-                                    setSelectedSymbols(prev => 
+                                    setSelectedSymbols(prev =>
                                       checked ? [...prev, stock.symbol] : prev.filter(s => s !== stock.symbol)
                                     );
                                   }}

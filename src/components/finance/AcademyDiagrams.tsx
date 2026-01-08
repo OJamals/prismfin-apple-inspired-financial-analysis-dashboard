@@ -10,82 +10,88 @@ export function AcademyDiagrams({ type, className }: AcademyDiagramsProps) {
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas || type !== 'bell-curve') return;
-
     const resizeCanvas = () => {
       const rect = canvas.getBoundingClientRect();
       const dpr = window.devicePixelRatio || 1;
       canvas.width = rect.width * dpr;
-      canvas.height = (rect.width * 0.5) * dpr; // Fixed 2:1 aspect ratio
+      canvas.height = (rect.width * 0.5) * dpr;
       drawChart();
     };
-
     const drawChart = () => {
       const ctx = canvas.getContext('2d');
       if (!ctx) return;
-      
       const width = canvas.width;
       const height = canvas.height;
       const dpr = window.devicePixelRatio || 1;
-      ctx.scale(dpr, dpr);
-      
-      // Clear
+      // Clear with absolute precision
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
       ctx.clearRect(0, 0, width, height);
-      const mean = width / 2;
-      const stdDev = width / 8;
-
-      // Get theme colors
+      ctx.scale(dpr, dpr);
+      const logicalWidth = width / dpr;
+      const logicalHeight = height / dpr;
+      const mean = logicalWidth / 2;
+      const stdDev = logicalWidth / 8;
+      // Dynamic theme variable extraction
       const rootStyle = getComputedStyle(document.documentElement);
-      const mutedForeground = rootStyle.getPropertyValue('--muted-foreground').trim();
-      const gainColor = rootStyle.getPropertyValue('--gain').trim();
-      const gainHsl = gainColor.match(/hsl\((\d+),\s*(\d+)%,\s*(\d+)%\)/);
-      const gainHsla = gainHsl ? `hsla(${gainHsl[1]}, ${gainHsl[2]}, ${gainHsl[3]}, 0.1)` : 'hsla(172, 50%, 45%, 0.1)';
-      
-      // Draw Bell Curve
+      const mutedForeground = rootStyle.getPropertyValue('--muted-foreground').trim() || '#64748b';
+      const gainColor = rootStyle.getPropertyValue('--brand-teal').trim() || '#14B8A6';
+      // Construct RGBA for shading based on theme
+      const fillStyle = gainColor.startsWith('#') 
+        ? `${gainColor}20` 
+        : gainColor.replace('rgb', 'rgba').replace(')', ', 0.1)');
+      // Draw Bell Curve Path
       ctx.beginPath();
-      ctx.lineWidth = 4;
+      ctx.lineWidth = 3;
       ctx.strokeStyle = gainColor;
-      for (let x = 0; x < width; x++) {
+      for (let x = 0; x < logicalWidth; x++) {
         const exponent = -Math.pow(x - mean, 2) / (2 * Math.pow(stdDev, 2));
-        const y = height - (height * 0.8 * Math.exp(exponent));
+        const y = logicalHeight - (logicalHeight * 0.8 * Math.exp(exponent));
         if (x === 0) ctx.moveTo(x, y);
         else ctx.lineTo(x, y);
       }
       ctx.stroke();
-      // Shading for 1SD
-      ctx.fillStyle = gainHsla;
+      // Shading for Central Tendency (1 SD)
+      ctx.fillStyle = fillStyle;
       ctx.beginPath();
+      ctx.moveTo(mean - stdDev, logicalHeight);
       for (let x = mean - stdDev; x <= mean + stdDev; x++) {
         const exponent = -Math.pow(x - mean, 2) / (2 * Math.pow(stdDev, 2));
-        const y = height - (height * 0.8 * Math.exp(exponent));
-        if (x === mean - stdDev) ctx.moveTo(x, height);
+        const y = logicalHeight - (logicalHeight * 0.8 * Math.exp(exponent));
         ctx.lineTo(x, y);
       }
-      ctx.lineTo(mean + stdDev, height);
+      ctx.lineTo(mean + stdDev, logicalHeight);
+      ctx.closePath();
       ctx.fill();
-      // Labels
+      // Institutional Labels
       ctx.fillStyle = mutedForeground;
-      ctx.font = 'bold 12px Inter';
+      ctx.font = 'bold 10px Inter';
       ctx.textAlign = 'center';
-      ctx.fillText('68% within 1 SD', mean, height - 20);
+      ctx.fillText('68% Probability (±1 SD)', mean, logicalHeight - 12);
     };
-
     resizeCanvas();
     window.addEventListener('resize', resizeCanvas);
-    return () => window.removeEventListener('resize', resizeCanvas);
+    // Observer for theme changes
+    const observer = new MutationObserver(drawChart);
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+    return () => {
+      window.removeEventListener('resize', resizeCanvas);
+      observer.disconnect();
+    };
   }, [type]);
   return (
-    <Card className={cn("p-10 rounded-4xl border-none shadow-soft bg-card/60 flex items-center justify-center", className)}>
+    <Card className={cn("p-10 rounded-4xl border-none shadow-soft bg-card/60 flex items-center justify-center overflow-hidden", className)}>
       {type === 'bell-curve' ? (
         <div className="space-y-6 w-full flex flex-col items-center">
-          <canvas ref={canvasRef} width={600} height={300} className="w-full h-auto max-w-lg" />
-          <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest text-center">
-            Figure 1.1: The Normal Distribution (Gaussian Curve)
-          </p>
+          <canvas ref={canvasRef} className="w-full h-auto max-w-lg cursor-crosshair" />
+          <div className="flex items-center gap-4 text-[10px] font-black text-muted-foreground uppercase tracking-widest text-center opacity-60">
+            <span className="flex items-center gap-1.5"><div className="size-1.5 rounded-full bg-brand-teal" /> Market Model</span>
+            <span className="flex items-center gap-1.5"><div className="size-1.5 rounded-full bg-brand-teal/20" /> Confidence Interval</span>
+          </div>
         </div>
       ) : (
         <div className="p-20 text-center space-y-4">
           <div className="size-16 rounded-3xl bg-secondary mx-auto animate-pulse" />
-          <p className="text-xs text-muted-foreground font-bold">Interactive diagram under audit...</p>
+          <p className="text-xs text-muted-foreground font-bold">Interactive diagram engine loading...</p>
         </div>
       )}
     </Card>

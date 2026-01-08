@@ -51,7 +51,7 @@ export function RiskRewardScatterCard({ data }: RiskRewardScatterCardProps) {
               axisLine={false}
               tickLine={false}
               tick={{ fontSize: 11, fill: '#94a3b8', fontWeight: 600 }}
-              label={{ value: 'Volatility (��)', position: 'bottom', offset: 20, fontSize: 10, fill: '#64748b', fontWeight: 700 }}
+              label={{ value: 'Volatility (%)', position: 'bottom', offset: 20, fontSize: 10, fill: '#64748b', fontWeight: 700 }}
             />
             <YAxis
               type="number"
@@ -65,13 +65,13 @@ export function RiskRewardScatterCard({ data }: RiskRewardScatterCardProps) {
               label={{ value: 'Return', angle: -90, position: 'left', offset: 0, fontSize: 10, fill: '#64748b', fontWeight: 700 }}
             />
             <ZAxis type="number" dataKey="weight" range={[100, 2000]} name="Weight" />
-            <Line 
-              data={frontier} 
-              type="monotone" 
-              dataKey="returns" 
-              stroke="#cbd5e1" 
-              strokeWidth={1} 
-              strokeDasharray="5 5" 
+            <Line
+              data={frontier}
+              type="monotone"
+              dataKey="returns"
+              stroke="#cbd5e1"
+              strokeWidth={1}
+              strokeDasharray="5 5"
               dot={false}
               activeDot={false}
               isAnimationActive={false}
@@ -83,7 +83,7 @@ export function RiskRewardScatterCard({ data }: RiskRewardScatterCardProps) {
                   const d = payload[0].payload as RiskRewardPoint;
                   if (!d.symbol) return null; // Ignore frontier line tooltip
                   return (
-                    <div className="glass-premium p-4 rounded-2xl border border-white/40 shadow-premium min-w-[200px]">
+                    <div className="bg-card/95 backdrop-blur-xl p-4 rounded-2xl border border-white/40 shadow-premium min-w-[200px]">
                       <div className="flex items-center justify-between mb-3">
                         <p className="font-extrabold text-foreground">{d.symbol}</p>
                         <div className={cn(
@@ -114,9 +114,9 @@ export function RiskRewardScatterCard({ data }: RiskRewardScatterCardProps) {
                 <Cell
                   key={`cell-${index}`}
                   fill={getSharpeColor(entry.sharpe)}
-                  fillOpacity={0.7}
+                  fillOpacity={0.8}
                   stroke={getSharpeColor(entry.sharpe)}
-                  strokeWidth={2}
+                  strokeWidth={1.5}
                   className="transition-all duration-300 hover:fill-opacity-100 cursor-pointer"
                 />
               ))}
