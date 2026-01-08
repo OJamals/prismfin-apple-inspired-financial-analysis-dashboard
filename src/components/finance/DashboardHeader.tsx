@@ -40,10 +40,10 @@ export function DashboardHeader({
       <div className="flex items-center gap-2.5 bg-card/40 p-1.5 rounded-2xl border border-card/60 shadow-soft ring-1 ring-border/20 backdrop-blur-md">
         {onRangeChange && (
           <Select value={range} onValueChange={onRangeChange}>
-            <SelectTrigger className="w-[110px] bg-card border-none shadow-sm rounded-xl h-10 font-bold text-xs uppercase tracking-widest focus:ring-1 focus:ring-brand-blue/30 outline-none">
+            <SelectTrigger className="min-w-[110px] w-[120px] sm:w-[140px] bg-card border-none shadow-sm rounded-2xl p-2 h-10 font-bold text-xs uppercase tracking-widest focus:ring-1 focus:ring-brand-blue/30 outline-none whitespace-nowrap">
               <SelectValue placeholder="Range" />
             </SelectTrigger>
-            <SelectContent className="rounded-2xl bg-card/90 backdrop-blur-xl border-card/40 shadow-premium">
+            <SelectContent className="rounded-2xl p-2 bg-card/90 backdrop-blur-xl border-card/40 shadow-premium">
               <SelectItem value="1M" className="rounded-lg text-xs font-bold uppercase tracking-widest py-2.5">1 Month</SelectItem>
               <SelectItem value="3M" className="rounded-lg text-xs font-bold uppercase tracking-widest py-2.5">3 Months</SelectItem>
               <SelectItem value="6M" className="rounded-lg text-xs font-bold uppercase tracking-widest py-2.5">6 Months</SelectItem>
