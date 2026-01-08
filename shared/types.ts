@@ -4,6 +4,7 @@ export interface ApiResponse<T = unknown> {
   error?: string;
 }
 export type TimeRange = '1M' | '3M' | '6M' | '1Y';
+export type AssetClass = 'all' | 'equity' | 'crypto' | 'fixed-income';
 export interface SeriesPoint {
   label: string;
   value: number;
@@ -14,6 +15,15 @@ export interface Kpi {
   value: number;
   deltaPct: number;
 }
+export type AlertPriority = 'high' | 'medium' | 'low';
+export interface Alert {
+  id: string;
+  type: string;
+  message: string;
+  priority: AlertPriority;
+  timestamp: number;
+  assetSymbol?: string;
+}
 export interface MetricsRow {
   name: string;
   symbol: string;
@@ -21,14 +31,21 @@ export interface MetricsRow {
   changePct: number;
   ytdPct: number;
   volume: string;
+  class: AssetClass;
+  sentiment: number; // 0-100
+  peRatio?: number;
+  rsi?: number;
+  miniSeries: SeriesPoint[];
 }
 export interface DashboardData {
   range: TimeRange;
+  filter: AssetClass;
   updatedAt: number;
   kpis: Kpi[];
   performance: SeriesPoint[];
   cashflow: SeriesPoint[];
   rows: MetricsRow[];
+  alerts: Alert[];
 }
 export interface MonteCarloSeriesPoint {
   label: string;

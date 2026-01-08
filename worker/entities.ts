@@ -1,14 +1,11 @@
 import { Entity, Env } from "./core-utils";
-import { DashboardData, TimeRange, QuantData } from "@shared/types";
+import { DashboardData, TimeRange, AssetClass, QuantData, Alert } from "@shared/types";
 import { generateDashboard, generateQuantData } from "@shared/mock-data";
 export interface DashboardState {
   dataByRange: Record<TimeRange, DashboardData>;
   quantByRange: Record<TimeRange, QuantData>;
+  dismissedAlertIds: string[];
 }
-/**
- * DashboardEntity manages persistence for financial metrics and quantitative analysis.
- * It uses a single Durable Object instance ("main") to store all time-series data.
- */
 export class DashboardEntity extends Entity<DashboardState> {
   static readonly entityName = "dashboard";
   static readonly initialState: DashboardState = {
@@ -23,65 +20,59 @@ export class DashboardEntity extends Entity<DashboardState> {
       '3M': generateQuantData('3M'),
       '6M': generateQuantData('6M'),
       '1Y': generateQuantData('1Y'),
-    }
+    },
+    dismissedAlertIds: []
   };
-  /**
-   * Ensures the global dashboard state is initialized.
-   */
   static async ensureSeed(env: Env): Promise<void> {
     const inst = new DashboardEntity(env, 'main');
     if (!(await inst.exists())) {
       await inst.save(DashboardEntity.initialState);
     }
   }
-  /**
-   * Retrieves dashboard data for a specific range with deep-copy fallback.
-   */
-  async getRange(range: TimeRange): Promise<DashboardData> {
+  async getRange(range: TimeRange, filter: AssetClass = 'all'): Promise<DashboardData> {
     const state = await this.ensureState();
-    if (!state.dataByRange || !state.dataByRange[range]) {
-      return JSON.parse(JSON.stringify(generateDashboard(range)));
-    }
-    return JSON.parse(JSON.stringify(state.dataByRange[range]));
+    let data = state.dataByRange[range] || generateDashboard(range, filter);
+    // Server-side filtering logic
+    const allRows = data.rows;
+    const filteredRows = filter === 'all' ? allRows : allRows.filter(r => r.class === filter);
+    // Filter alerts based on dismissed state
+    const alerts = data.alerts.filter(a => !state.dismissedAlertIds.includes(a.id));
+    return {
+      ...data,
+      filter,
+      rows: JSON.parse(JSON.stringify(filteredRows)),
+      alerts: JSON.parse(JSON.stringify(alerts))
+    };
   }
-  /**
-   * Retrieves quant data for a specific range with deep-copy fallback.
-   */
+  async dismissAlert(alertId: string): Promise<void> {
+    await this.mutate(state => {
+      if (!state.dismissedAlertIds.includes(alertId)) {
+        state.dismissedAlertIds.push(alertId);
+      }
+      return state;
+    });
+  }
   async getQuant(range: TimeRange): Promise<QuantData> {
     const state = await this.ensureState();
-    if (!state.quantByRange || !state.quantByRange[range]) {
-      return JSON.parse(JSON.stringify(generateQuantData(range)));
-    }
-    return JSON.parse(JSON.stringify(state.quantByRange[range]));
+    return JSON.parse(JSON.stringify(state.quantByRange[range] || generateQuantData(range)));
   }
-  /**
-   * Perturbs existing dashboard data to simulate real-time market updates.
-   */
   async refreshRange(range: TimeRange): Promise<DashboardData> {
     return this.mutate(state => {
       const current = state.dataByRange[range] || generateDashboard(range);
-      const updatedKpis = current.kpis.map(k => ({
-        ...k,
-        value: k.value * (1 + (Math.random() - 0.5) * 0.02),
-        deltaPct: k.deltaPct + (Math.random() - 0.5) * 0.3
-      }));
       const updatedRows = current.rows.map(r => ({
         ...r,
-        price: r.price * (1 + (Math.random() - 0.5) * 0.01),
-        changePct: r.changePct + (Math.random() - 0.5) * 0.2
+        price: r.price * (1 + (Math.random() - 0.5) * 0.02),
+        changePct: r.changePct + (Math.random() - 0.5) * 0.4,
+        sentiment: Math.min(100, Math.max(0, r.sentiment + (Math.random() - 0.5) * 5))
       }));
       state.dataByRange[range] = {
         ...current,
-        kpis: updatedKpis,
         rows: updatedRows,
         updatedAt: Date.now()
       };
       return state;
     }).then(s => JSON.parse(JSON.stringify(s.dataByRange[range])));
   }
-  /**
-   * Regenerates quant simulations for the specific range.
-   */
   async refreshQuant(range: TimeRange): Promise<QuantData> {
     return this.mutate(state => {
       state.quantByRange[range] = generateQuantData(range);

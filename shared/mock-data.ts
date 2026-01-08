@@ -1,9 +1,11 @@
 import {
   DashboardData,
   TimeRange,
+  AssetClass,
   SeriesPoint,
   Kpi,
   MetricsRow,
+  Alert,
   QuantData,
   FactorAttribution,
   MonteCarloStats,
@@ -45,23 +47,59 @@ export function getMockCashflow(): SeriesPoint[] {
     { label: 'Jun', value: 7200 },
   ];
 }
+function generateMiniSeries(base: number): SeriesPoint[] {
+  return Array.from({ length: 7 }).map((_, i) => ({
+    label: `T-${6-i}`,
+    value: base * (0.95 + Math.random() * 0.1)
+  }));
+}
 export function getMockRows(): MetricsRow[] {
   return [
-    { name: 'Apple Inc.', symbol: 'AAPL', price: 189.43, changePct: 1.2, ytdPct: 12.4, volume: '54.2M' },
-    { name: 'Microsoft Corp.', symbol: 'MSFT', price: 415.22, changePct: -0.4, ytdPct: 15.1, volume: '22.1M' },
-    { name: 'Nvidia Corp.', symbol: 'NVDA', price: 882.33, changePct: 3.5, ytdPct: 78.2, volume: '88.5M' },
-    { name: 'Tesla Inc.', symbol: 'TSLA', price: 172.50, changePct: -2.1, ytdPct: -31.4, volume: '95.2M' },
-    { name: 'Alphabet Inc.', symbol: 'GOOGL', price: 154.21, changePct: 0.8, ytdPct: 9.8, volume: '28.4M' },
+    { name: 'Apple Inc.', symbol: 'AAPL', price: 189.43, changePct: 1.2, ytdPct: 12.4, volume: '54.2M', class: 'equity', sentiment: 78, peRatio: 28.4, rsi: 62, miniSeries: generateMiniSeries(189) },
+    { name: 'Microsoft Corp.', symbol: 'MSFT', price: 415.22, changePct: -0.4, ytdPct: 15.1, volume: '22.1M', class: 'equity', sentiment: 65, peRatio: 35.2, rsi: 48, miniSeries: generateMiniSeries(415) },
+    { name: 'Nvidia Corp.', symbol: 'NVDA', price: 882.33, changePct: 3.5, ytdPct: 78.2, volume: '88.5M', class: 'equity', sentiment: 92, peRatio: 74.1, rsi: 72, miniSeries: generateMiniSeries(882) },
+    { name: 'Bitcoin', symbol: 'BTC', price: 64200.00, changePct: 5.2, ytdPct: 45.1, volume: '32.1B', class: 'crypto', sentiment: 84, rsi: 68, miniSeries: generateMiniSeries(64200) },
+    { name: 'Ethereum', symbol: 'ETH', price: 3450.00, changePct: -1.2, ytdPct: 32.4, volume: '18.4B', class: 'crypto', sentiment: 71, rsi: 54, miniSeries: generateMiniSeries(3450) },
+    { name: 'US 10Y Treasury', symbol: 'US10Y', price: 98.42, changePct: 0.1, ytdPct: -2.4, volume: 'N/A', class: 'fixed-income', sentiment: 45, rsi: 42, miniSeries: generateMiniSeries(98) },
   ];
 }
-export function generateDashboard(range: TimeRange): DashboardData {
+export function generateAlerts(rows: MetricsRow[]): Alert[] {
+  const alerts: Alert[] = [];
+  rows.forEach(r => {
+    if (Math.abs(r.changePct) > 3) {
+      alerts.push({
+        id: `alert-${r.symbol}-${Date.now()}`,
+        type: 'volatility',
+        message: `${r.symbol} volatility spike: ${r.changePct}% move detected.`,
+        priority: Math.abs(r.changePct) > 5 ? 'high' : 'medium',
+        timestamp: Date.now(),
+        assetSymbol: r.symbol
+      });
+    }
+  });
+  if (alerts.length === 0) {
+    alerts.push({
+      id: 'alert-system-1',
+      type: 'info',
+      message: 'Portfolio beta remains within target thresholds.',
+      priority: 'low',
+      timestamp: Date.now()
+    });
+  }
+  return alerts;
+}
+export function generateDashboard(range: TimeRange, filter: AssetClass = 'all'): DashboardData {
+  const allRows = getMockRows();
+  const filteredRows = filter === 'all' ? allRows : allRows.filter(r => r.class === filter);
   return {
     range,
+    filter,
     updatedAt: Date.now(),
     kpis: getMockKPIs(),
     performance: getMockPerformance(range),
     cashflow: getMockCashflow(),
-    rows: getMockRows(),
+    rows: filteredRows,
+    alerts: generateAlerts(filteredRows)
   };
 }
 function generateMonteCarlo(horizon: '1Y' | '5Y' | '10Y'): MonteCarloStats {
@@ -69,8 +107,8 @@ function generateMonteCarlo(horizon: '1Y' | '5Y' | '10Y'): MonteCarloStats {
   const steps = 12 * years;
   const series: MonteCarloSeriesPoint[] = [];
   let currentMedian = 124500;
-  const drift = 0.008; 
-  const vol = 0.04; 
+  const drift = 0.008;
+  const vol = 0.04;
   for (let i = 0; i <= steps; i++) {
     const spread = currentMedian * vol * Math.sqrt(i + 1);
     series.push({
@@ -131,7 +169,6 @@ function generateCorrelationMatrix(): CorrelationData {
       if (i === j) {
         matrix[s1][s2] = 1.0;
       } else {
-        // Deterministic-ish random correlation between 0.2 and 0.95
         const base = (i + j) % 2 === 0 ? 0.7 : 0.4;
         matrix[s1][s2] = parseFloat((base + Math.random() * 0.25).toFixed(2));
       }
