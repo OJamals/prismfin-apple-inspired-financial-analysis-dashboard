@@ -24,5 +24,10 @@ export function formatPct(value: number): string {
     return '0.00%';
   }
   const formatted = value.toFixed(2);
+  // Ensure we don't show +0.00% or -0.00% for values effectively at zero
+  const isEffectivelyZero = Math.abs(value) < 0.005;
+  if (isEffectivelyZero) {
+    return '0.00%';
+  }
   return `${value > 0 ? '+' : ''}${formatted}%`;
 }

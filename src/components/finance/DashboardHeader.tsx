@@ -1,5 +1,5 @@
 import React from 'react';
-import { RefreshCw, Download, Zap, Shield } from 'lucide-react';
+import { RefreshCw, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Select,
@@ -39,25 +39,25 @@ export function DashboardHeader({
           <h1 className="text-3xl md:text-5xl font-bold tracking-tight text-foreground font-display">
             {title}
           </h1>
-          <Badge 
-            variant="secondary" 
+          <Badge
+            variant="secondary"
             className={cn(
-              "rounded-xl px-3 py-1 flex items-center gap-2 border-none font-bold uppercase tracking-widest text-[10px] shadow-sm",
+              "rounded-xl px-3 py-1 flex items-center justify-center gap-2 border-none font-bold uppercase tracking-widest text-[10px] shadow-sm",
               isLive ? "bg-rose-50 text-rose-600" : "bg-emerald-50 text-emerald-600"
             )}
           >
-            <div className={cn("size-1.5 rounded-full", isLive ? "bg-rose-500 animate-pulse" : "bg-emerald-500")} />
-            {mode}
+            <div className={cn("size-1.5 rounded-full shrink-0", isLive ? "bg-rose-500 animate-pulse" : "bg-emerald-500")} />
+            <span className="leading-none">{mode}</span>
           </Badge>
         </div>
-        <p className="text-muted-foreground/80 text-sm md:text-base font-medium max-w-xl leading-relaxed">
+        <p className="text-muted-foreground/70 text-sm md:text-base font-medium max-w-xl leading-relaxed">
           {subtitle}
         </p>
       </div>
       <div className="flex items-center gap-2.5 bg-card/40 p-1.5 rounded-2xl border border-card/60 shadow-soft ring-1 ring-border/20 backdrop-blur-md">
         {onRangeChange && (
           <Select value={range} onValueChange={onRangeChange}>
-            <SelectTrigger className="w-[110px] bg-card border-none shadow-sm rounded-xl h-10 font-bold text-xs uppercase tracking-widest focus:ring-1 focus:ring-brand-blue/30">
+            <SelectTrigger className="w-[110px] bg-card border-none shadow-sm rounded-xl h-10 font-bold text-xs uppercase tracking-widest focus:ring-1 focus:ring-brand-blue/30 outline-none">
               <SelectValue placeholder="Range" />
             </SelectTrigger>
             <SelectContent className="rounded-2xl bg-card/90 backdrop-blur-xl border-card/40 shadow-premium">
@@ -76,7 +76,7 @@ export function DashboardHeader({
                 size="icon"
                 onClick={onRefresh}
                 disabled={isRefreshing}
-                className="rounded-xl h-9 w-9 bg-card shadow-sm hover:bg-muted/50 border-none"
+                className="rounded-xl h-9 w-9 bg-card shadow-sm hover:bg-muted/50 border-none transition-all"
               >
                 <RefreshCw className={cn("size-4 text-brand-blue", isRefreshing && "animate-spin")} />
               </Button>
@@ -86,14 +86,14 @@ export function DashboardHeader({
             <Button
               variant="ghost"
               size="icon"
-              className="rounded-xl h-9 w-9 bg-card shadow-sm hover:bg-muted/50 border-none"
+              className="rounded-xl h-9 w-9 bg-card shadow-sm hover:bg-muted/50 border-none transition-all"
             >
               <Download className="size-4 text-muted-foreground" />
             </Button>
           </motion.div>
           <div className="w-px h-5 bg-muted/40 mx-1" />
-          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-            <ThemeToggle className="static" />
+          <motion.div whileHover={{ scale: 1.1, rotate: 12 }} whileTap={{ scale: 0.9 }} className="flex items-center justify-center h-9 w-9 bg-card rounded-xl shadow-sm hover:bg-muted/50 transition-all">
+            <ThemeToggle className="static top-0 right-0" />
           </motion.div>
         </div>
       </div>

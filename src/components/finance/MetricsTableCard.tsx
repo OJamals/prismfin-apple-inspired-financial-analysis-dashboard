@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useId } from 'react';
 import {
   Table,
   TableBody,
@@ -19,6 +19,7 @@ interface MetricsTableCardProps {
 }
 export function MetricsTableCard({ rows }: MetricsTableCardProps) {
   const [expandedSymbol, setExpandedSymbol] = useState<string | null>(null);
+  const layoutGroupId = useId();
   const toggleRow = (symbol: string) => {
     setExpandedSymbol(expandedSymbol === symbol ? null : symbol);
   };
@@ -28,7 +29,7 @@ export function MetricsTableCard({ rows }: MetricsTableCardProps) {
         <CardTitle className="text-2xl font-bold font-display tracking-tight text-foreground">Position Ledger</CardTitle>
       </CardHeader>
       <CardContent className="px-6 pb-8">
-        <LayoutGroup>
+        <LayoutGroup id={layoutGroupId}>
           <div className="overflow-x-auto scrollbar-hide -mx-2 px-2">
             <Table className="min-w-[700px]">
               <TableHeader>
@@ -105,7 +106,7 @@ export function MetricsTableCard({ rows }: MetricsTableCardProps) {
                                 initial={{ height: 0, opacity: 0 }}
                                 animate={{ height: 'auto', opacity: 1 }}
                                 exit={{ height: 0, opacity: 0 }}
-                                transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+                                transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
                                 className="overflow-hidden bg-muted/5"
                               >
                                 <div className="px-10 py-12 grid grid-cols-1 md:grid-cols-3 gap-12 border-t border-white/40">
