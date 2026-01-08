@@ -1,13 +1,17 @@
-import { 
-  DashboardData, 
-  TimeRange, 
-  SeriesPoint, 
-  Kpi, 
-  MetricsRow, 
-  QuantData, 
-  FactorAttribution, 
-  MonteCarloStats, 
-  MonteCarloSeriesPoint 
+import {
+  DashboardData,
+  TimeRange,
+  SeriesPoint,
+  Kpi,
+  MetricsRow,
+  QuantData,
+  FactorAttribution,
+  MonteCarloStats,
+  MonteCarloSeriesPoint,
+  RiskRewardPoint,
+  DrawdownData,
+  DrawdownPoint,
+  CorrelationData
 } from './types';
 export function getMockKPIs(): Kpi[] {
   return [
@@ -65,10 +69,9 @@ function generateMonteCarlo(horizon: '1Y' | '5Y' | '10Y'): MonteCarloStats {
   const steps = 12 * years;
   const series: MonteCarloSeriesPoint[] = [];
   let currentMedian = 124500;
-  const drift = 0.008; // 0.8% monthly drift
-  const vol = 0.04; // 4% monthly vol
+  const drift = 0.008; 
+  const vol = 0.04; 
   for (let i = 0; i <= steps; i++) {
-    const timeRatio = i / steps;
     const spread = currentMedian * vol * Math.sqrt(i + 1);
     series.push({
       label: `Month ${i}`,
@@ -86,6 +89,55 @@ function generateMonteCarlo(horizon: '1Y' | '5Y' | '10Y'): MonteCarloStats {
     p90: last.p90,
     series
   };
+}
+function generateRiskRewardData(): RiskRewardPoint[] {
+  const symbols = ['AAPL', 'MSFT', 'NVDA', 'TSLA', 'GOOGL', 'AMZN', 'META', 'BRK.B'];
+  return symbols.map(s => {
+    const ret = 5 + Math.random() * 25;
+    const vol = 12 + Math.random() * 30;
+    return {
+      symbol: s,
+      returns: parseFloat(ret.toFixed(2)),
+      volatility: parseFloat(vol.toFixed(2)),
+      sharpe: parseFloat((ret / vol).toFixed(2)),
+      weight: parseFloat((5 + Math.random() * 20).toFixed(1))
+    };
+  });
+}
+function generateDrawdownData(performance: SeriesPoint[]): DrawdownData {
+  let peak = -Infinity;
+  let maxDD = 0;
+  const series: DrawdownPoint[] = performance.map(p => {
+    if (p.value > peak) peak = p.value;
+    const ddPct = peak === 0 ? 0 : ((p.value - peak) / peak) * 100;
+    if (ddPct < maxDD) maxDD = ddPct;
+    return {
+      label: p.label,
+      value: p.value,
+      drawdownPct: parseFloat(ddPct.toFixed(2))
+    };
+  });
+  return {
+    maxDrawdown: parseFloat(maxDD.toFixed(2)),
+    series
+  };
+}
+function generateCorrelationMatrix(): CorrelationData {
+  const symbols = ['AAPL', 'MSFT', 'NVDA', 'TSLA', 'GOOGL'];
+  const matrix: Record<string, Record<string, number>> = {};
+  symbols.forEach((s1, i) => {
+    matrix[s1] = {};
+    symbols.forEach((s2, j) => {
+      if (i === j) {
+        matrix[s1][s2] = 1.0;
+      } else {
+        // Deterministic-ish random correlation between 0.2 and 0.95
+        const base = (i + j) % 2 === 0 ? 0.7 : 0.4;
+        matrix[s1][s2] = parseFloat((base + Math.random() * 0.25).toFixed(2));
+      }
+    });
+  });
+  return { symbols, matrix };
 }
 export function generateQuantData(range: TimeRange): QuantData {
   const portfolio = getMockPerformance(range, 2200, -0.42);
@@ -109,6 +161,9 @@ export function generateQuantData(range: TimeRange): QuantData {
       '1Y': generateMonteCarlo('1Y'),
       '5Y': generateMonteCarlo('5Y'),
       '10Y': generateMonteCarlo('10Y'),
-    }
+    },
+    riskReward: generateRiskRewardData(),
+    drawdown: generateDrawdownData(portfolio),
+    correlation: generateCorrelationMatrix()
   };
 }

@@ -7,6 +7,9 @@ import { DashboardHeader } from '@/components/finance/DashboardHeader';
 import { BenchmarkingChart } from '@/components/finance/BenchmarkingChart';
 import { FactorAttributionCard } from '@/components/finance/FactorAttributionCard';
 import { MonteCarloCard } from '@/components/finance/MonteCarloCard';
+import { RiskRewardScatterCard } from '@/components/finance/RiskRewardScatterCard';
+import { DrawdownChartCard } from '@/components/finance/DrawdownChartCard';
+import { CorrelationMatrixCard } from '@/components/finance/CorrelationMatrixCard';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
 export function QuantPage() {
@@ -41,28 +44,47 @@ export function QuantPage() {
             {isLoading ? (
               <Skeleton className="h-[450px] rounded-4xl" />
             ) : (
-              <BenchmarkingChart 
-                portfolio={data?.portfolio ?? []} 
+              <BenchmarkingChart
+                portfolio={data?.portfolio ?? []}
                 benchmark={data?.benchmark ?? []}
                 range={range}
               />
             )}
           </div>
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-            <div className="lg:col-span-5">
+            <div className="lg:col-span-8">
+              {isLoading ? (
+                <Skeleton className="h-[400px] rounded-4xl" />
+              ) : (
+                <DrawdownChartCard data={data?.drawdown ?? { maxDrawdown: 0, series: [] }} />
+              )}
+            </div>
+            <div className="lg:col-span-4">
               {isLoading ? (
                 <Skeleton className="h-[400px] rounded-4xl" />
               ) : (
                 <FactorAttributionCard factors={data?.factors ?? []} />
               )}
             </div>
-            <div className="lg:col-span-7">
-              {isLoading ? (
-                <Skeleton className="h-[400px] rounded-4xl" />
-              ) : (
-                <MonteCarloCard data={data?.monteCarlo ?? {} as any} />
-              )}
-            </div>
+          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {isLoading ? (
+              <Skeleton className="h-[400px] rounded-4xl" />
+            ) : (
+              <RiskRewardScatterCard data={data?.riskReward ?? []} />
+            )}
+            {isLoading ? (
+              <Skeleton className="h-[400px] rounded-4xl" />
+            ) : (
+              <CorrelationMatrixCard data={data?.correlation ?? { symbols: [], matrix: {} }} />
+            )}
+          </div>
+          <div className="grid grid-cols-1 gap-6">
+            {isLoading ? (
+              <Skeleton className="h-[400px] rounded-4xl" />
+            ) : (
+              <MonteCarloCard data={data?.monteCarlo ?? {} as any} />
+            )}
           </div>
         </div>
       </div>
