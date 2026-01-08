@@ -1,6 +1,6 @@
 import { Entity, Env } from "./core-utils";
-import { DashboardData, TimeRange, TradingMode, QuantData, Alert } from "@shared/types";
-import { generateDashboard, generateQuantData } from "@shared/mock-data";
+import { DashboardData, TimeRange, TradingMode, QuantData, Alert, MetricsRow } from "@shared/types";
+import { generateDashboard, generateQuantData, getMockRows } from "@shared/mock-data";
 export interface DashboardState {
   dataByRange: Record<TradingMode, Record<TimeRange, DashboardData>>;
   quantByRange: Record<TradingMode, Record<TimeRange, QuantData>>;
@@ -42,20 +42,27 @@ export class DashboardEntity extends Entity<DashboardState> {
   static async ensureSeed(env: Env): Promise<void> {
     const inst = new DashboardEntity(env, 'main');
     if (!(await inst.exists())) {
-      // Deep clone initial state to prevent any reference contamination
       const seed = JSON.parse(JSON.stringify(DashboardEntity.initialState));
       await inst.save(seed);
     }
   }
   async getRange(range: TimeRange, mode: TradingMode): Promise<DashboardData> {
     const state = await this.ensureState();
-    // Use defensive nullish coalescing to handle potential missing keys during state evolution
     const modeData = state?.dataByRange?.[mode] ?? DashboardEntity.initialState.dataByRange[mode];
     const dismissedAlertIds = state?.dismissedAlertIds ?? [];
     let data = modeData[range];
     if (!data) {
       data = generateDashboard(range, mode);
     }
+    // Defensive check to ensure 'news' exists on all rows (migration support)
+    data.rows = data.rows.map(row => {
+      if (!row.news || row.news.length === 0) {
+        const fullRows = getMockRows();
+        const match = fullRows.find(r => r.symbol === row.symbol);
+        return { ...row, news: match?.news ?? [] };
+      }
+      return row;
+    });
     const clonedData = JSON.parse(JSON.stringify(data)) as DashboardData;
     clonedData.alerts = (clonedData.alerts ?? []).filter(a => !dismissedAlertIds.includes(a.id));
     return clonedData;
@@ -80,7 +87,6 @@ export class DashboardEntity extends Entity<DashboardState> {
   }
   async refreshRange(range: TimeRange, mode: TradingMode): Promise<DashboardData> {
     const updatedState = await this.mutate(state => {
-      // Return fresh objects for all levels of the tree
       const newDataByRange = { ...state.dataByRange };
       const currentModeData = { ...(newDataByRange[mode] ?? DashboardEntity.initialState.dataByRange[mode]) };
       newDataByRange[mode] = {
@@ -96,7 +102,6 @@ export class DashboardEntity extends Entity<DashboardState> {
   }
   async refreshQuant(range: TimeRange, mode: TradingMode): Promise<QuantData> {
     const updatedState = await this.mutate(state => {
-      // Return fresh objects for all levels of the tree
       const newQuantByRange = { ...state.quantByRange };
       const currentModeQuant = { ...(newQuantByRange[mode] ?? DashboardEntity.initialState.quantByRange[mode]) };
       newQuantByRange[mode] = {
