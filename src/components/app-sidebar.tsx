@@ -2,7 +2,6 @@ import React from "react";
 import { Home, PieChart, FileText, Settings, Search, Box } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import {
-  Sidebar,
   SidebarContent,
   SidebarFooter,
   SidebarGroup,
@@ -10,9 +9,6 @@ import {
   SidebarSeparator,
   SidebarInput,
   SidebarGroupLabel,
-  SidebarMenu,
-  SidebarMenuItem,
-  SidebarMenuButton,
 } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
 export function AppSidebar(): JSX.Element {
@@ -24,7 +20,7 @@ export function AppSidebar(): JSX.Element {
     { label: "Settings", icon: Settings, path: "/settings" },
   ];
   return (
-    <Sidebar className="bg-card/60 backdrop-blur-xl border-r border-card/60 shadow-soft">
+    <div className="h-full flex flex-col bg-card/60 backdrop-blur-xl border-r border-card/60 shadow-soft">
       <SidebarHeader className="pt-6 pb-4">
         <div className="flex items-center gap-3 px-3 py-1">
           <div className="h-8 w-8 rounded-xl bg-gradient-to-br from-brand-teal to-brand-blue flex items-center justify-center shadow-soft">
@@ -42,27 +38,25 @@ export function AppSidebar(): JSX.Element {
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel className="px-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground/70">Menu</SidebarGroupLabel>
-          <SidebarMenu className="px-2">
-            {navItems.map((item) => (
-              <SidebarMenuItem key={item.path}>
-                <SidebarMenuButton
-                  asChild
-                  isActive={location.pathname === item.path}
-                  className={cn(
-                    "rounded-xl px-4 py-5 transition-all duration-200",
-                    location.pathname === item.path
-                      ? "bg-muted shadow-soft text-brand-blue font-semibold"
-                      : "text-muted-foreground hover:bg-muted/50"
-                  )}
-                >
-                  <Link to={item.path}>
-                    <item.icon className={cn("size-5", location.pathname === item.path ? "text-brand-blue" : "text-muted-foreground")} />
-                    <span>{item.label}</span>
+          <ul className="px-2 -m-1">
+            {navItems.map(({label, icon: Icon, path}) => {
+              const active = location.pathname === path;
+              return (
+                <li key={path} className="list-none">
+                  <Link
+                    to={path}
+                    className={cn(
+                      "flex w-full items-center gap-3 rounded-xl px-4 py-5 transition-all duration-200 overflow-hidden hover:bg-muted/50 text-sm",
+                      active && "bg-muted shadow-soft text-brand-blue font-semibold"
+                    )}
+                  >
+                    <Icon className={cn("size-5", active ? "text-brand-blue" : "text-muted-foreground")} />
+                    <span>{label}</span>
                   </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            ))}
-          </SidebarMenu>
+                </li>
+              );
+            })}
+          </ul>
         </SidebarGroup>
         <SidebarSeparator className="mx-4 opacity-50" />
       </SidebarContent>
@@ -72,6 +66,6 @@ export function AppSidebar(): JSX.Element {
           <p className="text-[10px] text-muted-foreground">Premium Analysis Enabled</p>
         </div>
       </SidebarFooter>
-    </Sidebar>
+    </div>
   );
 }
