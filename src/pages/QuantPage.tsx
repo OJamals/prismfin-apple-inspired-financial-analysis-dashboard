@@ -10,8 +10,26 @@ import { MonteCarloCard } from '@/components/finance/MonteCarloCard';
 import { RiskRewardScatterCard } from '@/components/finance/RiskRewardScatterCard';
 import { DrawdownChartCard } from '@/components/finance/DrawdownChartCard';
 import { CorrelationMatrixCard } from '@/components/finance/CorrelationMatrixCard';
-import { Skeleton } from '@/components/ui/skeleton';
+import { ChartSkeleton } from '@/components/finance/PremiumSkeleton';
+import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
+const containerVariants = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+    }
+  }
+};
+const itemVariants = {
+  hidden: { opacity: 0, y: 30 },
+  show: { 
+    opacity: 1, 
+    y: 0, 
+    transition: { duration: 0.7, ease: [0.16, 1, 0.3, 1] } 
+  }
+};
 export function QuantPage() {
   const [range, setRange] = useState<TimeRange>('6M');
   const queryClient = useQueryClient();
@@ -23,69 +41,69 @@ export function QuantPage() {
     mutationFn: () => api<QuantData>(`/api/quant/refresh?range=${range}`, { method: 'POST' }),
     onSuccess: (updated) => {
       queryClient.setQueryData(['quant', range], updated);
-      toast.success('Simulation re-run complete');
+      toast.success('Risk models recalculated');
     },
-    onError: () => toast.error('Refresh failed'),
+    onError: () => toast.error('Simulation failed'),
   });
   const onRefresh = () => refreshMutation.mutate();
   return (
     <AppLayout>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="py-8 md:py-10 lg:py-12 space-y-8">
+        <div className="py-8 md:py-10 lg:py-12 space-y-10">
           <DashboardHeader
-            title="Quant Analysis"
-            subtitle="Deep-dive into factor exposure and risk simulations."
+            title="Quant Models"
+            subtitle="Proprietary risk simulations and multi-factor attribution."
             range={range}
             onRangeChange={(r) => setRange(r as TimeRange)}
             onRefresh={onRefresh}
             isRefreshing={refreshMutation.isPending}
           />
-          <div className="grid grid-cols-1 gap-6">
+          <AnimatePresence mode="wait">
             {isLoading ? (
-              <Skeleton className="h-[450px] rounded-4xl" />
+              <motion.div 
+                key="skeletons"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="grid grid-cols-1 lg:grid-cols-2 gap-6"
+              >
+                <ChartSkeleton className="lg:col-span-2" />
+                <ChartSkeleton />
+                <ChartSkeleton />
+              </motion.div>
             ) : (
-              <BenchmarkingChart
-                portfolio={data?.portfolio ?? []}
-                benchmark={data?.benchmark ?? []}
-                range={range}
-              />
+              <motion.div
+                key="content"
+                variants={containerVariants}
+                initial="hidden"
+                animate="show"
+                className="space-y-8"
+              >
+                <motion.div variants={itemVariants} className="grid grid-cols-1 gap-6">
+                  <BenchmarkingChart
+                    portfolio={data?.portfolio ?? []}
+                    benchmark={data?.benchmark ?? []}
+                    range={range}
+                  />
+                </motion.div>
+                <motion.div variants={itemVariants} className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                  <div className="lg:col-span-8">
+                    <DrawdownChartCard data={data?.drawdown ?? { maxDrawdown: 0, series: [] }} />
+                  </div>
+                  <div className="lg:col-span-4">
+                    <FactorAttributionCard factors={data?.factors ?? []} />
+                  </div>
+                </motion.div>
+                <motion.div variants={itemVariants} className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <RiskRewardScatterCard data={data?.riskReward ?? []} />
+                  <CorrelationMatrixCard data={data?.correlation ?? { symbols: [], matrix: {} }} />
+                </motion.div>
+                <motion.div variants={itemVariants} className="grid grid-cols-1 gap-6 pb-12">
+                  <MonteCarloCard data={data?.monteCarlo ?? {} as any} />
+                </motion.div>
+              </motion.div>
             )}
-          </div>
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-            <div className="lg:col-span-8">
-              {isLoading ? (
-                <Skeleton className="h-[400px] rounded-4xl" />
-              ) : (
-                <DrawdownChartCard data={data?.drawdown ?? { maxDrawdown: 0, series: [] }} />
-              )}
-            </div>
-            <div className="lg:col-span-4">
-              {isLoading ? (
-                <Skeleton className="h-[400px] rounded-4xl" />
-              ) : (
-                <FactorAttributionCard factors={data?.factors ?? []} />
-              )}
-            </div>
-          </div>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {isLoading ? (
-              <Skeleton className="h-[400px] rounded-4xl" />
-            ) : (
-              <RiskRewardScatterCard data={data?.riskReward ?? []} />
-            )}
-            {isLoading ? (
-              <Skeleton className="h-[400px] rounded-4xl" />
-            ) : (
-              <CorrelationMatrixCard data={data?.correlation ?? { symbols: [], matrix: {} }} />
-            )}
-          </div>
-          <div className="grid grid-cols-1 gap-6">
-            {isLoading ? (
-              <Skeleton className="h-[400px] rounded-4xl" />
-            ) : (
-              <MonteCarloCard data={data?.monteCarlo ?? {} as any} />
-            )}
-          </div>
+          </AnimatePresence>
         </div>
       </div>
     </AppLayout>
