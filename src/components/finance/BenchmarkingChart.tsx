@@ -30,15 +30,15 @@ export function BenchmarkingChart({ portfolio, benchmark, range }: BenchmarkingC
     <Card className="rounded-4xl border-none shadow-soft bg-card h-full min-h-[450px]">
       <CardHeader className="flex flex-row items-center justify-between pb-2">
         <div>
-          <CardTitle className="text-xl font-bold">Benchmarking Analysis</CardTitle>
-          <p className="text-sm text-muted-foreground">Portfolio vs S&P 500 Index ({range})</p>
+          <CardTitle className="text-xl font-bold font-display">Benchmarking Analysis</CardTitle>
+          <p className="text-sm text-muted-foreground">Portfolio Alpha vs. S&P 500 Index ({range})</p>
         </div>
-        <div className="flex items-center space-x-2">
-          <Label htmlFor="benchmark-toggle" className="text-xs font-medium text-muted-foreground">Show Benchmark</Label>
-          <Switch 
-            id="benchmark-toggle" 
-            checked={showBenchmark} 
-            onCheckedChange={setShowBenchmark} 
+        <div className="flex items-center space-x-3 bg-secondary/30 px-4 py-2 rounded-2xl border border-input/40">
+          <Label htmlFor="benchmark-toggle" className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Benchmark</Label>
+          <Switch
+            id="benchmark-toggle"
+            checked={showBenchmark}
+            onCheckedChange={setShowBenchmark}
           />
         </div>
       </CardHeader>
@@ -47,48 +47,63 @@ export function BenchmarkingChart({ portfolio, benchmark, range }: BenchmarkingC
           <AreaChart data={combinedData}>
             <defs>
               <linearGradient id="colorPortfolio" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#14B8A6" stopOpacity={0.1}/>
+                <stop offset="5%" stopColor="#14B8A6" stopOpacity={0.08}/>
                 <stop offset="95%" stopColor="#14B8A6" stopOpacity={0}/>
               </linearGradient>
               <linearGradient id="colorBenchmark" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#0EA5E9" stopOpacity={0.1}/>
+                <stop offset="5%" stopColor="#0EA5E9" stopOpacity={0.08}/>
                 <stop offset="95%" stopColor="#0EA5E9" stopOpacity={0}/>
               </linearGradient>
             </defs>
             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-            <XAxis dataKey="label" hide />
+            <XAxis 
+              dataKey="label" 
+              hide={false}
+              axisLine={false}
+              tickLine={false}
+              tick={{ fontSize: 10, fill: '#94a3b8' }}
+              interval="preserveStartEnd"
+              padding={{ left: 10, right: 10 }}
+            />
             <YAxis hide domain={['auto', 'auto']} />
             <Tooltip
               contentStyle={{
-                borderRadius: '16px',
-                border: 'none',
-                boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.07)',
-                backgroundColor: 'rgba(255, 255, 255, 0.9)',
-                backdropFilter: 'blur(8px)',
-                padding: '12px'
+                borderRadius: '20px',
+                border: '1px solid rgba(226, 232, 240, 0.4)',
+                boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05)',
+                backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                backdropFilter: 'blur(12px)',
+                padding: '16px'
               }}
-              formatter={(val: number) => [formatCurrencyUSD(val), 'Value']}
+              formatter={(val: number) => [formatCurrencyUSD(val), 'Market Value']}
             />
-            <Legend verticalAlign="top" height={36}/>
+            <Legend 
+              verticalAlign="top" 
+              height={40} 
+              iconType="circle"
+              wrapperStyle={{ paddingTop: '0px', paddingBottom: '20px' }}
+            />
             <Area
-              name="Portfolio"
+              name="My Portfolio"
               type="monotone"
               dataKey="portfolio"
               stroke="#14B8A6"
               strokeWidth={3}
               fillOpacity={1}
               fill="url(#colorPortfolio)"
+              isAnimationActive={true}
             />
             {showBenchmark && (
               <Area
-                name="Benchmark"
+                name="S&P 500 Index"
                 type="monotone"
                 dataKey="benchmark"
                 stroke="#0EA5E9"
                 strokeWidth={2}
-                strokeDasharray="5 5"
+                strokeDasharray="6 4"
                 fillOpacity={1}
                 fill="url(#colorBenchmark)"
+                isAnimationActive={true}
               />
             )}
           </AreaChart>
