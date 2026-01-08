@@ -61,7 +61,10 @@ export class DashboardEntity extends Entity<DashboardState> {
     await this.mutate(state => {
       const dismissed = state.dismissedAlertIds ?? [];
       if (!dismissed.includes(alertId)) {
-        state.dismissedAlertIds = [...dismissed, alertId];
+        return {
+          ...state,
+          dismissedAlertIds: [...dismissed, alertId]
+        };
       }
       return state;
     });
@@ -73,25 +76,33 @@ export class DashboardEntity extends Entity<DashboardState> {
     return JSON.parse(JSON.stringify(data)) as QuantData;
   }
   async refreshRange(range: TimeRange, mode: TradingMode): Promise<DashboardData> {
-    return this.mutate(state => {
-      const dataByRange = state.dataByRange ?? DashboardEntity.initialState.dataByRange;
-      if (!dataByRange[mode]) {
-        dataByRange[mode] = DashboardEntity.initialState.dataByRange[mode];
-      }
-      dataByRange[mode][range] = generateDashboard(range, mode);
-      state.dataByRange = dataByRange;
-      return state;
-    }).then(s => JSON.parse(JSON.stringify(s.dataByRange[mode][range])));
+    const updatedState = await this.mutate(state => {
+      const newDataByRange = { ...state.dataByRange };
+      const currentModeData = newDataByRange[mode] ?? { ...DashboardEntity.initialState.dataByRange[mode] };
+      newDataByRange[mode] = {
+        ...currentModeData,
+        [range]: generateDashboard(range, mode)
+      };
+      return {
+        ...state,
+        dataByRange: newDataByRange
+      };
+    });
+    return JSON.parse(JSON.stringify(updatedState.dataByRange[mode][range]));
   }
   async refreshQuant(range: TimeRange, mode: TradingMode): Promise<QuantData> {
-    return this.mutate(state => {
-      const quantByRange = state.quantByRange ?? DashboardEntity.initialState.quantByRange;
-      if (!quantByRange[mode]) {
-        quantByRange[mode] = DashboardEntity.initialState.quantByRange[mode];
-      }
-      quantByRange[mode][range] = generateQuantData(range, mode);
-      state.quantByRange = quantByRange;
-      return state;
-    }).then(s => JSON.parse(JSON.stringify(s.quantByRange[mode][range])));
+    const updatedState = await this.mutate(state => {
+      const newQuantByRange = { ...state.quantByRange };
+      const currentModeQuant = newQuantByRange[mode] ?? { ...DashboardEntity.initialState.quantByRange[mode] };
+      newQuantByRange[mode] = {
+        ...currentModeQuant,
+        [range]: generateQuantData(range, mode)
+      };
+      return {
+        ...state,
+        quantByRange: newQuantByRange
+      };
+    });
+    return JSON.parse(JSON.stringify(updatedState.quantByRange[mode][range]));
   }
 }

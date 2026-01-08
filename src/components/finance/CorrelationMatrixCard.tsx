@@ -10,19 +10,23 @@ export function CorrelationMatrixCard({ data }: CorrelationMatrixCardProps) {
   const { symbols, matrix } = data;
   const getCellColor = (val: number) => {
     if (val === 1) return 'bg-slate-100 text-muted-foreground/40';
+    // Positive Correlation Scale (Red-ish)
     if (val > 0.8) return 'bg-rose-600 text-white';
     if (val > 0.6) return 'bg-rose-400 text-white';
     if (val > 0.3) return 'bg-rose-200 text-rose-900';
-    if (val > 0) return 'bg-brand-blue/20 text-brand-blue';
-    if (val > -0.3) return 'bg-brand-blue/40 text-white';
-    return 'bg-brand-blue/70 text-white';
+    // Near Zero / Diversifiers (Teal/Blue-ish)
+    if (val > 0) return 'bg-brand-blue/10 text-brand-blue';
+    if (val > -0.3) return 'bg-brand-blue/30 text-white shadow-inner';
+    if (val > -0.7) return 'bg-brand-blue/50 text-white shadow-inner';
+    return 'bg-brand-blue/80 text-white shadow-inner';
   };
   const getLabel = (val: number) => {
     if (val === 1) return "Self Correlation";
     if (val > 0.7) return "Strong Positive";
     if (val > 0.4) return "Moderate Positive";
     if (val > 0) return "Weak Positive";
-    return "Negative Correlation";
+    if (val > -0.3) return "Minimal Correlation";
+    return "Strong Negative";
   };
   return (
     <Card className="rounded-4xl border-none shadow-soft bg-card h-full">
@@ -66,7 +70,7 @@ export function CorrelationMatrixCard({ data }: CorrelationMatrixCardProps) {
                             <TooltipContent className="bg-card/95 backdrop-blur-xl border border-border/20 shadow-xl text-foreground p-3 rounded-2xl min-w-[140px]">
                               <p className="text-xs font-bold mb-1">{s1} + {s2}</p>
                               <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-tighter">{getLabel(val)}</p>
-                              <div className="mt-2 text-lg font-display font-bold text-brand-blue">
+                              <div className="mt-2 text-lg font-display font-bold text-brand-blue tabular-nums">
                                 {val.toFixed(3)}
                               </div>
                             </TooltipContent>
@@ -91,7 +95,7 @@ export function CorrelationMatrixCard({ data }: CorrelationMatrixCardProps) {
               <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-tight">Diversifier</span>
             </div>
           </div>
-          <p className="text-[10px] font-mono italic text-muted-foreground bg-secondary/40 px-2 py-0.5 rounded-md">
+          <p className="text-[11px] font-mono italic text-muted-foreground bg-secondary/40 px-3 py-1 rounded-md">
             Avg Portfolio ρ: 0.42
           </p>
         </div>
