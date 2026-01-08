@@ -1,228 +1,190 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import React from 'react'
 
-import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Separator } from '@/components/ui/separator'
-import { Textarea } from '@/components/ui/textarea'
-import type { Chat, ChatMessage, User } from '@shared/types'
-import { api } from '@/lib/api-client'
 
 export const HAS_TEMPLATE_DEMO = true
 
 const glassCard = 'backdrop-blur-xl bg-white/10 dark:bg-black/20 border-white/20 shadow-2xl'
 
 export function TemplateDemo() {
-  const [users, setUsers] = useState<User[]>([])
-  const [chats, setChats] = useState<Chat[]>([])
-  const [messages, setMessages] = useState<ChatMessage[]>([])
-
-  const [selectedUserId, setSelectedUserId] = useState<string>('')
-  const [selectedChatId, setSelectedChatId] = useState<string>('')
-
-  const [newUserName, setNewUserName] = useState('')
-  const [newChatTitle, setNewChatTitle] = useState('')
-  const [text, setText] = useState('')
-
-  const [loadingMessages, setLoadingMessages] = useState(false)
-
-  const usersById = useMemo(() => new Map(users.map((u) => [u.id, u])), [users])
-
-  const load = useCallback(async () => {
-    const [uPage, cPage] = await Promise.all([
-      api<{ items: User[]; next: string | null }>('/api/users'),
-      api<{ items: Chat[]; next: string | null }>('/api/chats'),
-    ])
-    setUsers(uPage.items)
-    setChats(cPage.items)
-
-    setSelectedUserId((prev) => prev || uPage.items[0]?.id || '')
-    setSelectedChatId((prev) => prev || cPage.items[0]?.id || '')
-  }, [])
-
-  const loadMessages = useCallback(async (chatId: string) => {
-    setLoadingMessages(true)
-    try {
-      const list = await api<ChatMessage[]>(`/api/chats/${chatId}/messages`)
-      setMessages(list)
-    } finally {
-      setLoadingMessages(false)
-    }
-  }, [])
-
-  useEffect(() => {
-    load().catch(() => {})
-  }, [load])
-
-  useEffect(() => {
-    if (!selectedChatId) return
-    loadMessages(selectedChatId).catch(() => {})
-  }, [selectedChatId, loadMessages])
-
-  const createUser = async () => {
-    const name = newUserName.trim()
-    if (!name) return
-    const u = await api<User>('/api/users', { method: 'POST', body: JSON.stringify({ name }) })
-    setUsers((prev) => [...prev, u])
-    setNewUserName('')
-    setSelectedUserId((prev) => prev || u.id)
-  }
-
-  const createChat = async () => {
-    const title = newChatTitle.trim()
-    if (!title) return
-    const c = await api<Chat>('/api/chats', { method: 'POST', body: JSON.stringify({ title }) })
-    setChats((prev) => [...prev, c])
-    setNewChatTitle('')
-    setSelectedChatId((prev) => prev || c.id)
-  }
-
-  const send = async () => {
-    const msg = text.trim()
-    if (!selectedUserId || !selectedChatId || !msg) return
-
-    const created = await api<ChatMessage>(`/api/chats/${selectedChatId}/messages`, {
-      method: 'POST',
-      body: JSON.stringify({ userId: selectedUserId, text: msg }),
-    })
-
-    setMessages((prev) => [...prev, created])
-    setText('')
-  }
-
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      <Card className={glassCard}>
-        <CardHeader>
-          <CardTitle className="text-base">Entities</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <div className="text-sm font-medium">Users</div>
-            <div className="flex gap-2">
-              <Input placeholder="New user name" value={newUserName} onChange={(e) => setNewUserName(e.target.value)} />
-              <Button onClick={createUser} variant="outline">Add</Button>
-            </div>
-            <div className="space-y-2">
-              {users.length ? users.slice(0, 6).map((u) => (
-                <button
-                  key={u.id}
-                  type="button"
-                  onClick={() => setSelectedUserId(u.id)}
-                  className={`w-full text-left flex items-center justify-between border rounded px-3 py-2 transition-colors ${selectedUserId === u.id ? 'bg-white/10 dark:bg-white/5' : 'hover:bg-white/5 dark:hover:bg-white/5'}`}
-                >
-                  <span className="font-medium">{u.name}</span>
-                  <span className="text-xs text-muted-foreground">{u.id.slice(0, 6)}…</span>
-                </button>
-              )) : (
-                <div className="text-sm text-muted-foreground">No users yet.</div>
-              )}
-            </div>
-          </div>
-
-          <Separator className="bg-white/10" />
-
-          <div className="space-y-2">
-            <div className="text-sm font-medium">Chats</div>
-            <div className="flex gap-2">
-              <Input placeholder="New chat title" value={newChatTitle} onChange={(e) => setNewChatTitle(e.target.value)} />
-              <Button onClick={createChat} variant="outline">Add</Button>
-            </div>
-            <div className="space-y-2">
-              {chats.length ? chats.slice(0, 6).map((c) => (
-                <button
-                  key={c.id}
-                  type="button"
-                  onClick={() => setSelectedChatId(c.id)}
-                  className={`w-full text-left flex items-center justify-between border rounded px-3 py-2 transition-colors ${selectedChatId === c.id ? 'bg-white/10 dark:bg-white/5' : 'hover:bg-white/5 dark:hover:bg-white/5'}`}
-                >
-                  <span className="font-medium">{c.title}</span>
-                  <span className="text-xs text-muted-foreground">{c.id.slice(0, 6)}…</span>
-                </button>
-              )) : (
-                <div className="text-sm text-muted-foreground">No chats yet.</div>
-              )}
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card className={`${glassCard} lg:col-span-2 flex flex-col`}>
-        <CardHeader>
-          <CardTitle className="text-base">Chat</CardTitle>
-        </CardHeader>
-        <CardContent className="flex-1 flex flex-col gap-3">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-            <Select value={selectedUserId} onValueChange={setSelectedUserId}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select user" />
-              </SelectTrigger>
-              <SelectContent>
-                {users.map((u) => (
-                  <SelectItem key={u.id} value={u.id}>
-                    {u.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            <Select value={selectedChatId} onValueChange={setSelectedChatId}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select chat" />
-              </SelectTrigger>
-              <SelectContent>
-                {chats.map((c) => (
-                  <SelectItem key={c.id} value={c.id}>
-                    {c.title}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="flex-1 rounded-lg border bg-white/5 dark:bg-white/5 p-3 overflow-y-auto">
-            {loadingMessages ? (
-              <div className="text-sm text-muted-foreground">Loading messages…</div>
-            ) : messages.length ? (
-              <div className="space-y-2">
-                {messages.map((m) => (
-                  <div key={m.id} className="text-sm">
-                    <span className="font-medium">
-                      {usersById.get(m.userId)?.name ?? 'Unknown'}:
-                    </span>{' '}
-                    <span>{m.text}</span>
-                    <span className="ml-2 text-xs text-muted-foreground">
-                      {new Date(m.ts).toLocaleTimeString()}
-                    </span>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 p-8">
+      <div className="max-w-7xl mx-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+          {/* Sidebar */}
+          <Card className={`${glassCard} backdrop-blur-2xl sticky top-8 h-fit border-0 shadow-2xl shadow-black/5`}>
+            <CardHeader className="pb-4">
+              <CardTitle className="text-xl font-light tracking-tight text-slate-900">Dashboard</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div>
+                <h3 className="text-sm font-semibold text-slate-700 uppercase tracking-wider mb-4">Metrics</h3>
+                <div className="space-y-4">
+                  <div className="space-y-1">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-slate-600 font-medium">Revenue</span>
+                      <span className="font-semibold text-teal-600">$124.5K</span>
+                    </div>
+                    <div className="w-full bg-slate-200/50 rounded-full h-2">
+                      <div className="bg-gradient-to-r from-teal-500 to-blue-500 h-2 rounded-full" style={{width: '78%'}}></div>
+                    </div>
                   </div>
-                ))}
+                  <div className="space-y-1">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-slate-600 font-medium">Growth</span>
+                      <span className="font-semibold text-emerald-600">+12.4%</span>
+                    </div>
+                    <div className="w-full bg-slate-200/50 rounded-full h-2">
+                      <div className="bg-gradient-to-r from-emerald-500 to-teal-500 h-2 rounded-full" style={{width: '62%'}}></div>
+                    </div>
+                  </div>
+                </div>
               </div>
-            ) : (
-              <div className="text-sm text-muted-foreground">No messages yet.</div>
-            )}
-          </div>
+            </CardContent>
+          </Card>
 
-          <form
-            className="flex gap-2"
-            onSubmit={(e) => {
-              e.preventDefault()
-              send().catch(() => {})
-            }}
-          >
-            <Textarea
-              placeholder={selectedUserId && selectedChatId ? 'Write a message…' : 'Select a user and chat first'}
-              value={text}
-              onChange={(e) => setText(e.target.value)}
-              disabled={!selectedUserId || !selectedChatId}
-              className="min-h-[44px] max-h-28"
-            />
-            <Button type="submit" className="shrink-0" disabled={!selectedUserId || !selectedChatId || !text.trim()}>
-              Send
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
+          {/* Main Content */}
+          <div className="lg:col-span-3 space-y-8">
+            {/* Header */}
+            <div className="space-y-2">
+              <h1 className="text-4xl font-light tracking-tight text-slate-900 leading-tight">
+                Financial Overview
+              </h1>
+              <p className="text-xl text-slate-600 font-light">Monthly performance metrics and key insights</p>
+            </div>
+
+            {/* Charts Row */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              {/* Area Chart Card */}
+              <Card className="bg-white/80 backdrop-blur-xl border-0 shadow-xl shadow-black/10 hover:shadow-2xl transition-all duration-300 overflow-hidden">
+                <CardHeader className="pb-6">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-lg font-light text-slate-900">Revenue Trend</CardTitle>
+                    <div className="w-3 h-3 bg-gradient-to-r from-teal-500 to-blue-500 rounded-full"></div>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="h-80 bg-gradient-to-br from-slate-50 to-blue-50/50 rounded-3xl p-8 flex items-center justify-center">
+                    <div className="w-full h-full bg-gradient-to-r from-teal-500/10 via-blue-500/10 to-indigo-500/10 rounded-2xl animate-pulse"></div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Metrics Grid */}
+              <Card className="bg-white/80 backdrop-blur-xl border-0 shadow-xl shadow-black/10 hover:shadow-2xl transition-all duration-300">
+                <CardHeader className="pb-6">
+                  <CardTitle className="text-lg font-light text-slate-900">Key Metrics</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-end pb-4 border-b border-slate-100">
+                      <div>
+                        <p className="text-3xl font-light text-slate-900">$124,500</p>
+                        <p className="text-sm text-slate-500 font-medium uppercase tracking-wide">Monthly Revenue</p>
+                      </div>
+                      <span className="px-3 py-1 bg-emerald-100 text-emerald-700 text-xs font-medium rounded-full">+12.4%</span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4 pt-4">
+                      <div className="text-center p-4 rounded-2xl bg-slate-50/50">
+                        <p className="text-2xl font-semibold text-slate-900">847</p>
+                        <p className="text-xs text-slate-500 uppercase font-medium tracking-wide">Transactions</p>
+                      </div>
+                      <div className="text-center p-4 rounded-2xl bg-slate-50/50">
+                        <p className="text-2xl font-semibold text-slate-900">$892</p>
+                        <p className="text-xs text-slate-500 uppercase font-medium tracking-wide">Avg Order</p>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Table & Bar Chart Row */}
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
+              {/* Metrics Table */}
+              <Card className="bg-white/80 backdrop-blur-xl border-0 shadow-xl shadow-black/10 hover:shadow-2xl transition-all duration-300 xl:row-span-2">
+                <CardHeader className="pb-6">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-lg font-light text-slate-900">Performance</CardTitle>
+                    <div className="w-3 h-3 bg-gradient-to-r from-orange-500 to-red-500 rounded-full"></div>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="overflow-x-auto">
+                    <table className="w-full">
+                      <thead>
+                        <tr className="border-b border-slate-200">
+                          <th className="text-left py-4 pr-6 font-medium text-sm text-slate-700">Category</th>
+                          <th className="text-right py-4 pr-6 font-medium text-sm text-slate-700">Revenue</th>
+                          <th className="text-right py-4 font-medium text-sm text-slate-700">Growth</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100">
+                        <tr>
+                          <td className="py-4 pr-6 font-medium text-slate-900">Electronics</td>
+                          <td className="text-right py-4 pr-6 font-semibold text-slate-900">$45.2K</td>
+                          <td className="text-right py-4">
+                            <span className="px-2.5 py-0.5 bg-emerald-100 text-emerald-700 text-xs font-medium rounded-full">+18.2%</span>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td className="py-4 pr-6 font-medium text-slate-900">Apparel</td>
+                          <td className="text-right py-4 pr-6 font-semibold text-slate-900">$32.8K</td>
+                          <td className="text-right py-4">
+                            <span className="px-2.5 py-0.5 bg-amber-100 text-amber-700 text-xs font-medium rounded-full">+3.7%</span>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td className="py-4 pr-6 font-medium text-slate-900">Home Goods</td>
+                          <td className="text-right py-4 pr-6 font-semibold text-slate-900">$28.5K</td>
+                          <td className="text-right py-4">
+                            <span className="px-2.5 py-0.5 bg-red-100 text-red-700 text-xs font-medium rounded-full">-2.1%</span>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td className="py-4 pr-6 font-medium text-slate-900">Books</td>
+                          <td className="text-right py-4 pr-6 font-semibold text-slate-900">$18.0K</td>
+                          <td className="text-right py-4">
+                            <span className="px-2.5 py-0.5 bg-emerald-100 text-emerald-700 text-xs font-medium rounded-full">+9.8%</span>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Bar Chart */}
+              <Card className="bg-white/80 backdrop-blur-xl border-0 shadow-xl shadow-black/10 hover:shadow-2xl transition-all duration-300">
+                <CardHeader className="pb-6">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-lg font-light text-slate-900">Sales Distribution</CardTitle>
+                    <div className="w-3 h-3 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full"></div>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="h-96 bg-gradient-to-br from-slate-50 to-purple-50/30 rounded-3xl p-8 flex flex-col justify-end space-y-4">
+                    <div className="flex space-x-2 h-64">
+                      <div className="flex-1 bg-gradient-to-t from-orange-500 to-orange-400 rounded-xl relative group hover:scale-105 transition-all duration-300" style={{height: '80%'}}></div>
+                      <div className="flex-1 bg-gradient-to-t from-blue-500 to-blue-400 rounded-xl relative group hover:scale-105 transition-all duration-300" style={{height: '60%'}}></div>
+                      <div className="flex-1 bg-gradient-to-t from-teal-500 to-teal-400 rounded-xl relative group hover:scale-105 transition-all duration-300" style={{height: '95%'}}></div>
+                      <div className="flex-1 bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-xl relative group hover:scale-105 transition-all duration-300" style={{height: '45%'}}></div>
+                      <div className="flex-1 bg-gradient-to-t from-purple-500 to-purple-400 rounded-xl relative group hover:scale-105 transition-all duration-300" style={{height: '70%'}}></div>
+                    </div>
+                    <div className="grid grid-cols-5 gap-4 text-xs text-slate-600">
+                      <span>Mon</span>
+                      <span>Tue</span>
+                      <span>Wed</span>
+                      <span>Thu</span>
+                      <span>Fri</span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   )
 }
