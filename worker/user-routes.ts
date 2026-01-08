@@ -20,8 +20,6 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
     return ok(c, updated);
   });
   app.get('/api/screener', async (c) => {
-    // In a real app, we'd parse filters here:
-    // const filters = c.req.query('filters');
     const data = getMockScreenerData();
     return ok(c, data);
   });
@@ -40,6 +38,13 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
     const entity = new DashboardEntity(c.env, 'main');
     const data = await entity.getQuant(range);
     return ok(c, data);
+  });
+  app.post('/api/quant/refresh', async (c) => {
+    await DashboardEntity.ensureSeed(c.env);
+    const range = (c.req.query('range') as TimeRange) || '6M';
+    const entity = new DashboardEntity(c.env, 'main');
+    const updated = await entity.refreshQuant(range);
+    return ok(c, updated);
   });
   app.get('/api/alerts', async (c) => {
     await DashboardEntity.ensureSeed(c.env);

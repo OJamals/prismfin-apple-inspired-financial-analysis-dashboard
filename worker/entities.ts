@@ -38,6 +38,7 @@ export class DashboardEntity extends Entity<DashboardState> {
     if (!data) {
       data = generateDashboard(range);
     }
+    // Ensure rows are fully hydrated with metadata
     data.rows = (data.rows ?? []).map(row => {
       const fullRows = getMockRows();
       const match = fullRows.find(r => r.symbol === row.symbol);
@@ -76,14 +77,26 @@ export class DashboardEntity extends Entity<DashboardState> {
   }
   async refreshRange(range: TimeRange): Promise<DashboardData> {
     const updatedState = await this.mutate(state => {
-      const newDataByRange = { ...state.dataByRange, [range]: generateDashboard(range) };
+      const newDataByRange = { 
+        ...state.dataByRange, 
+        [range]: {
+          ...generateDashboard(range),
+          updatedAt: Date.now()
+        }
+      };
       return { ...state, dataByRange: newDataByRange };
     });
     return JSON.parse(JSON.stringify(updatedState.dataByRange[range]));
   }
   async refreshQuant(range: TimeRange): Promise<QuantData> {
     const updatedState = await this.mutate(state => {
-      const newQuantByRange = { ...state.quantByRange, [range]: generateQuantData(range) };
+      const newQuantByRange = { 
+        ...state.quantByRange, 
+        [range]: {
+          ...generateQuantData(range),
+          updatedAt: Date.now()
+        }
+      };
       return { ...state, quantByRange: newQuantByRange };
     });
     return JSON.parse(JSON.stringify(updatedState.quantByRange[range]));
