@@ -42,11 +42,14 @@ export class DashboardEntity extends Entity<DashboardState> {
   static async ensureSeed(env: Env): Promise<void> {
     const inst = new DashboardEntity(env, 'main');
     if (!(await inst.exists())) {
-      await inst.save(DashboardEntity.initialState);
+      // Deep clone initial state to prevent any reference contamination
+      const seed = JSON.parse(JSON.stringify(DashboardEntity.initialState));
+      await inst.save(seed);
     }
   }
   async getRange(range: TimeRange, mode: TradingMode): Promise<DashboardData> {
     const state = await this.ensureState();
+    // Use defensive nullish coalescing to handle potential missing keys during state evolution
     const modeData = state?.dataByRange?.[mode] ?? DashboardEntity.initialState.dataByRange[mode];
     const dismissedAlertIds = state?.dismissedAlertIds ?? [];
     let data = modeData[range];
@@ -77,8 +80,9 @@ export class DashboardEntity extends Entity<DashboardState> {
   }
   async refreshRange(range: TimeRange, mode: TradingMode): Promise<DashboardData> {
     const updatedState = await this.mutate(state => {
+      // Return fresh objects for all levels of the tree
       const newDataByRange = { ...state.dataByRange };
-      const currentModeData = newDataByRange[mode] ?? { ...DashboardEntity.initialState.dataByRange[mode] };
+      const currentModeData = { ...(newDataByRange[mode] ?? DashboardEntity.initialState.dataByRange[mode]) };
       newDataByRange[mode] = {
         ...currentModeData,
         [range]: generateDashboard(range, mode)
@@ -92,8 +96,9 @@ export class DashboardEntity extends Entity<DashboardState> {
   }
   async refreshQuant(range: TimeRange, mode: TradingMode): Promise<QuantData> {
     const updatedState = await this.mutate(state => {
+      // Return fresh objects for all levels of the tree
       const newQuantByRange = { ...state.quantByRange };
-      const currentModeQuant = newQuantByRange[mode] ?? { ...DashboardEntity.initialState.quantByRange[mode] };
+      const currentModeQuant = { ...(newQuantByRange[mode] ?? DashboardEntity.initialState.quantByRange[mode]) };
       newQuantByRange[mode] = {
         ...currentModeQuant,
         [range]: generateQuantData(range, mode)
