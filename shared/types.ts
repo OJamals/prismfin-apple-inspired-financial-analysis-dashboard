@@ -4,7 +4,6 @@ export interface ApiResponse<T = unknown> {
   error?: string;
 }
 export type TimeRange = '1M' | '3M' | '6M' | '1Y';
-export type TradingMode = 'live' | 'paper';
 export type AssetClass = 'all' | 'equity' | 'crypto' | 'fixed-income';
 export interface SeriesPoint {
   label: string;
@@ -54,7 +53,6 @@ export interface MetricsRow {
 }
 export interface DashboardData {
   range: TimeRange;
-  mode: TradingMode;
   updatedAt: number;
   kpis: Kpi[];
   holdingsMetrics: HoldingsMetrics;
@@ -103,7 +101,6 @@ export interface CorrelationData {
 }
 export interface QuantData {
   range: TimeRange;
-  mode: TradingMode;
   updatedAt: number;
   portfolio: SeriesPoint[];
   benchmark: SeriesPoint[];
