@@ -22,9 +22,9 @@ interface BenchmarkingChartProps {
 }
 export function BenchmarkingChart({ portfolio, benchmark, range }: BenchmarkingChartProps) {
   const [showBenchmark, setShowBenchmark] = useState(true);
-  const uniqueId = useId().replace(/:/g, '');
-  const portfolioGradientId = `colorPortfolio-${uniqueId}`;
-  const benchmarkGradientId = `colorBenchmark-${uniqueId}`;
+  const uniqueId = useId().replace(/[^a-zA-Z0-9]/g, '-');
+  const portfolioGradientId = `grad-pfolio-${uniqueId}`;
+  const benchmarkGradientId = `grad-bench-${uniqueId}`;
   const combinedData = portfolio.map((p, i) => ({
     label: p.label,
     portfolio: p.value,

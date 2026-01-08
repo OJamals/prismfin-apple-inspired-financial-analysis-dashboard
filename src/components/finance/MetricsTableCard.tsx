@@ -20,7 +20,7 @@ interface MetricsTableCardProps {
 }
 export function MetricsTableCard({ rows }: MetricsTableCardProps) {
   const [expandedSymbol, setExpandedSymbol] = useState<string | null>(null);
-  const layoutGroupId = useId();
+  const layoutGroupId = useId().replace(/[^a-zA-Z0-9]/g, '-');
   const toggleRow = (symbol: string) => {
     setExpandedSymbol(expandedSymbol === symbol ? null : symbol);
   };
@@ -45,16 +45,20 @@ export function MetricsTableCard({ rows }: MetricsTableCardProps) {
               <TableBody>
                 {rows.map((row, idx) => {
                   const safeSentiment = row.sentiment ?? 0;
-                  const gradientId = `miniFill-${row.symbol}-${idx}`;
+                  const gradientId = `miniFill-${row.symbol}-${idx}-${layoutGroupId}`;
                   const isPositive = row.changePct >= 0;
+                  const isExpanded = expandedSymbol === row.symbol;
+                  const controlsId = `details-${row.symbol}`;
                   return (
                     <React.Fragment key={`${row.symbol}-${idx}`}>
                       <motion.tr
                         layout
                         onClick={() => toggleRow(row.symbol)}
+                        aria-expanded={isExpanded}
+                        aria-controls={controlsId}
                         className={cn(
                           "border-none group transition-all cursor-pointer rounded-2xl",
-                          expandedSymbol === row.symbol ? "bg-muted/15" : "hover:bg-muted/10"
+                          isExpanded ? "bg-muted/15" : "hover:bg-muted/10"
                         )}
                       >
                         <TableCell className="py-6 px-4 rounded-l-3xl">
@@ -70,8 +74,8 @@ export function MetricsTableCard({ rows }: MetricsTableCardProps) {
                           <div className={cn(
                             "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold tabular-nums ml-auto shadow-sm transition-all",
                             isPositive
-                              ? "bg-[#34C759]/10 text-[#34C759] ring-1 ring-[#34C759]/20"
-                              : "bg-[#FF3B30]/10 text-[#FF3B30] ring-1 ring-[#FF3B30]/20"
+                              ? "bg-gain-500/10 text-gain-500 ring-1 ring-gain-500/20"
+                              : "bg-loss-500/10 text-loss-500 ring-1 ring-loss-500/20"
                           )}>
                             {isPositive ? <TrendingUp className="size-3" /> : <TrendingDown className="size-3" />}
                             {formatPct(row.changePct)}
@@ -80,7 +84,7 @@ export function MetricsTableCard({ rows }: MetricsTableCardProps) {
                         <TableCell className="text-right tabular-nums px-4 whitespace-nowrap text-sm">
                           <span className={cn(
                             "font-bold",
-                            row.ytdPct >= 0 ? "text-[#34C759]" : "text-[#FF3B30]"
+                            row.ytdPct >= 0 ? "text-gain-500" : "text-loss-500"
                           )}>
                             {formatPct(row.ytdPct)}
                           </span>
@@ -89,9 +93,9 @@ export function MetricsTableCard({ rows }: MetricsTableCardProps) {
                           <div className="flex justify-end">
                             <div className={cn(
                               "size-9 rounded-2xl flex items-center justify-center transition-all",
-                              expandedSymbol === row.symbol ? "bg-white shadow-soft" : "group-hover:bg-white/80"
+                              isExpanded ? "bg-white shadow-soft" : "group-hover:bg-white/80"
                             )}>
-                              {expandedSymbol === row.symbol
+                              {isExpanded
                                 ? <ChevronUp className="size-4 text-brand-blue" />
                                 : <ChevronDown className="size-4 text-muted-foreground/30 group-hover:text-muted-foreground/60" />
                               }
@@ -100,10 +104,11 @@ export function MetricsTableCard({ rows }: MetricsTableCardProps) {
                         </TableCell>
                       </motion.tr>
                       <AnimatePresence initial={false}>
-                        {expandedSymbol === row.symbol && (
+                        {isExpanded && (
                           <TableRow className="border-none hover:bg-transparent">
                             <TableCell colSpan={5} className="p-0">
                               <motion.div
+                                id={controlsId}
                                 initial={{ height: 0, opacity: 0 }}
                                 animate={{ height: 'auto', opacity: 1 }}
                                 exit={{ height: 0, opacity: 0 }}
@@ -138,7 +143,7 @@ export function MetricsTableCard({ rows }: MetricsTableCardProps) {
                                       </ResponsiveContainer>
                                     </div>
                                   </div>
-                                  {/* News Section (New) */}
+                                  {/* News Section */}
                                   <div className="space-y-6 lg:col-span-2">
                                     <div className="flex items-center gap-2.5 text-[10px] font-bold text-muted-foreground uppercase tracking-widest opacity-80">
                                       <Newspaper className="size-4 text-brand-blue" />
@@ -146,7 +151,7 @@ export function MetricsTableCard({ rows }: MetricsTableCardProps) {
                                     </div>
                                     <div className="space-y-3">
                                       {row.news?.map((n, i) => (
-                                        <div key={i} className="flex items-center justify-between p-3.5 rounded-2xl bg-white border border-white/60 shadow-sm ring-1 ring-black/5 hover:shadow-md transition-all group/news">
+                                        <div key={i} className="flex items-center justify-between p-3.5 rounded-2xl bg-white border border-white/60 shadow-sm ring-1 ring-black/5 hover:shadow-md transition-all group/news h-[48px]">
                                           <p className="text-xs font-bold text-foreground leading-snug line-clamp-1 flex-1 pr-4">{n.headline}</p>
                                           <Badge className={cn(
                                             "rounded-lg px-2 py-0.5 text-[10px] font-black border-none shrink-0",
@@ -156,7 +161,7 @@ export function MetricsTableCard({ rows }: MetricsTableCardProps) {
                                           </Badge>
                                         </div>
                                       ))}
-                                      {!row.news && <p className="text-xs text-muted-foreground italic">No recent intelligence reports found.</p>}
+                                      {(!row.news || row.news.length === 0) && <p className="text-xs text-muted-foreground italic">No recent intelligence reports found.</p>}
                                     </div>
                                   </div>
                                   {/* Stats & Sentiment Section */}

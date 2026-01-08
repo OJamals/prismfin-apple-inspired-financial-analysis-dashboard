@@ -34,8 +34,11 @@ export function AppLayout({ children, container = false, className, contentClass
         <div className={cn('w-[17.5rem] h-full flex flex-col shrink-0', sidebarClass)}>
           <AppSidebar />
         </div>
-        <main className="flex-1 overflow-y-auto relative flex flex-col">
-          <header className="sticky top-0 z-30 px-6 py-4 bg-canvas/80 backdrop-blur-md border-b border-border/5 flex items-center justify-between gap-4">
+        <main 
+          className="flex-1 overflow-y-auto relative flex flex-col"
+          aria-label="Main Content"
+        >
+          <header className="sticky top-0 z-30 px-6 py-4 bg-canvas/80 backdrop-blur-md border-b border-border/5 flex items-center justify-between gap-4 translate-z-0">
             <div className="flex-1 max-w-2xl">
               <GlobalFilter />
             </div>
@@ -54,13 +57,14 @@ export function AppLayout({ children, container = false, className, contentClass
   return (
     <>
       <div className={cn('relative min-h-screen flex flex-col bg-canvas', className)}>
-        <header className="sticky top-0 z-20 flex items-center justify-between h-16 px-4 bg-canvas/80 backdrop-blur-md border-b border-border/10 shrink-0">
+        <header className="sticky top-0 z-20 flex items-center justify-between h-16 px-4 bg-canvas/80 backdrop-blur-md border-b border-border/10 shrink-0 translate-z-0">
           <div className="flex items-center">
             <Button
               variant='ghost'
               size='icon'
               className='-ml-2 h-10 w-10 rounded-xl hover:bg-muted/50'
               onClick={() => setSheetOpen(true)}
+              aria-label="Open Navigation Menu"
             >
               <PanelLeft className='h-5 w-5 text-muted-foreground'/>
               <span className='sr-only'>Toggle sidebar</span>
@@ -72,7 +76,10 @@ export function AppLayout({ children, container = false, className, contentClass
         <div className="px-4 py-3 bg-muted/40 border-b border-border/5 shrink-0 overflow-hidden">
            <GlobalFilter />
         </div>
-        <main className="flex-1 overflow-y-auto">
+        <main 
+          className="flex-1 overflow-y-auto"
+          aria-label="Main Content"
+        >
           <div className={contentPaddingClass}>
             {children}
           </div>
@@ -80,8 +87,10 @@ export function AppLayout({ children, container = false, className, contentClass
       </div>
       <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
         <SheetContent side='left' className={cn('p-0 w-[18rem] border-r-0', sidebarClass)}>
-          <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
-          <SheetDescription className="sr-only">Primary navigation drawer with dashboard tools and settings.</SheetDescription>
+          <SheetTitle className="sr-only">PrismFin Navigation</SheetTitle>
+          <SheetDescription className="sr-only">
+            Access your dashboard, financial reports, quantitative models, and application settings.
+          </SheetDescription>
           <AppSidebar />
         </SheetContent>
       </Sheet>
