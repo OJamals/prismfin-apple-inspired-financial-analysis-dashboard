@@ -137,14 +137,15 @@ function generateMonteCarlo(horizon: '1Y' | '5Y' | '10Y', mode: TradingMode): Mo
   const series: MonteCarloSeriesPoint[] = [];
   let currentMedian = (isLive ? 124500 : 158200) * (0.98 + Math.random() * 0.04);
   const drift = isLive ? 0.008 : 0.012;
-  const vol = isLive ? 0.04 : 0.02;
+  const volBase = isLive ? 0.05 : 0.03;
   for (let i = 0; i <= steps; i++) {
-    const spread = currentMedian * vol * Math.sqrt(i + 1);
+    // Dispersion grows with sqrt of time
+    const vol = volBase * Math.sqrt((i + 1) / 12);
     series.push({
       label: `Month ${i}`,
       median: parseFloat(currentMedian.toFixed(2)),
-      p10: parseFloat((currentMedian - spread).toFixed(2)),
-      p90: parseFloat((currentMedian + spread).toFixed(2)),
+      p10: parseFloat((currentMedian * (1 - vol * 1.28)).toFixed(2)),
+      p90: parseFloat((currentMedian * (1 + vol * 1.28)).toFixed(2)),
     });
     currentMedian *= (1 + drift);
   }
@@ -152,16 +153,20 @@ function generateMonteCarlo(horizon: '1Y' | '5Y' | '10Y', mode: TradingMode): Mo
   return { horizon, median: last.median, p10: last.p10, p90: last.p90, series };
 }
 function generateRiskRewardData(): RiskRewardPoint[] {
-  const symbols = ['AAPL', 'MSFT', 'NVDA', 'TSLA', 'GOOGL', 'AMZN', 'META', 'BRK.B'];
+  const symbols = ['AAPL', 'MSFT', 'NVDA', 'TSLA', 'GOOGL', 'AMZN', 'META', 'BRK.B', 'BTC', 'ETH', 'GOLD', 'TLT'];
   return symbols.map(s => {
-    const ret = 5 + Math.random() * 25;
-    const vol = 12 + Math.random() * 30;
+    // More distinct clusters
+    const isVolatile = ['BTC', 'ETH', 'TSLA', 'NVDA'].includes(s);
+    const isSafe = ['GOLD', 'TLT', 'BRK.B'].includes(s);
+    const ret = isVolatile ? (15 + Math.random() * 35) : isSafe ? (2 + Math.random() * 8) : (8 + Math.random() * 15);
+    const vol = isVolatile ? (25 + Math.random() * 50) : isSafe ? (5 + Math.random() * 15) : (15 + Math.random() * 20);
+    const sharpe = parseFloat((ret / vol).toFixed(2));
     return {
       symbol: s,
       returns: parseFloat(ret.toFixed(2)),
       volatility: parseFloat(vol.toFixed(2)),
-      sharpe: parseFloat((ret / vol).toFixed(2)),
-      weight: parseFloat((5 + Math.random() * 20).toFixed(1))
+      sharpe: sharpe,
+      weight: parseFloat((2 + Math.random() * 23).toFixed(1))
     };
   });
 }
@@ -177,7 +182,7 @@ function generateDrawdownData(performance: SeriesPoint[]): DrawdownData {
   return { maxDrawdown: parseFloat(maxDD.toFixed(2)), series };
 }
 function generateCorrelationMatrix(): CorrelationData {
-  const symbols = ['AAPL', 'MSFT', 'NVDA', 'TSLA', 'GOOGL'];
+  const symbols = ['AAPL', 'MSFT', 'NVDA', 'BTC', 'GOLD'];
   const matrix: Record<string, Record<string, number>> = {};
   symbols.forEach((s1, i) => {
     matrix[s1] = {};
@@ -185,8 +190,10 @@ function generateCorrelationMatrix(): CorrelationData {
       if (i === j) {
         matrix[s1][s2] = 1.0;
       } else {
-        const base = (i + j) % 2 === 0 ? 0.7 : 0.4;
-        matrix[s1][s2] = parseFloat((base + Math.random() * 0.25).toFixed(2));
+        // Create some negative correlations (e.g., Gold vs BTC/Tech)
+        const isHedge = (s1 === 'GOLD' || s2 === 'GOLD');
+        const base = isHedge ? -0.4 : 0.6;
+        matrix[s1][s2] = parseFloat((base + (Math.random() - 0.5) * 0.4).toFixed(2));
       }
     });
   });
@@ -199,10 +206,10 @@ export function generateQuantData(range: TimeRange, mode: TradingMode): QuantDat
     value: parseFloat((p.value * (0.95 + Math.random() * 0.08)).toFixed(2))
   }));
   const factors: FactorAttribution[] = [
-    { label: 'Growth', value: 45, color: '#14B8A6' },
-    { label: 'Value', value: 20, color: '#0EA5E9' },
-    { label: 'Momentum', value: 15, color: '#6366F1' },
-    { label: 'Quality', value: 20, color: '#F59E0B' },
+    { label: 'Quality', value: 35, color: '#14B8A6' },
+    { label: 'Growth', value: 30, color: '#0EA5E9' },
+    { label: 'Momentum', value: 20, color: '#6366F1' },
+    { label: 'Volatility', value: 15, color: '#F43F5E' },
   ];
   return {
     range,
