@@ -44,7 +44,7 @@ export function MetricsTableCard({ rows }: MetricsTableCardProps) {
               </TableHeader>
               <TableBody>
                 {rows.map((row, idx) => {
-                  const safeSentiment = row.sentiment ?? 0;
+                  const safeSentiment = row.sentiment ?? 50;
                   const gradientId = `miniFill-${row.symbol}-${idx}-${layoutGroupId}`;
                   const isPositive = row.changePct >= 0;
                   const isExpanded = expandedSymbol === row.symbol;
@@ -103,7 +103,7 @@ export function MetricsTableCard({ rows }: MetricsTableCardProps) {
                           </div>
                         </TableCell>
                       </motion.tr>
-                      <AnimatePresence initial={false}>
+                      <AnimatePresence initial={false} mode="wait">
                         {isExpanded && (
                           <TableRow className="border-none hover:bg-transparent">
                             <TableCell colSpan={5} className="p-0">
@@ -116,7 +116,6 @@ export function MetricsTableCard({ rows }: MetricsTableCardProps) {
                                 className="overflow-hidden bg-muted/5"
                               >
                                 <div className="px-10 py-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 border-t border-white/40">
-                                  {/* Momentum Section */}
                                   <div className="space-y-6">
                                     <div className="flex items-center gap-2.5 text-[10px] font-bold text-muted-foreground uppercase tracking-widest opacity-80">
                                       <Zap className="size-4 text-amber-500 fill-amber-500" />
@@ -127,7 +126,7 @@ export function MetricsTableCard({ rows }: MetricsTableCardProps) {
                                         <AreaChart data={row.miniSeries}>
                                           <defs>
                                             <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
-                                              <stop offset="5%" stopColor={isPositive ? "#34C759" : "#FF3B30"} stopOpacity={0.2}/>
+                                              <stop offset="5%" stopColor={isPositive ? "#34C759" : "#FF3B30"} stopOpacity={0.15}/>
                                               <stop offset="95%" stopColor={isPositive ? "#34C759" : "#FF3B30"} stopOpacity={0}/>
                                             </linearGradient>
                                           </defs>
@@ -143,7 +142,6 @@ export function MetricsTableCard({ rows }: MetricsTableCardProps) {
                                       </ResponsiveContainer>
                                     </div>
                                   </div>
-                                  {/* News Section */}
                                   <div className="space-y-6 lg:col-span-2">
                                     <div className="flex items-center gap-2.5 text-[10px] font-bold text-muted-foreground uppercase tracking-widest opacity-80">
                                       <Newspaper className="size-4 text-brand-blue" />
@@ -151,8 +149,8 @@ export function MetricsTableCard({ rows }: MetricsTableCardProps) {
                                     </div>
                                     <div className="space-y-3">
                                       {row.news?.map((n, i) => (
-                                        <div key={i} className="flex items-center justify-between p-3.5 rounded-2xl bg-white border border-white/60 shadow-sm ring-1 ring-black/5 hover:shadow-md transition-all group/news h-[48px]">
-                                          <p className="text-xs font-bold text-foreground leading-snug line-clamp-1 flex-1 pr-4">{n.headline}</p>
+                                        <div key={i} className="flex items-center justify-between p-3.5 rounded-2xl bg-white border border-white/60 shadow-sm ring-1 ring-black/5 hover:shadow-md transition-all group/news min-h-[52px]">
+                                          <p className="text-xs font-bold text-foreground leading-snug line-clamp-2 flex-1 pr-4">{n.headline}</p>
                                           <Badge className={cn(
                                             "rounded-lg px-2 py-0.5 text-[10px] font-black border-none shrink-0",
                                             n.score > 70 ? "bg-gain-50 text-gain-700" : n.score < 35 ? "bg-loss-50 text-loss-700" : "bg-slate-50 text-slate-600"
@@ -164,7 +162,6 @@ export function MetricsTableCard({ rows }: MetricsTableCardProps) {
                                       {(!row.news || row.news.length === 0) && <p className="text-xs text-muted-foreground italic">No recent intelligence reports found.</p>}
                                     </div>
                                   </div>
-                                  {/* Stats & Sentiment Section */}
                                   <div className="space-y-6">
                                     <div className="flex items-center gap-2.5 text-[10px] font-bold text-muted-foreground uppercase tracking-widest opacity-80">
                                       <Target className="size-4 text-brand-blue fill-brand-blue" />

@@ -24,7 +24,9 @@ export function HomePage() {
   const refreshMutation = useMutation({
     mutationFn: () => api<DashboardData>(`/api/dashboard/refresh?range=${range}&mode=${mode}`, { method: 'POST' }),
     onSuccess: () => {
+      // Synchronize both dashboard and alerts to capture fresh market signals
       queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+      queryClient.invalidateQueries({ queryKey: ['alerts'] });
       toast.success(`${mode === 'live' ? 'Market' : 'Simulation'} state refreshed`, {
         icon: <div className="size-3 rounded-full bg-gradient-to-tr from-brand-teal to-brand-blue animate-pulse" />
       });
@@ -45,13 +47,14 @@ export function HomePage() {
             isRefreshing={refreshMutation.isPending}
             mode={mode}
           />
-          <AnimatePresence mode="wait">
+          <AnimatePresence mode="wait" initial={false}>
             {isLoading ? (
               <motion.div
                 key="skeletons"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
+                transition={{ duration: 0.3 }}
                 className="space-y-12"
               >
                 <HoldingsMetricsSkeleton />
@@ -62,6 +65,7 @@ export function HomePage() {
                 key="error"
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0 }}
                 className="py-40 text-center rounded-[3rem] bg-white border border-dashed border-muted-foreground/20 flex flex-col items-center justify-center space-y-6"
               >
                 <div className="size-20 rounded-full bg-loss-50 flex items-center justify-center shadow-inner">
@@ -75,8 +79,10 @@ export function HomePage() {
             ) : (
               <motion.div
                 key="content"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.4, ease: "easeOut" }}
                 className={cn(
                   "space-y-12 transition-all duration-500",
                   refreshMutation.isPending && "opacity-60 blur-[1px]"
