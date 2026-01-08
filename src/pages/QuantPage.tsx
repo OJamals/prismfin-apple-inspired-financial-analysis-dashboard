@@ -91,10 +91,11 @@ export function QuantPage() {
             isRefreshing={refreshMutation.isPending}
             mode={mode}
           />
-          <AnimatePresence mode="wait">
+          <AnimatePresence mode="popLayout">
             {isLoading ? (
               <motion.div
                 key="skeletons"
+                layout
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
@@ -109,6 +110,7 @@ export function QuantPage() {
             ) : (
               <motion.div
                 key="content"
+                layout
                 variants={containerVariants}
                 initial="hidden"
                 animate="show"

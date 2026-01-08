@@ -16,7 +16,7 @@ export function AppSidebar(): JSX.Element {
     { label: "Settings", icon: Settings, path: "/settings" },
   ];
   return (
-    <div className="h-full flex flex-col bg-white/60 backdrop-blur-xl border-r border-white/40">
+    <div className="h-full flex flex-col bg-card/80 backdrop-blur-xl border-r border-border/40">
       <SidebarHeader className="pt-10 pb-6 px-6">
         <div className="flex items-center gap-3">
           <div className="h-10 w-10 rounded-2xl bg-gradient-to-br from-brand-teal to-brand-blue flex items-center justify-center shadow-lg shadow-brand-blue/20">
@@ -37,8 +37,8 @@ export function AppSidebar(): JSX.Element {
                     className={cn(
                       "flex items-center gap-3 rounded-2xl px-4 py-3.5 transition-all duration-300 group",
                       active
-                        ? "bg-white shadow-soft text-brand-blue font-semibold ring-1 ring-black/5"
-                        : "hover:bg-white/50 text-muted-foreground hover:text-foreground"
+                        ? "bg-card/90 shadow-inset text-brand-blue font-semibold ring-1 ring-border/50"
+                        : "hover:bg-card/50 text-muted-foreground hover:text-foreground"
                     )}
                   >
                     <Icon className={cn("size-5 transition-colors", active ? "text-brand-blue" : "text-muted-foreground group-hover:text-foreground")} />
@@ -51,7 +51,7 @@ export function AppSidebar(): JSX.Element {
         </SidebarGroup>
       </SidebarContent>
       <SidebarFooter className="p-8 mt-auto">
-        <div className="flex flex-col gap-1 rounded-3xl bg-white/40 p-5 ring-1 ring-black/5 border border-white/60">
+        <div className="flex flex-col gap-1 rounded-3xl bg-card/50 backdrop-blur-md p-5 ring-1 ring-border/20 border border-border/20 shadow-soft">
           <div className="flex items-center justify-between">
             <p className="text-[10px] font-bold text-foreground uppercase tracking-widest">System Status</p>
             <div className="size-1.5 rounded-full bg-brand-teal animate-pulse" />
