@@ -8,12 +8,26 @@ interface AcademyDiagramsProps {
 export function AcademyDiagrams({ type, className }: AcademyDiagramsProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   useEffect(() => {
-    if (type === 'bell-curve' && canvasRef.current && document) {
-      const canvas = canvasRef.current;
+    const canvas = canvasRef.current;
+    if (!canvas || type !== 'bell-curve') return;
+
+    const resizeCanvas = () => {
+      const rect = canvas.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = rect.width * dpr;
+      canvas.height = (rect.width * 0.5) * dpr; // Fixed 2:1 aspect ratio
+      drawChart();
+    };
+
+    const drawChart = () => {
       const ctx = canvas.getContext('2d');
       if (!ctx) return;
+      
       const width = canvas.width;
       const height = canvas.height;
+      const dpr = window.devicePixelRatio || 1;
+      ctx.scale(dpr, dpr);
+      
       // Clear
       ctx.clearRect(0, 0, width, height);
       const mean = width / 2;
@@ -50,10 +64,14 @@ export function AcademyDiagrams({ type, className }: AcademyDiagramsProps) {
       ctx.fill();
       // Labels
       ctx.fillStyle = mutedForeground;
-      ctx.font = 'bold 10px Inter';
+      ctx.font = 'bold 12px Inter';
       ctx.textAlign = 'center';
-      ctx.fillText('68% within 1 SD', mean, height - 10);
-    }
+      ctx.fillText('68% within 1 SD', mean, height - 20);
+    };
+
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+    return () => window.removeEventListener('resize', resizeCanvas);
   }, [type]);
   return (
     <Card className={cn("p-10 rounded-4xl border-none shadow-soft bg-card/60 flex items-center justify-center", className)}>

@@ -43,14 +43,15 @@ export function AcademyPage() {
           <DashboardHeader
             title="Learning Academy"
             subtitle="Bridging the gap between raw data and actionable investment intelligence."
+            subtitleClassName="text-xs text-background/60 font-black uppercase tracking-widest"
           />
           {/* Global Progress Dashboard */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <Card className="lg:col-span-2 rounded-4xl border-none shadow-premium bg-foreground text-background overflow-hidden p-8 flex flex-col justify-between">
+            <Card className="lg:col-span-2 rounded-4xl border-none shadow-premium bg-foreground text-foreground overflow-hidden p-8 flex flex-col justify-between">
               <div className="flex items-center justify-between mb-8">
                 <div className="space-y-1">
                   <h3 className="text-2xl font-bold font-display tracking-tight">Certification Pathway</h3>
-                  <p className="text-xs text-background/60 font-black uppercase tracking-widest">Master Quantitative Analysis</p>
+                  <p className="text-xs text-foreground/60 font-black uppercase tracking-widest">Master Quantitative Analysis</p>
                 </div>
                 <GraduationCap className="size-12 text-brand-teal opacity-80" />
               </div>
@@ -94,7 +95,7 @@ export function AcademyPage() {
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                   {topics.filter(t => t.trackId === track.id).map((topic, idx) => {
-                    const progress = getTopicProgress(topic.id, topic.steps.length);
+                    const progress = getTopicProgress(topic.id, topic.steps?.length || 0);
                     return (
                       <motion.div
                         key={topic.id}
@@ -104,7 +105,7 @@ export function AcademyPage() {
                         whileHover={{ y: -5 }}
                         onClick={() => setSelectedTopic(topic)}
                       >
-                        <Card className="rounded-4xl border border-white/40 shadow-soft bg-card h-full cursor-pointer hover:shadow-premium transition-all overflow-hidden group">
+                        <Card className="rounded-4xl border border-border/30 shadow-soft bg-card h-full cursor-pointer group-hover:shadow-premium hover:shadow-premium transition-all overflow-hidden group">
                           <CardContent className="p-8 space-y-6">
                             <div className="flex items-center justify-between">
                               <Badge className="rounded-lg px-2 py-0.5 text-[10px] font-black border-none bg-secondary/80 text-muted-foreground">

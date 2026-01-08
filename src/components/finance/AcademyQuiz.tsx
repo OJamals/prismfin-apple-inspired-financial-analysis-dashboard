@@ -16,6 +16,11 @@ export function AcademyQuiz({ questions, onComplete }: AcademyQuizProps) {
   const [submitted, setSubmitted] = useState(false);
   const [score, setScore] = useState(0);
   const [isFinished, setIsFinished] = useState(false);
+  
+  if (!questions?.length) {
+    return <div className="p-12 text-center text-muted-foreground">No questions available</div>;
+  }
+  
   const currentQ = questions[currentIdx];
   const handleSelect = (idx: number) => {
     if (submitted) return;
@@ -110,14 +115,14 @@ export function AcademyQuiz({ questions, onComplete }: AcademyQuizProps) {
             <Button
               onClick={handleSubmit}
               disabled={selectedIdx === null}
-              className="rounded-2xl h-14 px-12 bg-foreground text-background font-black uppercase tracking-widest text-xs"
+              className="rounded-2xl h-14 px-12 bg-foreground text-background font-black uppercase tracking-widest text-xs hover:bg-foreground/90 active:bg-foreground active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-primary/50 focus-visible:outline-none ring-offset-background transition-all duration-200"
             >
               Submit Analysis
             </Button>
           ) : (
             <Button
               onClick={handleNext}
-              className="rounded-2xl h-14 px-12 bg-brand-blue text-white font-black uppercase tracking-widest text-xs shadow-lg shadow-brand-blue/20"
+              className="rounded-2xl h-14 px-12 bg-brand-blue text-white font-black uppercase tracking-widest text-xs shadow-lg shadow-brand-blue/20 hover:bg-brand-blue/90 active:bg-brand-blue/95 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-blue/50 focus-visible:outline-none ring-offset-background transition-all duration-200"
             >
               Next Step <ChevronRight className="size-4 ml-2" />
             </Button>

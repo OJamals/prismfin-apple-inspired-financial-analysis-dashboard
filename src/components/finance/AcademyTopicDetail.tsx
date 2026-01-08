@@ -124,7 +124,7 @@ export function AcademyTopicDetail({ topic }: AcademyTopicDetailProps) {
               </Button>
               <Button
                 onClick={handleNext}
-                className="rounded-2xl h-14 px-10 bg-brand-blue text-white font-black uppercase tracking-widest text-xs shadow-lg shadow-brand-blue/20 gap-2"
+                className="rounded-2xl h-14 px-10 bg-brand-blue text-white font-black uppercase tracking-widest text-xs shadow-lg shadow-brand-blue/20 hover:bg-brand-blue/90 active:bg-brand-blue active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-blue/50 focus-visible:outline-none ring-offset-background transition-all duration-200 gap-2"
               >
                 {currentStepIdx === topic.steps.length - 1 ? 'Finish Lesson' : 'Continue'} <ChevronRight className="size-4" />
               </Button>
