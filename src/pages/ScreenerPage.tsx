@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useSearchParams } from 'react-router-dom';
 import { api } from '@/lib/api-client';
@@ -40,11 +40,12 @@ const INITIAL_FILTERS: ScreenerFilters = {
   sentiment: 'all'
 };
 export function ScreenerPage() {
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
   const [viewMode, setViewMode] = useState<'compact' | 'detailed'>('detailed');
   const [search, setSearch] = useState('');
   const [filters, setFilters] = useState<ScreenerFilters>(INITIAL_FILTERS);
   const [selectedSymbols, setSelectedSymbols] = useState<string[]>([]);
+  // Stable effect to sync URL params to state
   useEffect(() => {
     const sector = searchParams.get('sector') || 'all';
     const sentiment = searchParams.get('sentiment') || 'all';
@@ -66,11 +67,13 @@ export function ScreenerPage() {
       peg: getRange('peg', INITIAL_FILTERS.peg),
       beta: getRange('beta', INITIAL_FILTERS.beta),
     };
-    // Deep equality check to prevent loops
-    if (JSON.stringify(newFilters) !== JSON.stringify(filters)) {
+    // Use stringified check to avoid infinite loop while satisfying dependency array
+    const currentStr = JSON.stringify(filters);
+    const nextStr = JSON.stringify(newFilters);
+    if (currentStr !== nextStr) {
       setFilters(newFilters);
     }
-  }, [searchParams]);
+  }, [searchParams, filters]);
   const { data: stocks = [], isLoading } = useQuery<ScreenerStock[]>({
     queryKey: ['screener'],
     queryFn: () => api<ScreenerStock[]>('/api/screener'),
@@ -90,7 +93,7 @@ export function ScreenerPage() {
              inRange(s.beta, filters.beta);
     });
   }, [stocks, search, filters]);
-  const handleShare = () => {
+  const handleShare = useCallback(() => {
     const params = new URLSearchParams();
     if (filters.sector !== 'all') params.set('sector', filters.sector);
     if (filters.sentiment !== 'all') params.set('sentiment', filters.sentiment);
@@ -106,7 +109,7 @@ export function ScreenerPage() {
     const shareUrl = `${window.location.origin}${window.location.pathname}?${params.toString()}`;
     navigator.clipboard.writeText(shareUrl);
     toast.success('Analytical view link copied to clipboard');
-  };
+  }, [filters]);
   return (
     <AppLayout>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -128,7 +131,11 @@ export function ScreenerPage() {
           </div>
           <ScreenerFilterBar search={search} onSearchChange={setSearch} filters={filters} onFilterChange={setFilters} />
           <div className="space-y-4">
-            <ScreenerActiveChips filters={filters} onReset={(key) => setFilters({...filters, [key]: INITIAL_FILTERS[key]})} onClearAll={() => setFilters(INITIAL_FILTERS)} />
+            <ScreenerActiveChips 
+              filters={filters} 
+              onReset={(key) => setFilters({...filters, [key]: INITIAL_FILTERS[key]})} 
+              onClearAll={() => setFilters(INITIAL_FILTERS)} 
+            />
             <Card className="rounded-4xl border border-white/40 shadow-soft bg-card overflow-hidden">
               <CardContent className="p-0">
                 {isLoading ? (
@@ -155,9 +162,22 @@ export function ScreenerPage() {
                       <TableBody>
                         <AnimatePresence mode='popLayout'>
                           {filteredStocks.map((stock) => (
-                            <motion.tr key={stock.symbol} layout initial={{ opacity: 0 }} animate={{ opacity: 1 }} className={cn("border-none hover:bg-muted/10 transition-all", selectedSymbols.includes(stock.symbol) && "bg-brand-blue/5")}>
+                            <motion.tr 
+                              key={stock.symbol} 
+                              layout 
+                              initial={{ opacity: 0 }} 
+                              animate={{ opacity: 1 }} 
+                              className={cn(
+                                "border-none hover:bg-muted/10 transition-all", 
+                                selectedSymbols.includes(stock.symbol) && "bg-brand-blue/5"
+                              )}
+                            >
                               <TableCell className="px-6 py-4">
-                                <Checkbox checked={selectedSymbols.includes(stock.symbol)} onCheckedChange={(checked) => checked ? setSelectedSymbols([...selectedSymbols, stock.symbol]) : setSelectedSymbols(selectedSymbols.filter(s => s !== stock.symbol))} className="rounded-md border-muted-foreground/30 data-[state=checked]:bg-brand-blue" />
+                                <Checkbox 
+                                  checked={selectedSymbols.includes(stock.symbol)} 
+                                  onCheckedChange={(checked) => checked ? setSelectedSymbols([...selectedSymbols, stock.symbol]) : setSelectedSymbols(selectedSymbols.filter(s => s !== stock.symbol))} 
+                                  className="rounded-md border-muted-foreground/30 data-[state=checked]:bg-brand-blue" 
+                                />
                               </TableCell>
                               <TableCell className="px-4 py-4">
                                 <div className="flex flex-col">

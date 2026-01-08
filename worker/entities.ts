@@ -35,8 +35,18 @@ export class DashboardEntity extends Entity<DashboardState> {
     const rangeData = state?.dataByRange ?? DashboardEntity.initialState.dataByRange;
     const dismissedAlertIds = state?.dismissedAlertIds ?? [];
     let data = rangeData[range];
+    // Seed new fields if missing in legacy state
     if (!data) {
       data = generateDashboard(range);
+    }
+    if (!data.sectors) {
+      data.sectors = generateDashboard(range).sectors;
+    }
+    if (!data.benchmarkPerformance) {
+      data.benchmarkPerformance = generateDashboard(range).benchmarkPerformance;
+    }
+    if (!data.riskReward) {
+      data.riskReward = generateDashboard(range).riskReward;
     }
     // Ensure rows are fully hydrated with metadata
     data.rows = (data.rows ?? []).map(row => {
@@ -77,8 +87,8 @@ export class DashboardEntity extends Entity<DashboardState> {
   }
   async refreshRange(range: TimeRange): Promise<DashboardData> {
     const updatedState = await this.mutate(state => {
-      const newDataByRange = { 
-        ...state.dataByRange, 
+      const newDataByRange = {
+        ...state.dataByRange,
         [range]: {
           ...generateDashboard(range),
           updatedAt: Date.now()
@@ -90,8 +100,8 @@ export class DashboardEntity extends Entity<DashboardState> {
   }
   async refreshQuant(range: TimeRange): Promise<QuantData> {
     const updatedState = await this.mutate(state => {
-      const newQuantByRange = { 
-        ...state.quantByRange, 
+      const newQuantByRange = {
+        ...state.quantByRange,
         [range]: {
           ...generateQuantData(range),
           updatedAt: Date.now()

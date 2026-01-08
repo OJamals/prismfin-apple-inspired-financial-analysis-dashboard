@@ -58,9 +58,12 @@ export interface DashboardData {
   kpis: Kpi[];
   holdingsMetrics: HoldingsMetrics;
   performance: SeriesPoint[];
+  benchmarkPerformance: SeriesPoint[];
   cashflow: SeriesPoint[];
   rows: MetricsRow[];
   alerts: Alert[];
+  sectors: Record<string, number>;
+  riskReward: RiskRewardPoint[];
 }
 export interface QuantInsight {
   summary: string;

@@ -206,6 +206,8 @@ export function getMockRows(): MetricsRow[] {
   return [
     { name: 'Apple Inc.', symbol: 'AAPL', price: 189.43, changePct: 1.2, ytdPct: 12.4, volume: '54.2M', class: 'equity', sentiment: 78, miniSeries: [] },
     { name: 'Bitcoin', symbol: 'BTC', price: 64200, changePct: 5.2, ytdPct: 45.1, volume: '32.1B', class: 'crypto', sentiment: 84, miniSeries: [] },
+    { name: 'Microsoft', symbol: 'MSFT', price: 420.55, changePct: -0.5, ytdPct: 8.2, volume: '18.4M', class: 'equity', sentiment: 72, miniSeries: [] },
+    { name: 'Tesla Inc.', symbol: 'TSLA', price: 175.22, changePct: -3.4, ytdPct: -15.2, volume: '95.2M', class: 'equity', sentiment: 45, miniSeries: [] },
   ];
 }
 export function generateDashboard(range: TimeRange): DashboardData {
@@ -214,8 +216,18 @@ export function generateDashboard(range: TimeRange): DashboardData {
     kpis: getMockKPIs(),
     holdingsMetrics: calculateHoldingsMetrics([]),
     performance: Array.from({ length: 20 }).map((_, i) => ({ label: `Day ${i}`, value: 100000 + i * 500 })),
+    benchmarkPerformance: Array.from({ length: 20 }).map((_, i) => ({ label: `Day ${i}`, value: 100000 + i * 400 })),
     cashflow: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'].map(m => ({ label: m, value: 4000 + Math.random() * 2000 })),
     rows: getMockRows(),
-    alerts: []
+    alerts: [],
+    sectors: {
+      'Technology': 28.5,
+      'Financials': 15.2,
+      'Healthcare': 12.8,
+      'Energy': 8.4,
+      'Consumer Disc.': 10.1,
+      'Others': 25.0
+    },
+    riskReward: generateRiskReward().slice(0, 5)
   };
 }
