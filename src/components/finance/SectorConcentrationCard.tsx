@@ -1,7 +1,5 @@
-import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
-import { cn } from '@/lib/utils';
 interface SectorConcentrationCardProps {
   sectors: Record<string, number>;
 }
@@ -49,7 +47,7 @@ export function SectorConcentrationCard({ sectors }: SectorConcentrationCardProp
           </ResponsiveContainer>
           <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
             <span className="text-xs font-black text-muted-foreground uppercase tracking-tighter">Top</span>
-            <span className="text-lg font-black font-display">{data[0]?.value}%</span>
+            <span className="text-lg font-black font-display">{data[0]?.value ?? 0}%</span>
           </div>
         </div>
         <div className="flex-1 w-full space-y-3">

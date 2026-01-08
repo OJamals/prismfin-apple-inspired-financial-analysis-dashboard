@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
-import { Card, CardContent } from '@/components/ui/card';
-import { PulseMetric } from '@shared/types';
-import { Sparkles, ArrowRight, Info } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { motion } from 'framer-motion';
+import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
+import { motion } from 'framer-motion';
+import React, { useState } from 'react';
+import { Sparkles, ArrowRight, Info } from 'lucide-react';
 import { MetricsDetailDrawer } from './MetricsDetailDrawer';
+import { PulseMetric } from '@shared/types';
 interface PortfolioPulseCardProps {
   pulse: PulseMetric;
 }
@@ -65,11 +65,11 @@ export function PortfolioPulseCard({ pulse }: PortfolioPulseCardProps) {
           </CardContent>
         </Card>
       </motion.div>
-      <MetricsDetailDrawer 
-        isOpen={showDetail} 
+      <MetricsDetailDrawer
+        isOpen={showDetail}
         onClose={() => setShowDetail(false)}
         metricName="Portfolio Health"
-        description={pulse.detail}
+        pulse={pulse}
       />
     </div>
   );

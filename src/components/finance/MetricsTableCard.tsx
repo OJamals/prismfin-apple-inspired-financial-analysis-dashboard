@@ -1,5 +1,31 @@
 import React, { useState, useId } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { cn } from '@/lib/utils';
+import { formatCurrencyUSD, formatPct } from '@/lib/format';
+import { MetricsRow } from '@shared/types';
+import {
+  AreaChart,
+  Area,
+  ResponsiveContainer,
+  XAxis,
+  YAxis,
+} from 'recharts';
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import {
+  Badge,
+} from '@/components/ui/badge';
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuTrigger,
+  ContextMenuSeparator,
+} from "@/components/ui/context-menu";
 import {
   Table,
   TableBody,
@@ -8,26 +34,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import {
-  ContextMenu,
-  ContextMenuContent,
-  ContextMenuItem,
-  ContextMenuTrigger,
-  ContextMenuSeparator,
-} from "@/components/ui/context-menu";
-import { MetricsRow } from '@shared/types';
-import { formatCurrencyUSD, formatPct } from '@/lib/format';
+import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
 import {
   TrendingUp, TrendingDown, ChevronDown, ChevronUp,
-  Zap, Target, Newspaper, Search, Copy, Play, Activity, Info
+  Target, Newspaper, Search, Play, Activity, Info
 } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
-import { AreaChart, Area, ResponsiveContainer, XAxis, YAxis } from 'recharts';
-import { Badge } from '@/components/ui/badge';
-import { toast } from 'sonner';
 import { SimulateChangeDrawer } from './SimulateChangeDrawer';
+import { toast } from 'sonner';
 interface MetricsTableCardProps {
   rows: MetricsRow[];
 }

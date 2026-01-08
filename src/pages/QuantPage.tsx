@@ -12,25 +12,17 @@ import { DrawdownChartCard } from '@/components/finance/DrawdownChartCard';
 import { CorrelationMatrixCard } from '@/components/finance/CorrelationMatrixCard';
 import { AIAnalystNote } from '@/components/finance/AIAnalystNote';
 import { PortfolioPulseCard } from '@/components/finance/PortfolioPulseCard';
-import { ErrorRecoveryDisplay } from '@/components/finance/ErrorRecoveryDisplay';
-import { ChartSkeleton, PulseSkeleton } from '@/components/finance/PremiumSkeleton';
-import { GuidedTour, TourStep } from '@/components/finance/GuidedTour';
-import { useTourState } from '@/hooks/use-tour-state';
+
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { useUserSettings } from '@/hooks/use-user-settings';
 import { Sparkles, ShieldCheck } from 'lucide-react';
-const QUANT_TOUR_STEPS: TourStep[] = [
-  { targetId: 'quant-pulse', title: 'Intelligence Summary', content: 'Get an instant plain-English breakdown of your portfolios quantitative standing.', position: 'bottom' },
-  { targetId: 'efficiency-frontier', title: 'Risk-Reward Mapping', content: 'Visualize how your assets map against the theoretical efficiency frontier.', position: 'right' },
-  { targetId: 'monte-carlo', title: 'Predictive Wealth', content: 'Forecast potential terminal value ranges using institutional-grade simulation.', position: 'top' }
-];
+
 export function QuantPage() {
   const [range, setRange] = useState<TimeRange>('6M');
-  const { skillLevel, tradingMode, density, showTooltips } = useUserSettings();
+  const { skillLevel, tradingMode, density } = useUserSettings();
   const queryClient = useQueryClient();
-  const { isTourOpen, startTour, completeTour } = useTourState('quant-lab');
   const { data, isLoading, isError, refetch, isFetching } = useQuery<QuantData>({
     queryKey: ['quant', range, tradingMode],
     queryFn: () => api<QuantData>(`/api/quant?range=${range}&mode=${tradingMode}`),
@@ -72,22 +64,31 @@ export function QuantPage() {
                   Model Stability: <span className="text-gain-600">Tier 1 Institutional</span>
                 </p>
               </div>
-              <motion.button 
-                whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
-                onClick={startTour}
-                className="flex items-center gap-2 px-4 py-2 bg-brand-blue/10 text-brand-blue rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-brand-blue/20"
-              >
-                <Sparkles className="size-4" /> Start Tour
-              </motion.button>
+
             </div>
           </div>
           <AnimatePresence>
             {isLoading ? (
               <motion.div key="loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-12">
-                <PulseSkeleton /><div className="grid grid-cols-1 lg:grid-cols-12 gap-8"><div className="lg:col-span-12"><ChartSkeleton /></div></div>
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8"><div className="lg:col-span-12"><div className="animate-pulse bg-card/60 rounded-3xl h-96" /></div></div>
               </motion.div>
             ) : isError ? (
-              <ErrorRecoveryDisplay key="error" onRetry={() => refetch()} isRetrying={isFetching} />
+              <motion.div key="error" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6 text-center py-24">
+                <div className="text-6xl text-muted-foreground mb-4">⚠️</div>
+                <h3 className="text-2xl font-bold text-foreground mb-2">Quant analysis temporarily unavailable</h3>
+                <p className="text-lg text-muted-foreground mb-8 max-w-md mx-auto">
+                  Our quantitative models are experiencing technical difficulties. 
+                </p>
+                <motion.button
+                  onClick={() => refetch()}
+                  disabled={isFetching}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="px-8 py-3 bg-brand-blue text-white rounded-2xl font-semibold text-lg shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isFetching ? 'Retrying...' : 'Try Again'}
+                </motion.button>
+              </motion.div>
             ) : (
               <>
                 <motion.div
@@ -132,7 +133,6 @@ export function QuantPage() {
                     <MonteCarloCard data={data?.monteCarlo ?? ({} as any)} />
                   </div>
                 </motion.div>
-                {showTooltips && <GuidedTour steps={QUANT_TOUR_STEPS} isOpen={isTourOpen} onComplete={completeTour} />}
               </>
             )}
           </AnimatePresence>

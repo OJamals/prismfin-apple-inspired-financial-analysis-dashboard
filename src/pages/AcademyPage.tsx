@@ -1,11 +1,11 @@
 import React, { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
+
 import { api } from '@/lib/api-client';
-import { AcademyTopic, FinancialTerm } from '@shared/types';
+import { AcademyTopic } from '@shared/types';
 import { GLOSSARY_TERMS } from '@shared/mock-data';
+
 import { AppLayout } from '@/components/layout/AppLayout';
-import { DashboardHeader } from '@/components/finance/DashboardHeader';
-import { AcademyTopicDetail } from '@/components/finance/AcademyTopicDetail';
 import { useAcademyProgress } from '@/hooks/use-academy-progress';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -15,7 +15,6 @@ import { Clock, BookOpen, ChevronRight, Zap, Search, GraduationCap, Target } fro
 import { motion, AnimatePresence } from 'framer-motion';
 import { Drawer, DrawerContent } from '@/components/ui/drawer';
 import { cn } from '@/lib/utils';
-import { toast } from 'sonner';
 export function AcademyPage() {
   const { data: topics = [] } = useQuery<AcademyTopic[]>({
     queryKey: ['academy'],
@@ -40,10 +39,14 @@ export function AcademyPage() {
     <AppLayout>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="py-8 md:py-10 lg:py-12 space-y-12">
-          <DashboardHeader
-            title="Learning Academy"
-            subtitle="Bridging the gap between raw data and actionable investment intelligence."
-          />
+          <div className="space-y-1 mb-12">
+            <h1 className="text-4xl font-black font-display tracking-tight bg-gradient-to-r from-brand-blue to-brand-teal bg-clip-text text-transparent">
+              Learning Academy
+            </h1>
+            <p className="text-xl text-muted-foreground font-medium max-w-2xl leading-relaxed">
+              Bridging the gap between raw data and actionable investment intelligence.
+            </p>
+          </div>
           {/* Global Progress Dashboard */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <Card className="lg:col-span-2 rounded-4xl border-none shadow-premium bg-card text-card-foreground overflow-hidden p-8 flex flex-col justify-between">
@@ -147,7 +150,24 @@ export function AcademyPage() {
         <DrawerContent className="h-[95vh] bg-canvas/95 backdrop-blur-3xl border-t border-border/20">
           <div className="max-w-6xl mx-auto w-full h-full overflow-hidden flex flex-col">
             <AnimatePresence mode="wait">
-              {selectedTopic && <AcademyTopicDetail topic={selectedTopic} />}
+              {selectedTopic && (
+                <div className="p-8 max-w-4xl mx-auto">
+                  <div className="text-center mb-12">
+                    <h2 className="text-3xl font-black font-display tracking-tight mb-4">
+                      {selectedTopic.title}
+                    </h2>
+                    <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+                      {selectedTopic.description}
+                    </p>
+                  </div>
+                  <div className="prose prose-sm max-w-none">
+                    {/* Topic content would render here */}
+                    <p className="text-muted-foreground text-center py-12">
+                      Topic content loading...
+                    </p>
+                  </div>
+                </div>
+              )}
             </AnimatePresence>
           </div>
         </DrawerContent>

@@ -1,4 +1,6 @@
 import React from 'react';
+import { BookOpen, Info, Target } from "lucide-react";
+import { useNavigate } from 'react-router-dom';
 import {
   Drawer,
   DrawerContent,
@@ -8,8 +10,6 @@ import {
   DrawerFooter,
 } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
-import { BookOpen, Target, Info, ChevronRight } from "lucide-react";
-import { useNavigate } from 'react-router-dom';
 interface MetricsDetailDrawerProps {
   isOpen: boolean;
   onClose: () => void;

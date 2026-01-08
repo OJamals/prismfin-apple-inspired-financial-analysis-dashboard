@@ -1,19 +1,30 @@
 import React from 'react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { DashboardHeader } from '@/components/finance/DashboardHeader';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Slider } from "@/components/ui/slider";
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { 
-  Database, Shield, User, GraduationCap, Target, 
-  Layers, Layout, LayoutPanelLeft, Bell, Zap, Activity
+import {
+  Badge,
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  Label,
+  RadioGroup,
+  RadioGroupItem,
+  Slider,
+  Switch,
+} from '@/components/ui';
+import {
+  Bell,
+  Database,
+  GraduationCap,
+  Layout,
+  LayoutPanelLeft,
+  Shield,
+  Target,
 } from 'lucide-react';
 import { useUserSettings } from '@/hooks/use-user-settings';
-import { SkillLevel, TradingMode, DensityMode } from '@shared/types';
+import { SkillLevel, TradingMode } from '@shared/types';
 import { cn } from '@/lib/utils';
 export function SettingsPage() {
   const { 
@@ -49,7 +60,7 @@ export function SettingsPage() {
                   >
                     {[
                       { id: 'novice', label: 'Novice', icon: Target, desc: 'Plain-English summaries and core health metrics.' },
-                      { id: 'pro', label: 'Pro', icon: Activity, desc: 'Institutional grid access and factor attribution models.' },
+                      { id: 'pro', label: 'Pro', icon: Target, desc: 'Institutional grid access and factor attribution models.' },
                       { id: 'institutional', label: 'Institutional', icon: Shield, desc: 'Unrestricted access to all risk and quantitative simulation labs.' }
                     ].map((tier) => (
                       <div key={tier.id} className="relative">

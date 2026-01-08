@@ -1,7 +1,7 @@
 import React from 'react';
 import { Input } from '@/components/ui/input';
-import { Slider } from '@/components/ui/slider';
 import { Label } from '@/components/ui/label';
+import { Slider } from '@/components/ui/slider';
 import {
   Select,
   SelectContent,
@@ -9,7 +9,7 @@ import {
   SelectTrigger,
   SelectValue
 } from "@/components/ui/select";
-import { Search, SlidersHorizontal } from 'lucide-react';
+import { Search } from 'lucide-react';
 import { ScreenerFilters, ScreenerPreset } from '@shared/types';
 const PRESETS: ScreenerPreset[] = [
   { id: 'div-aristocrats', label: 'Dividend Aristocrats', filters: { yield: [3, 10], pe: [0, 20], sentiment: 'Bullish' } },
@@ -25,7 +25,7 @@ interface ScreenerFilterBarProps {
 export function ScreenerFilterBar({ search, onSearchChange, filters, onFilterChange }: ScreenerFilterBarProps) {
   const updateRange = (key: keyof ScreenerFilters, index: number, val: string) => {
     const num = parseFloat(val) || 0;
-    const current = [...(filters[key] as number[])];
+    const current = [...((filters[key] as number[]) || [0, 100])];
     current[index] = num;
     onFilterChange({ ...filters, [key]: current });
   };
@@ -39,15 +39,15 @@ export function ScreenerFilterBar({ search, onSearchChange, filters, onFilterCha
     }
   };
   const RangeFilter = ({ label, fKey, min, max, step, unit = '' }: { label: string, fKey: keyof ScreenerFilters, min: number, max: number, step: number, unit?: string }) => {
-    const vals = filters[fKey] as number[];
+    const vals = (filters[fKey] as number[]) || [min, max];
     return (
       <div className="space-y-4">
         <div className="flex justify-between items-center px-1">
           <Label className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">{label}</Label>
           <div className="flex items-center gap-1.5">
-            <Input 
-              className="h-6 w-12 text-[10px] p-1 text-center bg-card border-none rounded-md" 
-              value={vals[0]} 
+            <Input
+              className="h-6 w-12 text-[10px] p-1 text-center bg-card border-none rounded-md"
+              value={vals[0]}
               onChange={(e) => updateRange(fKey, 0, e.target.value)}
             />
             <span className="text-[10px] text-muted-foreground">-</span>

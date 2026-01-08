@@ -1,8 +1,8 @@
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { Activity, ShieldCheck, Target } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { Activity } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { motion } from 'framer-motion';
 interface BetaSensitivityCardProps {
   beta: number;
 }
@@ -55,7 +55,7 @@ export function BetaSensitivityCard({ beta }: BetaSensitivityCardProps) {
         </div>
         <div className="pt-6 mt-4 border-t border-border/5 space-y-2">
           <div className="flex items-center gap-2">
-            <ShieldCheck className="size-4 text-brand-teal" />
+            <Activity className="size-4 text-brand-teal" />
             <p className="text-xs font-bold">Sensitivity Insight</p>
           </div>
           <p className="text-xs text-muted-foreground leading-relaxed">

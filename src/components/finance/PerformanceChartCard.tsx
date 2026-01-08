@@ -12,7 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { cn } from '@/lib/utils';
+
 interface PerformanceChartCardProps {
   portfolio: SeriesPoint[];
   benchmark: SeriesPoint[];
@@ -26,7 +26,7 @@ export function PerformanceChartCard({ portfolio, benchmark, range }: Performanc
     return portfolio.map((p, i) => {
       const baseBench = benchmark[i]?.value ?? 0;
       // Deterministic IXIC simulation for stability during renders
-      const ixicVol = (Math.sin(i * 0.5) * 0.002); 
+      const ixicVol = (Math.sin(i * 0.5) * 0.002);
       const adjustedBench = benchmarkType === 'IXIC'
         ? baseBench * (1 + (i * 0.003) + ixicVol)
         : baseBench;
@@ -36,7 +36,7 @@ export function PerformanceChartCard({ portfolio, benchmark, range }: Performanc
         benchmark: adjustedBench
       };
     });
-  }, [portfolio, benchmark, benchmarkType]);
+  }, [portfolio, benchmark, benchmarkType, showBenchmark]);
   return (
     <Card className="rounded-4xl border-none shadow-soft bg-card overflow-hidden h-full">
       <CardHeader className="flex flex-col md:flex-row md:items-center justify-between p-8 pb-0 gap-4">
@@ -70,7 +70,7 @@ export function PerformanceChartCard({ portfolio, benchmark, range }: Performanc
       </CardHeader>
       <CardContent className="h-[320px] p-8 pt-8">
         <ResponsiveContainer width="100%" height="100%">
-          <AreaChart data={combinedData} key={`perf-${range}-${benchmarkType}`}>
+          <AreaChart data={combinedData} key={`perf-${range}-${benchmarkType}-${showBenchmark}`}>
             <defs>
               <linearGradient id={`portfolioFill-${id}`} x1="0" y1="0" x2="0" y2="1">
                 <stop offset="5%" stopColor="#34C759" stopOpacity={0.15}/>

@@ -1,24 +1,23 @@
 import React, { useState, useId } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import {
-  AreaChart,
-  Area,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  Line,
-  ComposedChart
-} from 'recharts';
-import { MonteCarloStats } from '@shared/types';
-import { formatCurrencyUSD } from '@/lib/format';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Skeleton } from '@/components/ui/skeleton';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Target, ShieldAlert, TrendingUp, Info } from 'lucide-react';
-import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Switch } from '@/components/ui/switch';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { motion, AnimatePresence } from 'framer-motion';
+import {
+  Area,
+  CartesianGrid,
+  ComposedChart,
+  Line,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis
+} from 'recharts';
+import { formatCurrencyUSD } from '@/lib/format';
+import { MonteCarloStats } from '@shared/types';
+import { ShieldAlert, Target, TrendingUp } from 'lucide-react';
 interface MonteCarloCardProps {
   data: Record<'1Y' | '5Y' | '10Y', MonteCarloStats>;
 }

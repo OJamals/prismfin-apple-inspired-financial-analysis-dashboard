@@ -1,11 +1,11 @@
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { MetricsRow } from '@shared/types';
-import { formatPct, formatCurrencyUSD } from '@/lib/format';
-import { cn } from '@/lib/utils';
+import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { TrendingUp, TrendingDown, ArrowRight } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { MetricsRow } from '@shared/types';
+import { cn } from '@/lib/utils';
+import { formatPct, formatCurrencyUSD } from '@/lib/format';
 interface TopMoversCardProps {
   movers: MetricsRow[];
 }
@@ -18,7 +18,7 @@ export function TopMoversCard({ movers }: TopMoversCardProps) {
         <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mt-1">Significant 24H Delta</p>
       </CardHeader>
       <CardContent className="px-8 pb-8 space-y-4">
-        {movers.map((mover, idx) => {
+        {movers.map((mover) => {
           const isPositive = mover.changePct >= 0;
           return (
             <motion.div

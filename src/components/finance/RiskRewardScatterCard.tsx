@@ -1,17 +1,16 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
-  ScatterChart,
-  Scatter,
-  XAxis,
-  YAxis,
-  ZAxis,
   CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
   Cell,
+  ComposedChart,
   Line,
-  ComposedChart
+  ResponsiveContainer,
+  Scatter,
+  ScatterChart,
+  Tooltip,
+  XAxis,
+  YAxis
 } from 'recharts';
 import { RiskRewardPoint } from '@shared/types';
 import { cn } from '@/lib/utils';
@@ -64,7 +63,6 @@ export function RiskRewardScatterCard({ data }: RiskRewardScatterCardProps) {
               tick={{ fontSize: 11, fill: '#94a3b8', fontWeight: 600 }}
               label={{ value: 'Return', angle: -90, position: 'left', offset: 0, fontSize: 10, fill: '#64748b', fontWeight: 700 }}
             />
-            <ZAxis type="number" dataKey="weight" range={[100, 2000]} name="Weight" />
             <Line
               data={frontier}
               type="monotone"
@@ -113,9 +111,9 @@ export function RiskRewardScatterCard({ data }: RiskRewardScatterCardProps) {
               {data.map((entry, index) => (
                 <Cell
                   key={`cell-${index}`}
-                  fill={getSharpeColor(entry.sharpe)}
+                  fill={entry.sharpe != null ? getSharpeColor(entry.sharpe) : '#0ea5e9'}
                   fillOpacity={0.8}
-                  stroke={getSharpeColor(entry.sharpe)}
+                  stroke={entry.sharpe != null ? getSharpeColor(entry.sharpe) : '#0ea5e9'}
                   strokeWidth={1.5}
                   className="transition-all duration-300 hover:fill-opacity-100 cursor-pointer"
                 />

@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api-client';
 import { DashboardData, TimeRange } from '@shared/types';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -13,9 +13,9 @@ import { PortfolioPulseCard } from '@/components/finance/PortfolioPulseCard';
 import { ErrorRecoveryDisplay } from '@/components/finance/ErrorRecoveryDisplay';
 import { HoldingsMetricsSkeleton, ChartSkeleton } from '@/components/finance/PremiumSkeleton';
 import { motion, AnimatePresence } from 'framer-motion';
-import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
-import { ShieldCheck, Activity, Wifi, WifiOff } from 'lucide-react';
+import { toast } from 'sonner';
+import { ShieldCheck, Activity, Wifi } from 'lucide-react';
 import { useUserSettings } from '@/hooks/use-user-settings';
 import { Button } from '@/components/ui/button';
 export function HomePage() {
