@@ -9,8 +9,22 @@ import { KpiCard } from '@/components/finance/KpiCard';
 import { PerformanceAreaCard } from '@/components/finance/PerformanceAreaCard';
 import { CashflowBarCard } from '@/components/finance/CashflowBarCard';
 import { MetricsTableCard } from '@/components/finance/MetricsTableCard';
-import { Skeleton } from '@/components/ui/skeleton';
+import { KpiSkeleton, ChartSkeleton, TableSkeleton } from '@/components/finance/PremiumSkeleton';
+import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
+const containerVariants = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.08,
+    }
+  }
+};
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.16, 1, 0.3, 1] } }
+};
 export function HomePage() {
   const [range, setRange] = useState<TimeRange>('6M');
   const [searchParams] = useSearchParams();
@@ -26,69 +40,85 @@ export function HomePage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['dashboard'] });
       queryClient.invalidateQueries({ queryKey: ['alerts'] });
-      toast.success('Market data updated');
+      toast.success('Real-time data synchronized');
     },
-    onError: () => toast.error('Refresh failed'),
+    onError: () => toast.error('Connection failed'),
   });
   const onRefresh = () => refreshMutation.mutate();
   return (
     <AppLayout>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="py-8 md:py-10 lg:py-12 space-y-8">
+        <div className="py-8 md:py-10 lg:py-12 space-y-10">
           <DashboardHeader
-            title="Dashboard"
-            subtitle={`Real-time ${filter === 'all' ? 'portfolio' : filter} analytics and insights.`}
+            title="Overview"
+            subtitle={`Analyzing ${filter === 'all' ? 'total portfolio' : filter} performance metrics.`}
             range={range}
             onRangeChange={(r) => setRange(r as TimeRange)}
             onRefresh={onRefresh}
             isRefreshing={refreshMutation.isPending}
           />
-          {/* KPI Strip */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <AnimatePresence mode="wait">
             {isLoading ? (
-              Array.from({ length: 4 }).map((_, i) => (
-                <Skeleton key={`kpi-skeleton-${i}`} className="h-32 rounded-4xl" />
-              ))
+              <motion.div 
+                key="skeletons"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="space-y-10"
+              >
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                  {Array.from({ length: 4 }).map((_, i) => <KpiSkeleton key={i} />)}
+                </div>
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                  <div className="lg:col-span-8"><ChartSkeleton /></div>
+                  <div className="lg:col-span-4"><ChartSkeleton /></div>
+                </div>
+                <TableSkeleton />
+              </motion.div>
             ) : isError ? (
-              <div className="col-span-full py-10 text-center bg-muted/20 rounded-4xl">
-                <p className="text-muted-foreground text-sm">Failed to load market metrics.</p>
-              </div>
+              <motion.div 
+                key="error"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="py-20 text-center glass-premium rounded-4xl"
+              >
+                <p className="text-muted-foreground font-semibold">Failed to reconcile market data. Please check your connection.</p>
+              </motion.div>
             ) : (
-              data?.kpis.map((kpi) => (
-                <KpiCard
-                  key={kpi.id}
-                  label={kpi.label}
-                  value={kpi.value}
-                  deltaPct={kpi.deltaPct}
-                />
-              ))
+              <motion.div
+                key="content"
+                variants={containerVariants}
+                initial="hidden"
+                animate="show"
+                className="space-y-10"
+              >
+                {/* KPI Strip */}
+                <motion.div variants={itemVariants} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                  {data?.kpis.map((kpi) => (
+                    <KpiCard
+                      key={kpi.id}
+                      label={kpi.label}
+                      value={kpi.value}
+                      deltaPct={kpi.deltaPct}
+                    />
+                  ))}
+                </motion.div>
+                {/* Charts Row */}
+                <motion.div variants={itemVariants} className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                  <div className="lg:col-span-8">
+                    <PerformanceAreaCard data={data?.performance ?? []} range={range} />
+                  </div>
+                  <div className="lg:col-span-4">
+                    <CashflowBarCard data={data?.cashflow ?? []} />
+                  </div>
+                </motion.div>
+                {/* Metrics Table */}
+                <motion.div variants={itemVariants} className="grid grid-cols-1 gap-6 pb-8">
+                  <MetricsTableCard rows={data?.rows ?? []} />
+                </motion.div>
+              </motion.div>
             )}
-          </div>
-          {/* Charts Row */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-            <div className="lg:col-span-8">
-              {isLoading ? (
-                <Skeleton className="h-[400px] rounded-4xl" />
-              ) : (
-                <PerformanceAreaCard data={data?.performance ?? []} range={range} />
-              )}
-            </div>
-            <div className="lg:col-span-4">
-              {isLoading ? (
-                <Skeleton className="h-[400px] rounded-4xl" />
-              ) : (
-                <CashflowBarCard data={data?.cashflow ?? []} />
-              )}
-            </div>
-          </div>
-          {/* Metrics Table */}
-          <div className="grid grid-cols-1 gap-6">
-            {isLoading ? (
-              <Skeleton className="h-[500px] rounded-4xl" />
-            ) : (
-              <MetricsTableCard rows={data?.rows ?? []} />
-            )}
-          </div>
+          </AnimatePresence>
         </div>
       </div>
     </AppLayout>
