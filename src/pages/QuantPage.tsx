@@ -1,25 +1,16 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api-client';
-import { QuantData, TimeRange, DensityMode } from '@shared/types';
+import { QuantData, TimeRange } from '@shared/types';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { DashboardHeader } from '@/components/finance/DashboardHeader';
 import { BenchmarkingChart } from '@/components/finance/BenchmarkingChart';
 import { FactorAttributionCard } from '@/components/finance/FactorAttributionCard';
 import { MonteCarloCard } from '@/components/finance/MonteCarloCard';
-import { RiskRewardScatterCard } from '@/components/finance/RiskRewardScatterCard';
-import { DrawdownChartCard } from '@/components/finance/DrawdownChartCard';
-import { CorrelationMatrixCard } from '@/components/finance/CorrelationMatrixCard';
-import { AIAnalystNote } from '@/components/finance/AIAnalystNote';
-import { ChartSkeleton } from '@/components/finance/PremiumSkeleton';
-import { motion, AnimatePresence } from 'framer-motion';
+import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
-import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
-import { FileDown, Layout, LayoutPanelLeft } from 'lucide-react';
 export function QuantPage() {
   const [range, setRange] = useState<TimeRange>('6M');
-  const [density, setDensity] = useState<DensityMode>('comfortable');
   const queryClient = useQueryClient();
   const { data, isLoading } = useQuery<QuantData>({
     queryKey: ['quant', range],
@@ -27,97 +18,52 @@ export function QuantPage() {
   });
   const refreshMutation = useMutation({
     mutationFn: () => api<QuantData>(`/api/quant/refresh?range=${range}`, { method: 'POST' }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['quant', range] });
-      toast.success('Quant models recalculated');
-    }
+    onSuccess: (updated) => {
+      queryClient.setQueryData(['quant', range], updated);
+      toast.success('Simulation re-run complete');
+    },
+    onError: () => toast.error('Refresh failed'),
   });
-  const handleExport = () => {
-    toast.success('Generating institutional risk report...');
-  };
+  const onRefresh = () => refreshMutation.mutate();
   return (
     <AppLayout>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className={cn(
-          "py-8 md:py-10 lg:py-12 transition-all duration-300",
-          density === 'comfortable' ? "space-y-12" : "space-y-6"
-        )}>
-          <div className="flex flex-col space-y-8">
-            <DashboardHeader
-              title="Quant Lab"
-              subtitle="Multi-factor risk attribution and predictive simulation engine."
-              range={range}
-              onRangeChange={(r) => setRange(r as TimeRange)}
-              onRefresh={() => refreshMutation.mutate()}
-              isRefreshing={refreshMutation.isPending}
-            />
-            <div className="sticky top-[100px] z-20 flex items-center justify-between bg-canvas/60 backdrop-blur-md p-3 rounded-2xl border border-border/5 ring-1 ring-black/5">
-              <div className="flex items-center gap-2">
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  onClick={() => setDensity('comfortable')}
-                  className={cn("rounded-xl h-9 px-4 text-xs font-bold", density === 'comfortable' && "bg-white shadow-sm text-brand-blue")}
-                >
-                  <Layout className="size-3.5 mr-2" /> Comfortable
-                </Button>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  onClick={() => setDensity('compact')}
-                  className={cn("rounded-xl h-9 px-4 text-xs font-bold", density === 'compact' && "bg-white shadow-sm text-brand-blue")}
-                >
-                  <LayoutPanelLeft className="size-3.5 mr-2" /> Compact
-                </Button>
-              </div>
-              <Button variant="outline" size="sm" onClick={handleExport} className="rounded-xl h-9 px-4 text-xs font-bold border-none bg-white shadow-sm">
-                <FileDown className="size-3.5 mr-2 text-brand-blue" /> Export PDF
-              </Button>
+        <div className="py-8 md:py-10 lg:py-12 space-y-8">
+          <DashboardHeader
+            title="Quant Analysis"
+            subtitle="Deep-dive into factor exposure and risk simulations."
+            range={range}
+            onRangeChange={(r) => setRange(r as TimeRange)}
+            onRefresh={onRefresh}
+            isRefreshing={refreshMutation.isPending}
+          />
+          <div className="grid grid-cols-1 gap-6">
+            {isLoading ? (
+              <Skeleton className="h-[450px] rounded-4xl" />
+            ) : (
+              <BenchmarkingChart 
+                portfolio={data?.portfolio ?? []} 
+                benchmark={data?.benchmark ?? []}
+                range={range}
+              />
+            )}
+          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <div className="lg:col-span-5">
+              {isLoading ? (
+                <Skeleton className="h-[400px] rounded-4xl" />
+              ) : (
+                <FactorAttributionCard factors={data?.factors ?? []} />
+              )}
+            </div>
+            <div className="lg:col-span-7">
+              {isLoading ? (
+                <Skeleton className="h-[400px] rounded-4xl" />
+              ) : (
+                <MonteCarloCard data={data?.monteCarlo ?? {} as any} />
+              )}
             </div>
           </div>
-          <AnimatePresence mode="popLayout">
-            {isLoading ? (
-              <motion.div key="skeletons" layout className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <div className="lg:col-span-2"><ChartSkeleton /></div>
-                <ChartSkeleton /><ChartSkeleton />
-              </motion.div>
-            ) : (
-              <motion.div 
-                key="content" 
-                layout 
-                initial={{ opacity: 0 }} 
-                animate={{ opacity: 1 }}
-                className={cn(
-                  "grid grid-cols-1 lg:grid-cols-12 transition-all duration-300",
-                  density === 'comfortable' ? "gap-10" : "gap-4"
-                )}
-              >
-                {data?.insight && (
-                  <div className="lg:col-span-12">
-                    <AIAnalystNote insight={data.insight} />
-                  </div>
-                )}
-                <div className="lg:col-span-12">
-                  <BenchmarkingChart portfolio={data?.portfolio ?? []} benchmark={data?.benchmark ?? []} range={range} />
-                </div>
-                <div className="lg:col-span-8">
-                  <DrawdownChartCard data={data?.drawdown ?? { maxDrawdown: 0, series: [] }} />
-                </div>
-                <div className="lg:col-span-4">
-                  <FactorAttributionCard factors={data?.factors ?? []} />
-                </div>
-                <div className="lg:col-span-6">
-                  <RiskRewardScatterCard data={data?.riskReward ?? []} />
-                </div>
-                <div className="lg:col-span-6">
-                  <CorrelationMatrixCard data={data?.correlation ?? { symbols: [], matrix: {} }} />
-                </div>
-                <div className="lg:col-span-12">
-                  <MonteCarloCard data={data?.monteCarlo ?? {} as any} />
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
         </div>
       </div>
     </AppLayout>
