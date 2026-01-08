@@ -63,7 +63,7 @@ export function CorrelationMatrixCard({ data }: CorrelationMatrixCardProps) {
                                 {val.toFixed(2)}
                               </div>
                             </TooltipTrigger>
-                            <TooltipContent className="bg-white/95 backdrop-blur-xl border border-input shadow-xl text-foreground p-3 rounded-2xl min-w-[140px]">
+                            <TooltipContent className="bg-card/95 backdrop-blur-xl border border-border/20 shadow-xl text-foreground p-3 rounded-2xl min-w-[140px]">
                               <p className="text-xs font-bold mb-1">{s1} + {s2}</p>
                               <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-tighter">{getLabel(val)}</p>
                               <div className="mt-2 text-lg font-display font-bold text-brand-blue">

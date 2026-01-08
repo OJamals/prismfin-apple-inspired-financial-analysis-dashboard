@@ -54,13 +54,13 @@ export function DashboardHeader({
           {subtitle}
         </p>
       </div>
-      <div className="flex items-center gap-2.5 bg-white/40 p-1.5 rounded-2xl border border-white/60 shadow-soft ring-1 ring-black/5 backdrop-blur-md">
+      <div className="flex items-center gap-2.5 bg-card/40 p-1.5 rounded-2xl border border-card/60 shadow-soft ring-1 ring-border/20 backdrop-blur-md">
         {onRangeChange && (
           <Select value={range} onValueChange={onRangeChange}>
-            <SelectTrigger className="w-[110px] bg-white border-none shadow-sm rounded-xl h-10 font-bold text-xs uppercase tracking-widest focus:ring-1 focus:ring-brand-blue/30">
+            <SelectTrigger className="w-[110px] bg-card border-none shadow-sm rounded-xl h-10 font-bold text-xs uppercase tracking-widest focus:ring-1 focus:ring-brand-blue/30">
               <SelectValue placeholder="Range" />
             </SelectTrigger>
-            <SelectContent className="rounded-2xl border-white/60 shadow-premium backdrop-blur-2xl bg-white/90">
+            <SelectContent className="rounded-2xl bg-card/90 backdrop-blur-xl border-card/40 shadow-premium">
               <SelectItem value="1M" className="rounded-lg text-xs font-bold uppercase tracking-widest py-2.5">1 Month</SelectItem>
               <SelectItem value="3M" className="rounded-lg text-xs font-bold uppercase tracking-widest py-2.5">3 Months</SelectItem>
               <SelectItem value="6M" className="rounded-lg text-xs font-bold uppercase tracking-widest py-2.5">6 Months</SelectItem>
@@ -76,7 +76,7 @@ export function DashboardHeader({
                 size="icon"
                 onClick={onRefresh}
                 disabled={isRefreshing}
-                className="rounded-xl h-9 w-9 bg-white shadow-sm hover:bg-muted/50 border-none"
+                className="rounded-xl h-9 w-9 bg-card shadow-sm hover:bg-muted/50 border-none"
               >
                 <RefreshCw className={cn("size-4 text-brand-blue", isRefreshing && "animate-spin")} />
               </Button>
@@ -86,7 +86,7 @@ export function DashboardHeader({
             <Button
               variant="ghost"
               size="icon"
-              className="rounded-xl h-9 w-9 bg-white shadow-sm hover:bg-muted/50 border-none"
+              className="rounded-xl h-9 w-9 bg-card shadow-sm hover:bg-muted/50 border-none"
             >
               <Download className="size-4 text-muted-foreground" />
             </Button>

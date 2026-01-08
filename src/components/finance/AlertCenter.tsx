@@ -42,7 +42,7 @@ export function AlertCenter() {
   return (
     <Sheet>
       <SheetTrigger asChild>
-        <Button variant="ghost" size="icon" className="relative rounded-2xl h-11 w-11 bg-white border border-white/60 shadow-soft hover:shadow-md transition-all active:scale-95 group">
+        <Button variant="ghost" size="icon" className="relative rounded-2xl h-11 w-11 bg-card/80 border border-card/60 shadow-soft hover:shadow-md transition-all active:scale-95 group">
           <Bell className={cn("size-5 transition-colors", unreadCount > 0 ? "text-foreground" : "text-muted-foreground group-hover:text-foreground")} />
           {unreadCount > 0 && (
             <motion.div
@@ -60,7 +60,7 @@ export function AlertCenter() {
           )}
         </Button>
       </SheetTrigger>
-      <SheetContent className="w-full sm:max-w-md p-0 border-l border-white/40 bg-white/90 backdrop-blur-3xl">
+      <SheetContent className="w-full sm:max-w-md p-0 border-l border-border/40 bg-card/90 backdrop-blur-3xl">
         <SheetHeader className="p-8 border-b border-border/5">
           <div className="flex items-center justify-between">
             <div className="space-y-1">
@@ -91,7 +91,7 @@ export function AlertCenter() {
                   initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
                   className={cn(
-                    "group relative p-5 rounded-3xl border bg-white shadow-soft transition-all hover:shadow-premium border-white/60",
+                    "group relative p-5 rounded-3xl border bg-card shadow-soft transition-all hover:shadow-premium border-card/60",
                     alert.priority === 'high' ? "ring-1 ring-rose-100" : ""
                   )}
                 >

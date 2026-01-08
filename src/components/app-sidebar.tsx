@@ -54,7 +54,7 @@ export function AppSidebar(): JSX.Element {
                     className={cn(
                       "flex items-center gap-3 rounded-xl px-4 py-3 transition-all duration-200 group",
                       active 
-                        ? "bg-white shadow-soft text-brand-blue font-semibold ring-1 ring-black/5" 
+                        ? "bg-white shadow-soft text-brand-blue font-semibold ring-1 ring-border/10" 
                         : "hover:bg-muted/60 text-muted-foreground hover:text-foreground"
                     )}
                   >
@@ -69,7 +69,7 @@ export function AppSidebar(): JSX.Element {
         <SidebarSeparator className="my-4 mx-4 opacity-30" />
       </SidebarContent>
       <SidebarFooter className="p-6 mt-auto">
-        <div className="flex flex-col gap-1 rounded-2xl bg-muted/60 p-4 ring-1 ring-black/5">
+        <div className="flex flex-col gap-1 rounded-2xl bg-muted/60 p-4 ring-1 ring-border/20">
           <div className="flex items-center justify-between">
             <p className="text-xs font-bold text-foreground">Pro Account</p>
             <div className="size-1.5 rounded-full bg-brand-teal animate-pulse" />

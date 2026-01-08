@@ -21,7 +21,7 @@ export function AppLayout({ children, container = false, className, contentClass
   useEffect(() => {
     setSheetOpen(false);
   }, [location.pathname]);
-  const sidebarClass = 'bg-white/60 backdrop-blur-2xl border-r border-white/40 shadow-soft';
+  const sidebarClass = 'bg-card/60 backdrop-blur-2xl border-r border-border/30 shadow-soft';
   const contentPaddingClass = cn(
     'flex-1 flex flex-col min-h-0',
     container ? 'max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-10 lg:py-12 w-full' : 'w-full',
@@ -54,7 +54,7 @@ export function AppLayout({ children, container = false, className, contentClass
   return (
     <>
       <div className={cn('relative min-h-screen flex flex-col bg-canvas', className)}>
-        <header className="sticky top-0 z-20 flex items-center justify-between h-16 px-4 bg-white/80 backdrop-blur-md border-b border-border/10 shrink-0">
+        <header className="sticky top-0 z-20 flex items-center justify-between h-16 px-4 bg-canvas/80 backdrop-blur-md border-b border-border/10 shrink-0">
           <div className="flex items-center">
             <Button
               variant='ghost'
@@ -69,7 +69,7 @@ export function AppLayout({ children, container = false, className, contentClass
           </div>
           <AlertCenter />
         </header>
-        <div className="px-4 py-3 bg-canvas/40 border-b border-border/5 shrink-0 overflow-hidden">
+        <div className="px-4 py-3 bg-muted/40 border-b border-border/5 shrink-0 overflow-hidden">
            <GlobalFilter />
         </div>
         <main className="flex-1 overflow-y-auto">

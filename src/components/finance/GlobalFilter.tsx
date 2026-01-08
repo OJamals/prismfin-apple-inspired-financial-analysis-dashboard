@@ -18,7 +18,7 @@ export function GlobalFilter() {
   };
   return (
     <div className="w-full flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide no-underline">
-      <div className="flex bg-white/40 backdrop-blur-md p-1.5 rounded-2xl border border-white/60 shadow-soft ring-1 ring-black/5">
+      <div className="flex bg-card/40 backdrop-blur-md p-1.5 rounded-2xl border border-card/60 shadow-soft ring-1 ring-border/20">
         {OPTIONS.map((opt) => {
           const isActive = activeMode === opt.value;
           const Icon = opt.icon;

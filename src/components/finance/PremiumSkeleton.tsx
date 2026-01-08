@@ -5,7 +5,7 @@ interface SkeletonProps {
 }
 export function KpiSkeleton({ className }: SkeletonProps) {
   return (
-    <div className={cn("h-32 rounded-4xl bg-white shadow-soft p-6 flex flex-col justify-between shimmer-fast border border-white/60", className)}>
+    <div className={cn("h-32 rounded-4xl bg-card shadow-soft p-6 flex flex-col justify-between shimmer-fast border border-card/60", className)}>
       <div className="flex justify-between items-start">
         <div className="h-4 w-24 bg-muted/60 rounded-full" />
         <div className="h-6 w-16 bg-muted/40 rounded-full" />
@@ -19,7 +19,7 @@ export function KpiSkeleton({ className }: SkeletonProps) {
 }
 export function ChartSkeleton({ className }: SkeletonProps) {
   return (
-    <div className={cn("h-[400px] rounded-4xl bg-white shadow-soft p-8 shimmer-fast border border-white/60", className)}>
+    <div className={cn("h-[400px] rounded-4xl bg-card shadow-soft p-8 shimmer-fast border border-card/60", className)}>
       <div className="space-y-2 mb-8">
         <div className="h-6 w-48 bg-muted/60 rounded-lg" />
         <div className="h-4 w-64 bg-muted/40 rounded-md" />
@@ -38,7 +38,7 @@ export function ChartSkeleton({ className }: SkeletonProps) {
 }
 export function TableSkeleton({ className }: SkeletonProps) {
   return (
-    <div className={cn("rounded-4xl bg-white shadow-soft overflow-hidden border border-white/60", className)}>
+    <div className={cn("rounded-4xl bg-card shadow-soft overflow-hidden border border-card/60", className)}>
       <div className="p-8 pb-4">
         <div className="h-7 w-32 bg-muted/60 rounded-lg" />
       </div>
