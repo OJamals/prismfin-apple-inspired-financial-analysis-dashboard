@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useSearchParams } from 'react-router-dom';
 import { api } from '@/lib/api-client';
-import { QuantData, TimeRange } from '@shared/types';
+import { QuantData, TimeRange, TradingMode } from '@shared/types';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { DashboardHeader } from '@/components/finance/DashboardHeader';
 import { BenchmarkingChart } from '@/components/finance/BenchmarkingChart';
@@ -27,23 +28,25 @@ const itemVariants: Variants = {
   show: {
     opacity: 1,
     y: 0,
-    transition: { 
-      duration: 0.7, 
-      ease: [0.16, 1, 0.3, 1] as [number, number, number, number] 
+    transition: {
+      duration: 0.7,
+      ease: [0.16, 1, 0.3, 1] as [number, number, number, number]
     }
   }
 };
 export function QuantPage() {
   const [range, setRange] = useState<TimeRange>('6M');
+  const [searchParams] = useSearchParams();
+  const mode = (searchParams.get('mode') as TradingMode) || 'live';
   const queryClient = useQueryClient();
   const { data, isLoading } = useQuery<QuantData>({
-    queryKey: ['quant', range],
-    queryFn: () => api<QuantData>(`/api/quant?range=${range}`),
+    queryKey: ['quant', range, mode],
+    queryFn: () => api<QuantData>(`/api/quant?range=${range}&mode=${mode}`),
   });
   const refreshMutation = useMutation({
-    mutationFn: () => api<QuantData>(`/api/quant/refresh?range=${range}`, { method: 'POST' }),
+    mutationFn: () => api<QuantData>(`/api/quant/refresh?range=${range}&mode=${mode}`, { method: 'POST' }),
     onSuccess: (updated) => {
-      queryClient.setQueryData(['quant', range], updated);
+      queryClient.setQueryData(['quant', range, mode], updated);
       toast.success('Risk models recalculated');
     },
     onError: () => toast.error('Simulation failed'),
@@ -55,11 +58,12 @@ export function QuantPage() {
         <div className="py-8 md:py-10 lg:py-12 space-y-10">
           <DashboardHeader
             title="Quant Models"
-            subtitle="Proprietary risk simulations and multi-factor attribution."
+            subtitle={mode === 'live' ? "Live proprietary risk simulations and multi-factor attribution." : "Hypothetical strategy testing and risk estimation."}
             range={range}
             onRangeChange={(r) => setRange(r as TimeRange)}
             onRefresh={onRefresh}
             isRefreshing={refreshMutation.isPending}
+            mode={mode}
           />
           <AnimatePresence mode="wait">
             {isLoading ? (

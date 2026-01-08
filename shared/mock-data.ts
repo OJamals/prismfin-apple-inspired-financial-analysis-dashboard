@@ -1,7 +1,7 @@
 import {
   DashboardData,
   TimeRange,
-  AssetClass,
+  TradingMode,
   SeriesPoint,
   Kpi,
   MetricsRow,
@@ -15,15 +15,19 @@ import {
   DrawdownPoint,
   CorrelationData
 } from './types';
-export function getMockKPIs(): Kpi[] {
+export function getMockKPIs(mode: TradingMode): Kpi[] {
+  const isLive = mode === 'live';
   return [
-    { id: '1', label: 'Portfolio Value', value: 124500.65, deltaPct: 2.4 },
-    { id: '2', label: 'Daily P&L', value: 3450.21, deltaPct: 1.2 },
-    { id: '3', label: 'YTD Return', value: 15.8, deltaPct: 0.5 },
-    { id: '4', label: 'Total Gains', value: 24500.00, deltaPct: 4.8 },
+    { id: '1', label: 'Portfolio Value', value: isLive ? 124500.65 : 158200.40, deltaPct: isLive ? 2.4 : 5.8 },
+    { id: '2', label: 'Daily P&L', value: isLive ? 3450.21 : 1200.45, deltaPct: isLive ? 1.2 : 0.8 },
+    { id: '3', label: 'YTD Return', value: isLive ? 15.8 : 22.4, deltaPct: isLive ? 0.5 : 1.2 },
+    { id: '4', label: 'Total Gains', value: isLive ? 24500.00 : 38200.00, deltaPct: isLive ? 4.8 : 7.2 },
   ];
 }
-export function getMockPerformance(range: TimeRange, volatility = 2000, bias = -0.45): SeriesPoint[] {
+export function getMockPerformance(range: TimeRange, mode: TradingMode): SeriesPoint[] {
+  const isLive = mode === 'live';
+  const volatility = isLive ? 3000 : 800;
+  const bias = isLive ? -0.45 : 0.15;
   const points = range === '1M' ? 30 : range === '3M' ? 90 : range === '6M' ? 180 : 365;
   const skip = range === '1M' ? 1 : range === '3M' ? 3 : range === '6M' ? 6 : 12;
   const results: SeriesPoint[] = [];
@@ -63,14 +67,15 @@ export function getMockRows(): MetricsRow[] {
     { name: 'US 10Y Treasury', symbol: 'US10Y', price: 98.42, changePct: 0.1, ytdPct: -2.4, volume: 'N/A', class: 'fixed-income', sentiment: 45, rsi: 42, miniSeries: generateMiniSeries(98) },
   ];
 }
-export function generateAlerts(rows: MetricsRow[]): Alert[] {
+export function generateAlerts(rows: MetricsRow[], mode: TradingMode): Alert[] {
   const alerts: Alert[] = [];
+  const threshold = mode === 'live' ? 2 : 4; // More sensitive in live
   rows.forEach(r => {
-    if (Math.abs(r.changePct) > 3) {
+    if (Math.abs(r.changePct) > threshold) {
       alerts.push({
         id: `alert-${r.symbol}-${Date.now()}`,
         type: 'volatility',
-        message: `${r.symbol} volatility spike: ${r.changePct}% move detected.`,
+        message: `${mode.toUpperCase()} Alert: ${r.symbol} ${r.changePct}% move detected.`,
         priority: Math.abs(r.changePct) > 5 ? 'high' : 'medium',
         timestamp: Date.now(),
         assetSymbol: r.symbol
@@ -81,34 +86,34 @@ export function generateAlerts(rows: MetricsRow[]): Alert[] {
     alerts.push({
       id: 'alert-system-1',
       type: 'info',
-      message: 'Portfolio beta remains within target thresholds.',
+      message: `${mode === 'live' ? 'Live market' : 'Paper sim'} stability confirmed.`,
       priority: 'low',
       timestamp: Date.now()
     });
   }
   return alerts;
 }
-export function generateDashboard(range: TimeRange, filter: AssetClass = 'all'): DashboardData {
-  const allRows = getMockRows();
-  const filteredRows = filter === 'all' ? allRows : allRows.filter(r => r.class === filter);
+export function generateDashboard(range: TimeRange, mode: TradingMode): DashboardData {
+  const rows = getMockRows();
   return {
     range,
-    filter,
+    mode,
     updatedAt: Date.now(),
-    kpis: getMockKPIs(),
-    performance: getMockPerformance(range),
+    kpis: getMockKPIs(mode),
+    performance: getMockPerformance(range, mode),
     cashflow: getMockCashflow(),
-    rows: filteredRows,
-    alerts: generateAlerts(filteredRows)
+    rows: rows,
+    alerts: generateAlerts(rows, mode)
   };
 }
-function generateMonteCarlo(horizon: '1Y' | '5Y' | '10Y'): MonteCarloStats {
+function generateMonteCarlo(horizon: '1Y' | '5Y' | '10Y', mode: TradingMode): MonteCarloStats {
+  const isLive = mode === 'live';
   const years = horizon === '1Y' ? 1 : horizon === '5Y' ? 5 : 10;
   const steps = 12 * years;
   const series: MonteCarloSeriesPoint[] = [];
-  let currentMedian = 124500;
-  const drift = 0.008;
-  const vol = 0.04;
+  let currentMedian = isLive ? 124500 : 158200;
+  const drift = isLive ? 0.008 : 0.012;
+  const vol = isLive ? 0.04 : 0.02;
   for (let i = 0; i <= steps; i++) {
     const spread = currentMedian * vol * Math.sqrt(i + 1);
     series.push({
@@ -176,8 +181,8 @@ function generateCorrelationMatrix(): CorrelationData {
   });
   return { symbols, matrix };
 }
-export function generateQuantData(range: TimeRange): QuantData {
-  const portfolio = getMockPerformance(range, 2200, -0.42);
+export function generateQuantData(range: TimeRange, mode: TradingMode): QuantData {
+  const portfolio = getMockPerformance(range, mode);
   const benchmark = portfolio.map(p => ({
     label: p.label,
     value: parseFloat((p.value * (0.95 + Math.random() * 0.08)).toFixed(2))
@@ -190,14 +195,15 @@ export function generateQuantData(range: TimeRange): QuantData {
   ];
   return {
     range,
+    mode,
     updatedAt: Date.now(),
     portfolio,
     benchmark,
     factors,
     monteCarlo: {
-      '1Y': generateMonteCarlo('1Y'),
-      '5Y': generateMonteCarlo('5Y'),
-      '10Y': generateMonteCarlo('10Y'),
+      '1Y': generateMonteCarlo('1Y', mode),
+      '5Y': generateMonteCarlo('5Y', mode),
+      '10Y': generateMonteCarlo('10Y', mode),
     },
     riskReward: generateRiskRewardData(),
     drawdown: generateDrawdownData(portfolio),

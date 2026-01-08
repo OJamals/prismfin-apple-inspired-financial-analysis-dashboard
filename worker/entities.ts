@@ -1,25 +1,41 @@
 import { Entity, Env } from "./core-utils";
-import { DashboardData, TimeRange, AssetClass, QuantData, Alert } from "@shared/types";
+import { DashboardData, TimeRange, TradingMode, QuantData, Alert } from "@shared/types";
 import { generateDashboard, generateQuantData } from "@shared/mock-data";
 export interface DashboardState {
-  dataByRange: Record<TimeRange, DashboardData>;
-  quantByRange: Record<TimeRange, QuantData>;
+  dataByRange: Record<TradingMode, Record<TimeRange, DashboardData>>;
+  quantByRange: Record<TradingMode, Record<TimeRange, QuantData>>;
   dismissedAlertIds: string[];
 }
 export class DashboardEntity extends Entity<DashboardState> {
   static readonly entityName = "dashboard";
   static readonly initialState: DashboardState = {
     dataByRange: {
-      '1M': generateDashboard('1M'),
-      '3M': generateDashboard('3M'),
-      '6M': generateDashboard('6M'),
-      '1Y': generateDashboard('1Y'),
+      'live': {
+        '1M': generateDashboard('1M', 'live'),
+        '3M': generateDashboard('3M', 'live'),
+        '6M': generateDashboard('6M', 'live'),
+        '1Y': generateDashboard('1Y', 'live'),
+      },
+      'paper': {
+        '1M': generateDashboard('1M', 'paper'),
+        '3M': generateDashboard('3M', 'paper'),
+        '6M': generateDashboard('6M', 'paper'),
+        '1Y': generateDashboard('1Y', 'paper'),
+      }
     },
     quantByRange: {
-      '1M': generateQuantData('1M'),
-      '3M': generateQuantData('3M'),
-      '6M': generateQuantData('6M'),
-      '1Y': generateQuantData('1Y'),
+      'live': {
+        '1M': generateQuantData('1M', 'live'),
+        '3M': generateQuantData('3M', 'live'),
+        '6M': generateQuantData('6M', 'live'),
+        '1Y': generateQuantData('1Y', 'live'),
+      },
+      'paper': {
+        '1M': generateQuantData('1M', 'paper'),
+        '3M': generateQuantData('3M', 'paper'),
+        '6M': generateQuantData('6M', 'paper'),
+        '1Y': generateQuantData('1Y', 'paper'),
+      }
     },
     dismissedAlertIds: []
   };
@@ -29,24 +45,17 @@ export class DashboardEntity extends Entity<DashboardState> {
       await inst.save(DashboardEntity.initialState);
     }
   }
-  async getRange(range: TimeRange, filter: AssetClass = 'all'): Promise<DashboardData> {
+  async getRange(range: TimeRange, mode: TradingMode): Promise<DashboardData> {
     const state = await this.ensureState();
-    // Defensive check: handle cases where persistent state might be partial or corrupted
-    const dataByRange = state?.dataByRange ?? DashboardEntity.initialState.dataByRange;
+    const modeData = state?.dataByRange?.[mode] ?? DashboardEntity.initialState.dataByRange[mode];
     const dismissedAlertIds = state?.dismissedAlertIds ?? [];
-    let data = dataByRange[range];
+    let data = modeData[range];
     if (!data) {
-      data = generateDashboard(range, filter);
+      data = generateDashboard(range, mode);
     }
-    // Server-side filtering logic
-    const allRows = data?.rows ?? [];
-    const filteredRows = filter === 'all' ? allRows : allRows.filter(r => r.class === filter);
-    // Filter alerts based on dismissed state
     const alerts = (data?.alerts ?? []).filter(a => !dismissedAlertIds.includes(a.id));
     return {
       ...data,
-      filter,
-      rows: JSON.parse(JSON.stringify(filteredRows)),
       alerts: JSON.parse(JSON.stringify(alerts))
     };
   }
@@ -59,36 +68,26 @@ export class DashboardEntity extends Entity<DashboardState> {
       return state;
     });
   }
-  async getQuant(range: TimeRange): Promise<QuantData> {
+  async getQuant(range: TimeRange, mode: TradingMode): Promise<QuantData> {
     const state = await this.ensureState();
-    const quantMap = state?.quantByRange ?? DashboardEntity.initialState.quantByRange;
-    const data = quantMap[range] ?? generateQuantData(range);
+    const modeQuant = state?.quantByRange?.[mode] ?? DashboardEntity.initialState.quantByRange[mode];
+    const data = modeQuant[range] ?? generateQuantData(range, mode);
     return JSON.parse(JSON.stringify(data));
   }
-  async refreshRange(range: TimeRange): Promise<DashboardData> {
+  async refreshRange(range: TimeRange, mode: TradingMode): Promise<DashboardData> {
     return this.mutate(state => {
-      // Ensure nested objects exist
       if (!state.dataByRange) state.dataByRange = DashboardEntity.initialState.dataByRange;
-      const current = state.dataByRange[range] || generateDashboard(range);
-      const updatedRows = (current?.rows ?? []).map(r => ({
-        ...r,
-        price: r.price * (1 + (Math.random() - 0.5) * 0.02),
-        changePct: r.changePct + (Math.random() - 0.5) * 0.4,
-        sentiment: Math.min(100, Math.max(0, r.sentiment + (Math.random() - 0.5) * 5))
-      }));
-      state.dataByRange[range] = {
-        ...current,
-        rows: updatedRows,
-        updatedAt: Date.now()
-      };
+      if (!state.dataByRange[mode]) state.dataByRange[mode] = DashboardEntity.initialState.dataByRange[mode];
+      state.dataByRange[mode][range] = generateDashboard(range, mode);
       return state;
-    }).then(s => JSON.parse(JSON.stringify(s.dataByRange[range])));
+    }).then(s => JSON.parse(JSON.stringify(s.dataByRange[mode][range])));
   }
-  async refreshQuant(range: TimeRange): Promise<QuantData> {
+  async refreshQuant(range: TimeRange, mode: TradingMode): Promise<QuantData> {
     return this.mutate(state => {
       if (!state.quantByRange) state.quantByRange = DashboardEntity.initialState.quantByRange;
-      state.quantByRange[range] = generateQuantData(range);
+      if (!state.quantByRange[mode]) state.quantByRange[mode] = DashboardEntity.initialState.quantByRange[mode];
+      state.quantByRange[mode][range] = generateQuantData(range, mode);
       return state;
-    }).then(s => JSON.parse(JSON.stringify(s.quantByRange[range])));
+    }).then(s => JSON.parse(JSON.stringify(s.quantByRange[mode][range])));
   }
 }

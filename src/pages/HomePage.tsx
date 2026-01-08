@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSearchParams } from 'react-router-dom';
 import { api } from '@/lib/api-client';
-import { DashboardData, TimeRange, AssetClass } from '@shared/types';
+import { DashboardData, TimeRange, TradingMode } from '@shared/types';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { DashboardHeader } from '@/components/finance/DashboardHeader';
 import { KpiCard } from '@/components/finance/KpiCard';
@@ -23,31 +23,31 @@ const containerVariants: Variants = {
 };
 const itemVariants: Variants = {
   hidden: { opacity: 0, y: 20 },
-  show: { 
-    opacity: 1, 
-    y: 0, 
-    transition: { 
-      duration: 0.5, 
-      ease: [0.16, 1, 0.3, 1] as [number, number, number, number] 
-    } 
+  show: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.5,
+      ease: [0.16, 1, 0.3, 1] as [number, number, number, number]
+    }
   }
 };
 export function HomePage() {
   const [range, setRange] = useState<TimeRange>('6M');
   const [searchParams] = useSearchParams();
-  const filter = (searchParams.get('filter') as AssetClass) || 'all';
+  const mode = (searchParams.get('mode') as TradingMode) || 'live';
   const queryClient = useQueryClient();
   const { data, isLoading, isError } = useQuery<DashboardData>({
-    queryKey: ['dashboard', range, filter],
-    queryFn: () => api<DashboardData>(`/api/dashboard?range=${range}&filter=${filter}`),
+    queryKey: ['dashboard', range, mode],
+    queryFn: () => api<DashboardData>(`/api/dashboard?range=${range}&mode=${mode}`),
     retry: 1,
   });
   const refreshMutation = useMutation({
-    mutationFn: () => api<DashboardData>(`/api/dashboard/refresh?range=${range}`, { method: 'POST' }),
+    mutationFn: () => api<DashboardData>(`/api/dashboard/refresh?range=${range}&mode=${mode}`, { method: 'POST' }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['dashboard'] });
       queryClient.invalidateQueries({ queryKey: ['alerts'] });
-      toast.success('Real-time data synchronized');
+      toast.success(`${mode === 'live' ? 'Market' : 'Simulation'} synchronized`);
     },
     onError: () => toast.error('Connection failed'),
   });
@@ -58,11 +58,12 @@ export function HomePage() {
         <div className="py-8 md:py-10 lg:py-12 space-y-10">
           <DashboardHeader
             title="Overview"
-            subtitle={`Analyzing ${filter === 'all' ? 'total portfolio' : filter} performance metrics.`}
+            subtitle={mode === 'live' ? "Analyzing real-time market volatility and liquidity." : "Exploring risk-free strategic simulations."}
             range={range}
             onRangeChange={(r) => setRange(r as TimeRange)}
             onRefresh={onRefresh}
             isRefreshing={refreshMutation.isPending}
+            mode={mode}
           />
           <AnimatePresence mode="wait">
             {isLoading ? (
