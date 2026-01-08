@@ -35,9 +35,13 @@ export class DashboardEntity extends Entity<DashboardState> {
     const rangeData = state?.dataByRange ?? DashboardEntity.initialState.dataByRange;
     const dismissedAlertIds = state?.dismissedAlertIds ?? [];
     let data = rangeData[range];
-    // Seed new fields if missing in legacy state
+    // Seed/Hydrate missing fields in legacy or incomplete state
     if (!data) {
       data = generateDashboard(range);
+    }
+    // Ensure 'pulse' exists (Critical for UI rendering)
+    if (!data.pulse) {
+      data.pulse = generateDashboard(range).pulse;
     }
     if (!data.sectors) {
       data.sectors = generateDashboard(range).sectors;
@@ -88,7 +92,7 @@ export class DashboardEntity extends Entity<DashboardState> {
     const state = await this.ensureState();
     const rangeQuant = state?.quantByRange ?? DashboardEntity.initialState.quantByRange;
     let data = rangeQuant[range] ?? generateQuantData(range);
-    // Defensive check for Monte Carlo structure (if legacy data exists)
+    // Defensive check for Monte Carlo structure
     if (!data.monteCarlo || !data.monteCarlo['10Y']) {
       data = generateQuantData(range);
     }

@@ -20,11 +20,11 @@ import { MetricsRow } from '@shared/types';
 import { formatCurrencyUSD, formatPct } from '@/lib/format';
 import {
   TrendingUp, TrendingDown, ChevronDown, ChevronUp,
-  Zap, Target, Newspaper, Search, Copy, Play
+  Zap, Target, Newspaper, Search, Copy, Play, Activity, Info
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
-import { AreaChart, Area, ResponsiveContainer } from 'recharts';
+import { AreaChart, Area, ResponsiveContainer, XAxis, YAxis } from 'recharts';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { SimulateChangeDrawer } from './SimulateChangeDrawer';
@@ -150,8 +150,83 @@ export function MetricsTableCard({ rows }: MetricsTableCardProps) {
                                 exit={{ height: 0, opacity: 0 }}
                                 className="overflow-hidden bg-muted/5 border-t border-white/40"
                               >
-                                <div className="px-10 py-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
-                                  {/* Rest of expanded content (Mini charts, news etc) */}
+                                <div className="px-10 py-12 grid grid-cols-1 md:grid-cols-3 gap-12">
+                                  {/* Mini Trend Section */}
+                                  <div className="space-y-4">
+                                    <div className="flex items-center gap-2">
+                                      <Activity className="size-4 text-brand-blue" />
+                                      <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Historical Trend</p>
+                                    </div>
+                                    <div className="h-32 w-full bg-white/40 rounded-3xl p-4 ring-1 ring-black/5">
+                                      <ResponsiveContainer width="100%" height="100%">
+                                        <AreaChart data={row.miniSeries}>
+                                          <defs>
+                                            <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
+                                              <stop offset="5%" stopColor={isPositive ? "#14B8A6" : "#FF3B30"} stopOpacity={0.2} />
+                                              <stop offset="95%" stopColor={isPositive ? "#14B8A6" : "#FF3B30"} stopOpacity={0} />
+                                            </linearGradient>
+                                          </defs>
+                                          <XAxis hide dataKey="label" />
+                                          <YAxis hide domain={['auto', 'auto']} />
+                                          <Area
+                                            type="monotone"
+                                            dataKey="value"
+                                            stroke={isPositive ? "#14B8A6" : "#FF3B30"}
+                                            strokeWidth={3}
+                                            fill={`url(#${gradientId})`}
+                                          />
+                                        </AreaChart>
+                                      </ResponsiveContainer>
+                                    </div>
+                                  </div>
+                                  {/* Technical Profile Section */}
+                                  <div className="space-y-6">
+                                    <div className="flex items-center gap-2">
+                                      <Target className="size-4 text-brand-teal" />
+                                      <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Technical Profile</p>
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-4">
+                                      <div className="space-y-1">
+                                        <p className="text-[9px] font-bold text-muted-foreground uppercase">P/E Ratio</p>
+                                        <p className="text-sm font-black tabular-nums">{row.peRatio ?? '24.5'}x</p>
+                                      </div>
+                                      <div className="space-y-1">
+                                        <p className="text-[9px] font-bold text-muted-foreground uppercase">RSI (14)</p>
+                                        <p className="text-sm font-black tabular-nums">{row.rsi ?? '58.2'}</p>
+                                      </div>
+                                      <div className="space-y-1">
+                                        <p className="text-[9px] font-bold text-muted-foreground uppercase">24H Vol</p>
+                                        <p className="text-sm font-black tabular-nums">{row.volume ?? '12.4M'}</p>
+                                      </div>
+                                      <div className="space-y-1">
+                                        <p className="text-[9px] font-bold text-muted-foreground uppercase">Sentiment</p>
+                                        <p className="text-sm font-black tabular-nums">{row.sentiment ?? '72'}%</p>
+                                      </div>
+                                    </div>
+                                  </div>
+                                  {/* Signal Stream Section */}
+                                  <div className="space-y-4">
+                                    <div className="flex items-center gap-2">
+                                      <Newspaper className="size-4 text-indigo-500" />
+                                      <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Signal Stream</p>
+                                    </div>
+                                    <div className="space-y-3">
+                                      {row.news?.slice(0, 2).map((news, nIdx) => (
+                                        <div key={nIdx} className="p-3 bg-white/40 rounded-2xl ring-1 ring-black/5 hover:bg-white transition-colors cursor-pointer group/news">
+                                          <p className="text-[11px] font-bold text-foreground leading-snug line-clamp-2 group-hover/news:text-brand-blue">{news.headline}</p>
+                                          <div className="flex items-center justify-between mt-2">
+                                            <span className="text-[8px] font-black uppercase text-muted-foreground/60">PRISM SIGNAL</span>
+                                            <Badge className="bg-brand-blue/10 text-brand-blue border-none text-[8px] h-4">{news.score}% Match</Badge>
+                                          </div>
+                                        </div>
+                                      )) ?? (
+                                        <div className="flex flex-col items-center justify-center py-6 text-center opacity-40">
+                                          <Info className="size-8 mb-2" />
+                                          <p className="text-[10px] font-bold">No active news signals</p>
+                                        </div>
+                                      )}
+                                    </div>
+                                  </div>
                                 </div>
                               </motion.div>
                             </TableCell>
@@ -167,8 +242,8 @@ export function MetricsTableCard({ rows }: MetricsTableCardProps) {
         </LayoutGroup>
       </CardContent>
       {simTarget && (
-        <SimulateChangeDrawer 
-          isOpen={!!simTarget} 
+        <SimulateChangeDrawer
+          isOpen={!!simTarget}
           onClose={() => setSimTarget(null)}
           assetName={simTarget.name}
         />

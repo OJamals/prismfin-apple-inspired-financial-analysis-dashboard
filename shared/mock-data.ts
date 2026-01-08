@@ -17,7 +17,8 @@ import {
   MonteCarloSeriesPoint,
   SentimentCategory,
   Alert,
-  FinancialTerm
+  FinancialTerm,
+  PulseMetric
 } from './types';
 export const GLOSSARY_TERMS: FinancialTerm[] = [
   { term: 'Alpha', definition: 'The excess return of an investment relative to the return of a benchmark index.', category: 'Performance' },
@@ -130,6 +131,12 @@ export function getMockAcademyTopics(): AcademyTopic[] {
   ];
 }
 export function generateDashboard(range: TimeRange): DashboardData {
+  const pulse: PulseMetric = {
+    summary: "Portfolio Health is Robust",
+    detail: "Your asset allocation demonstrates high capital efficiency with low correlation to volatile sectors. Maintain current exposure for target growth.",
+    health: 'healthy',
+    comparisonLabel: "Performing 4.2% better than 60/40 benchmark"
+  };
   return {
     range,
     updatedAt: Date.now(),
@@ -148,7 +155,8 @@ export function generateDashboard(range: TimeRange): DashboardData {
     rows: [],
     alerts: generateTechnicalAlerts(),
     sectors: { 'Tech': 30, 'Finance': 20, 'Health': 25, 'Other': 25 },
-    riskReward: []
+    riskReward: [],
+    pulse
   };
 }
 function generateMCSim(horizon: '1Y' | '5Y' | '10Y'): MonteCarloStats {
@@ -184,11 +192,11 @@ export function generateQuantData(range: TimeRange): QuantData {
   return {
     range,
     updatedAt: Date.now(),
-    insight: { 
-      summary: 'The portfolio demonstrates robust alpha generation against the S&P 500 benchmark, primarily driven by core technology exposure and disciplined risk hedging.', 
-      attribution: '65% of excess returns are attributed to Sector Momentum and Quality factors.', 
-      riskExposure: 'Current tracking error is 4.2%, with a slight overweight in High-Beta tech names.', 
-      recommendation: 'Maintain current positioning but monitor macro volatility for potential defensive rotation.' 
+    insight: {
+      summary: 'The portfolio demonstrates robust alpha generation against the S&P 500 benchmark, primarily driven by core technology exposure and disciplined risk hedging.',
+      attribution: '65% of excess returns are attributed to Sector Momentum and Quality factors.',
+      riskExposure: 'Current tracking error is 4.2%, with a slight overweight in High-Beta tech names.',
+      recommendation: 'Maintain current positioning but monitor macro volatility for potential defensive rotation.'
     },
     portfolio: Array.from({ length: 30 }).map((_, i) => ({ label: `T-${29-i}`, value: 110000 + (Math.sin(i * 0.4) * 5000) + (i * 800) })),
     benchmark: Array.from({ length: 30 }).map((_, i) => ({ label: `T-${29-i}`, value: 105000 + (i * 600) })),
@@ -211,23 +219,23 @@ export function generateQuantData(range: TimeRange): QuantData {
       sharpe: 0.8 + Math.random() * 1.5,
       weight: 5 + Math.random() * 15
     })),
-    drawdown: { 
-      maxDrawdown: 12.4, 
-      series: Array.from({ length: 30 }).map((_, i) => ({ 
-        label: `T-${29-i}`, 
-        value: 100000 - (Math.random() * 5000), 
-        drawdownPct: -(Math.random() * 12.4) 
+    drawdown: {
+      maxDrawdown: 12.4,
+      series: Array.from({ length: 30 }).map((_, i) => ({
+        label: `T-${29-i}`,
+        value: 100000 - (Math.random() * 5000),
+        drawdownPct: -(Math.random() * 12.4)
       }))
     },
-    correlation: { 
-      symbols: ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'NVDA'], 
+    correlation: {
+      symbols: ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'NVDA'],
       matrix: {
         'AAPL': { 'AAPL': 1, 'MSFT': 0.82, 'GOOGL': 0.75, 'AMZN': 0.68, 'NVDA': 0.55 },
         'MSFT': { 'AAPL': 0.82, 'MSFT': 1, 'GOOGL': 0.79, 'AMZN': 0.72, 'NVDA': 0.58 },
         'GOOGL': { 'AAPL': 0.75, 'MSFT': 0.79, 'GOOGL': 1, 'AMZN': 0.84, 'NVDA': 0.49 },
         'AMZN': { 'AAPL': 0.68, 'MSFT': 0.72, 'GOOGL': 0.84, 'AMZN': 1, 'NVDA': 0.42 },
         'NVDA': { 'AAPL': 0.55, 'MSFT': 0.58, 'GOOGL': 0.49, 'AMZN': 0.42, 'NVDA': 1 }
-      } 
+      }
     }
   };
 }
