@@ -30,3 +30,29 @@ export interface DashboardData {
   cashflow: SeriesPoint[];
   rows: MetricsRow[];
 }
+export interface MonteCarloSeriesPoint {
+  label: string;
+  p10: number;
+  median: number;
+  p90: number;
+}
+export interface MonteCarloStats {
+  horizon: '1Y' | '5Y' | '10Y';
+  p10: number;
+  median: number;
+  p90: number;
+  series: MonteCarloSeriesPoint[];
+}
+export interface FactorAttribution {
+  label: string;
+  value: number;
+  color: string;
+}
+export interface QuantData {
+  range: TimeRange;
+  updatedAt: number;
+  portfolio: SeriesPoint[];
+  benchmark: SeriesPoint[];
+  factors: FactorAttribution[];
+  monteCarlo: Record<'1Y' | '5Y' | '10Y', MonteCarloStats>;
+}

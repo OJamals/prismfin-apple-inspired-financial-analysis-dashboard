@@ -1,6 +1,6 @@
 import { Hono } from "hono";
 import type { Env } from './core-utils';
-import { ok, bad } from './core-utils';
+import { ok } from './core-utils';
 import { DashboardEntity } from "./entities";
 import { TimeRange } from "@shared/types";
 export function userRoutes(app: Hono<{ Bindings: Env }>) {
@@ -16,6 +16,20 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
     const range = (c.req.query('range') as TimeRange) || '6M';
     const entity = new DashboardEntity(c.env, 'main');
     const updated = await entity.refreshRange(range);
+    return ok(c, updated);
+  });
+  app.get('/api/quant', async (c) => {
+    await DashboardEntity.ensureSeed(c.env);
+    const range = (c.req.query('range') as TimeRange) || '6M';
+    const entity = new DashboardEntity(c.env, 'main');
+    const data = await entity.getQuant(range);
+    return ok(c, data);
+  });
+  app.post('/api/quant/refresh', async (c) => {
+    await DashboardEntity.ensureSeed(c.env);
+    const range = (c.req.query('range') as TimeRange) || '6M';
+    const entity = new DashboardEntity(c.env, 'main');
+    const updated = await entity.refreshQuant(range);
     return ok(c, updated);
   });
 }

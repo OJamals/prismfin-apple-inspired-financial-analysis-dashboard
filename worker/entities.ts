@@ -1,8 +1,9 @@
 import { Entity } from "./core-utils";
-import { DashboardData, TimeRange } from "@shared/types";
-import { generateDashboard } from "@shared/mock-data";
+import { DashboardData, TimeRange, QuantData } from "@shared/types";
+import { generateDashboard, generateQuantData } from "@shared/mock-data";
 export interface DashboardState {
   dataByRange: Record<TimeRange, DashboardData>;
+  quantByRange: Record<TimeRange, QuantData>;
 }
 export class DashboardEntity extends Entity<DashboardState> {
   static readonly entityName = "dashboard";
@@ -12,6 +13,12 @@ export class DashboardEntity extends Entity<DashboardState> {
       '3M': generateDashboard('3M'),
       '6M': generateDashboard('6M'),
       '1Y': generateDashboard('1Y'),
+    },
+    quantByRange: {
+      '1M': generateQuantData('1M'),
+      '3M': generateQuantData('3M'),
+      '6M': generateQuantData('6M'),
+      '1Y': generateQuantData('1Y'),
     }
   };
   static async ensureSeed(env: any): Promise<void> {
@@ -24,11 +31,14 @@ export class DashboardEntity extends Entity<DashboardState> {
     const state = await this.getState();
     return state.dataByRange[range] || generateDashboard(range);
   }
+  async getQuant(range: TimeRange): Promise<QuantData> {
+    const state = await this.getState();
+    return state.quantByRange[range] || generateQuantData(range);
+  }
   async refreshRange(range: TimeRange): Promise<DashboardData> {
     return this.mutate(state => {
       const current = state.dataByRange[range];
       if (!current) return state;
-      // Small bounded random walk to simulate activity
       const updatedKpis = current.kpis.map(k => ({
         ...k,
         value: k.value * (1 + (Math.random() - 0.5) * 0.01),
@@ -47,5 +57,11 @@ export class DashboardEntity extends Entity<DashboardState> {
       };
       return state;
     }).then(s => s.dataByRange[range]);
+  }
+  async refreshQuant(range: TimeRange): Promise<QuantData> {
+    return this.mutate(state => {
+      state.quantByRange[range] = generateQuantData(range);
+      return state;
+    }).then(s => s.quantByRange[range]);
   }
 }

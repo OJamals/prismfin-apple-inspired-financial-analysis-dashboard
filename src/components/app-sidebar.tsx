@@ -1,5 +1,5 @@
 import React from "react";
-import { Home, PieChart, FileText, Settings, Search, Box } from "lucide-react";
+import { Home, PieChart, FileText, Settings, Search, Box, TrendingUp } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import {
   SidebarContent,
@@ -17,6 +17,7 @@ export function AppSidebar(): JSX.Element {
     { label: "Dashboard", icon: Home, path: "/" },
     { label: "Holdings", icon: Box, path: "/holdings" },
     { label: "Reports", icon: FileText, path: "/reports" },
+    { label: "Quant", icon: TrendingUp, path: "/quant" },
     { label: "Settings", icon: Settings, path: "/settings" },
   ];
   return (
