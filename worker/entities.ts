@@ -53,11 +53,10 @@ export class DashboardEntity extends Entity<DashboardState> {
     if (!data) {
       data = generateDashboard(range, mode);
     }
-    const alerts = (data?.alerts ?? []).filter(a => !dismissedAlertIds.includes(a.id));
-    return {
-      ...data,
-      alerts: JSON.parse(JSON.stringify(alerts))
-    };
+    // Deep clone to prevent accidental mutations of internal state
+    const clonedData = JSON.parse(JSON.stringify(data)) as DashboardData;
+    clonedData.alerts = (clonedData.alerts ?? []).filter(a => !dismissedAlertIds.includes(a.id));
+    return clonedData;
   }
   async dismissAlert(alertId: string): Promise<void> {
     await this.mutate(state => {
@@ -72,21 +71,28 @@ export class DashboardEntity extends Entity<DashboardState> {
     const state = await this.ensureState();
     const modeQuant = state?.quantByRange?.[mode] ?? DashboardEntity.initialState.quantByRange[mode];
     const data = modeQuant[range] ?? generateQuantData(range, mode);
-    return JSON.parse(JSON.stringify(data));
+    // Deep clone decoupling
+    return JSON.parse(JSON.stringify(data)) as QuantData;
   }
   async refreshRange(range: TimeRange, mode: TradingMode): Promise<DashboardData> {
     return this.mutate(state => {
-      if (!state.dataByRange) state.dataByRange = DashboardEntity.initialState.dataByRange;
-      if (!state.dataByRange[mode]) state.dataByRange[mode] = DashboardEntity.initialState.dataByRange[mode];
-      state.dataByRange[mode][range] = generateDashboard(range, mode);
+      const dataByRange = state.dataByRange ?? DashboardEntity.initialState.dataByRange;
+      if (!dataByRange[mode]) {
+        dataByRange[mode] = DashboardEntity.initialState.dataByRange[mode];
+      }
+      dataByRange[mode][range] = generateDashboard(range, mode);
+      state.dataByRange = dataByRange;
       return state;
     }).then(s => JSON.parse(JSON.stringify(s.dataByRange[mode][range])));
   }
   async refreshQuant(range: TimeRange, mode: TradingMode): Promise<QuantData> {
     return this.mutate(state => {
-      if (!state.quantByRange) state.quantByRange = DashboardEntity.initialState.quantByRange;
-      if (!state.quantByRange[mode]) state.quantByRange[mode] = DashboardEntity.initialState.quantByRange[mode];
-      state.quantByRange[mode][range] = generateQuantData(range, mode);
+      const quantByRange = state.quantByRange ?? DashboardEntity.initialState.quantByRange;
+      if (!quantByRange[mode]) {
+        quantByRange[mode] = DashboardEntity.initialState.quantByRange[mode];
+      }
+      quantByRange[mode][range] = generateQuantData(range, mode);
+      state.quantByRange = quantByRange;
       return state;
     }).then(s => JSON.parse(JSON.stringify(s.quantByRange[mode][range])));
   }

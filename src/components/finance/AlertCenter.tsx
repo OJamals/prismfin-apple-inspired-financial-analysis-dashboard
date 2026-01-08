@@ -1,8 +1,9 @@
 import React from 'react';
 import { Bell, AlertTriangle, Info, Check, X } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useSearchParams } from 'react-router-dom';
 import { api } from '@/lib/api-client';
-import { Alert } from '@shared/types';
+import { Alert, TradingMode } from '@shared/types';
 import {
   Sheet,
   SheetContent,
@@ -15,93 +16,118 @@ import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { formatDistanceToNow } from 'date-fns';
 import { cn } from '@/lib/utils';
+import { motion } from 'framer-motion';
 export function AlertCenter() {
   const queryClient = useQueryClient();
+  const [searchParams] = useSearchParams();
+  const mode = (searchParams.get('mode') as TradingMode) || 'live';
+  const isLive = mode === 'live';
   const { data: alerts = [] } = useQuery<Alert[]>({
-    queryKey: ['alerts'],
-    queryFn: () => api<Alert[]>('/api/alerts'),
-    refetchInterval: 30000,
+    queryKey: ['alerts', mode],
+    queryFn: () => api<Alert[]>(`/api/alerts?mode=${mode}`),
+    refetchInterval: isLive ? 15000 : 60000,
   });
   const dismissMutation = useMutation({
-    mutationFn: (id: string) => api('/api/alerts/dismiss', { 
-      method: 'POST', 
-      body: JSON.stringify({ id }) 
+    mutationFn: (id: string) => api('/api/alerts/dismiss', {
+      method: 'POST',
+      body: JSON.stringify({ id })
     }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['alerts'] });
-      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+      queryClient.invalidateQueries({ queryKey: ['alerts', mode] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard', mode] });
     }
   });
   const unreadCount = alerts.length;
+  const hasHighPriority = alerts.some(a => a.priority === 'high');
   return (
     <Sheet>
       <SheetTrigger asChild>
-        <Button variant="ghost" size="icon" className="relative rounded-xl h-10 w-10 bg-card shadow-soft hover:bg-muted">
-          <Bell className="size-5" />
+        <Button variant="ghost" size="icon" className="relative rounded-2xl h-11 w-11 bg-white border border-white/60 shadow-soft hover:shadow-md transition-all active:scale-95 group">
+          <Bell className={cn("size-5 transition-colors", unreadCount > 0 ? "text-foreground" : "text-muted-foreground group-hover:text-foreground")} />
           {unreadCount > 0 && (
-            <Badge className="absolute -top-1 -right-1 size-5 flex items-center justify-center p-0 bg-rose-500 border-2 border-white text-[10px] font-bold">
-              {unreadCount}
-            </Badge>
+            <motion.div
+              initial={{ scale: 0.5, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              className="absolute -top-1 -right-1"
+            >
+              <Badge className={cn(
+                "size-5 flex items-center justify-center p-0 border-2 border-white text-[10px] font-bold shadow-sm",
+                hasHighPriority && isLive ? "bg-rose-500 animate-pulse" : "bg-brand-blue"
+              )}>
+                {unreadCount}
+              </Badge>
+            </motion.div>
           )}
         </Button>
       </SheetTrigger>
-      <SheetContent className="w-full sm:max-w-md p-0 border-l border-white/40 bg-white/80 backdrop-blur-2xl">
-        <SheetHeader className="p-6 border-b border-border/40">
+      <SheetContent className="w-full sm:max-w-md p-0 border-l border-white/40 bg-white/90 backdrop-blur-3xl">
+        <SheetHeader className="p-8 border-b border-border/5">
           <div className="flex items-center justify-between">
-            <SheetTitle className="text-xl font-bold font-display">Alert Center</SheetTitle>
-            <Badge variant="secondary" className="rounded-lg">{unreadCount} Active</Badge>
+            <div className="space-y-1">
+              <SheetTitle className="text-2xl font-bold font-display tracking-tight">Alerts</SheetTitle>
+              <p className="text-xs text-muted-foreground font-medium uppercase tracking-widest">{mode} environment</p>
+            </div>
+            <Badge variant="secondary" className="rounded-xl px-3 py-1 bg-secondary/80 text-foreground font-bold">
+              {unreadCount} Active
+            </Badge>
           </div>
         </SheetHeader>
-        <ScrollArea className="h-[calc(100vh-80px)]">
-          <div className="p-4 space-y-3">
+        <ScrollArea className="h-[calc(100vh-120px)]">
+          <div className="p-6 space-y-4">
             {alerts.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-20 text-center">
-                <div className="size-12 rounded-full bg-emerald-50 text-emerald-500 flex items-center justify-center mb-4">
-                  <Check className="size-6" />
+              <div className="flex flex-col items-center justify-center py-32 text-center">
+                <div className="size-16 rounded-3xl bg-gain-50 text-gain-500 flex items-center justify-center mb-6 shadow-sm">
+                  <Check className="size-8" />
                 </div>
-                <p className="text-sm font-semibold">All clear!</p>
-                <p className="text-xs text-muted-foreground mt-1">No pending alerts for your portfolio.</p>
+                <h3 className="text-lg font-bold font-display">All Clear</h3>
+                <p className="text-sm text-muted-foreground mt-2 max-w-[200px] leading-relaxed">
+                  No notifications for the current {mode} market view.
+                </p>
               </div>
             ) : (
               alerts.map((alert) => (
-                <div 
-                  key={alert.id} 
+                <motion.div
+                  key={alert.id}
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
                   className={cn(
-                    "group relative p-4 rounded-2xl border bg-white shadow-soft transition-all hover:shadow-md",
-                    alert.priority === 'high' ? "border-l-4 border-l-rose-500" : 
-                    alert.priority === 'medium' ? "border-l-4 border-l-amber-500" : "border-l-4 border-l-brand-blue"
+                    "group relative p-5 rounded-3xl border bg-white shadow-soft transition-all hover:shadow-premium border-white/60",
+                    alert.priority === 'high' ? "ring-1 ring-rose-100" : ""
                   )}
                 >
-                  <div className="flex gap-3">
+                  <div className="flex gap-4">
                     <div className={cn(
-                      "mt-0.5 size-8 rounded-xl flex items-center justify-center shrink-0",
-                      alert.priority === 'high' ? "bg-rose-50 text-rose-600" : "bg-muted text-muted-foreground"
+                      "mt-1 size-10 rounded-2xl flex items-center justify-center shrink-0 shadow-sm",
+                      alert.priority === 'high' ? "bg-rose-50 text-rose-500" : 
+                      alert.priority === 'medium' ? "bg-amber-50 text-amber-500" : "bg-brand-blue/5 text-brand-blue"
                     )}>
-                      {alert.type === 'volatility' ? <AlertTriangle className="size-4" /> : <Info className="size-4" />}
+                      {alert.type === 'volatility' ? <AlertTriangle className="size-5" /> : <Info className="size-5" />}
                     </div>
-                    <div className="flex-1 space-y-1">
+                    <div className="flex-1 space-y-2">
                       <div className="flex items-center justify-between">
-                        <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-                          {alert.type} • {formatDistanceToNow(alert.timestamp)} ago
+                        <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">
+                          {alert.type} • {formatDistanceToNow(alert.timestamp)}
                         </span>
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
-                          className="size-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="size-8 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity hover:bg-muted/50"
                           onClick={() => dismissMutation.mutate(alert.id)}
                         >
-                          <X className="size-3" />
+                          <X className="size-4" />
                         </Button>
                       </div>
-                      <p className="text-sm font-semibold leading-tight">{alert.message}</p>
+                      <p className="text-sm font-bold leading-snug text-foreground">{alert.message}</p>
                       {alert.assetSymbol && (
-                        <Button variant="link" className="p-0 h-auto text-xs text-brand-blue font-bold">
-                          Analyze {alert.assetSymbol}
-                        </Button>
+                        <div className="pt-1">
+                          <Badge variant="outline" className="rounded-lg text-[10px] border-brand-blue/20 text-brand-blue bg-brand-blue/5 font-bold cursor-pointer hover:bg-brand-blue hover:text-white transition-colors">
+                            Analyze {alert.assetSymbol}
+                          </Badge>
+                        </div>
                       )}
                     </div>
                   </div>
-                </div>
+                </motion.div>
               ))
             )}
           </div>
