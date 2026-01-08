@@ -42,6 +42,11 @@ export class DashboardEntity extends Entity<DashboardState> {
     if (!data.sectors) {
       data.sectors = generateDashboard(range).sectors;
     }
+    if (!data.monthlyReturns || !data.topMovers) {
+      const fresh = generateDashboard(range);
+      data.monthlyReturns = fresh.monthlyReturns;
+      data.topMovers = fresh.topMovers;
+    }
     if (!data.benchmarkPerformance) {
       data.benchmarkPerformance = generateDashboard(range).benchmarkPerformance;
     }

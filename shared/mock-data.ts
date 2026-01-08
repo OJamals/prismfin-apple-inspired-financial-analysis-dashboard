@@ -211,14 +211,19 @@ export function getMockRows(): MetricsRow[] {
   ];
 }
 export function generateDashboard(range: TimeRange): DashboardData {
+  const rows = getMockRows();
+  const topMovers = [...rows].sort((a, b) => Math.abs(b.changePct) - Math.abs(a.changePct));
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
   return {
     range, updatedAt: Date.now(),
     kpis: getMockKPIs(),
     holdingsMetrics: calculateHoldingsMetrics([]),
     performance: Array.from({ length: 20 }).map((_, i) => ({ label: `Day ${i}`, value: 100000 + i * 500 })),
     benchmarkPerformance: Array.from({ length: 20 }).map((_, i) => ({ label: `Day ${i}`, value: 100000 + i * 400 })),
+    monthlyReturns: months.map(m => ({ label: m, value: (Math.random() - 0.3) * 8 })),
+    topMovers: topMovers.slice(0, 4),
     cashflow: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'].map(m => ({ label: m, value: 4000 + Math.random() * 2000 })),
-    rows: getMockRows(),
+    rows: rows,
     alerts: [],
     sectors: {
       'Technology': 28.5,

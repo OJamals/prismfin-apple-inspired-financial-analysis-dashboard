@@ -9,7 +9,9 @@ import { MetricsTableCard } from '@/components/finance/MetricsTableCard';
 import { SectorConcentrationCard } from '@/components/finance/SectorConcentrationCard';
 import { PerformanceChartCard } from '@/components/finance/PerformanceChartCard';
 import { RiskRewardScatterCard } from '@/components/finance/RiskRewardScatterCard';
-import { TableSkeleton, HoldingsMetricsSkeleton, ChartSkeleton } from '@/components/finance/PremiumSkeleton';
+import { MonthlyReturnsCard } from '@/components/finance/MonthlyReturnsCard';
+import { TopMoversCard } from '@/components/finance/TopMoversCard';
+import { TableSkeleton, HoldingsMetricsSkeleton, ChartSkeleton, ListSkeleton } from '@/components/finance/PremiumSkeleton';
 import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
@@ -36,7 +38,6 @@ export function HomePage() {
     <AppLayout>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="py-8 md:py-10 lg:py-12 space-y-12">
-          {/* Sticky Analytical Toolbar */}
           <div className="sticky top-[100px] z-20 bg-canvas/60 backdrop-blur-xl -mx-4 px-4 py-4 rounded-3xl border border-white/5 ring-1 ring-black/5 mb-8 transition-all">
             <DashboardHeader
               title="Dashboard"
@@ -62,7 +63,10 @@ export function HomePage() {
                     <ChartSkeleton />
                     <ChartSkeleton />
                   </div>
-                  <TableSkeleton />
+                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                    <div className="lg:col-span-8"><ChartSkeleton /></div>
+                    <div className="lg:col-span-4"><ListSkeleton /></div>
+                  </div>
                 </motion.div>
               ) : isError ? (
                 <motion.div
@@ -78,7 +82,7 @@ export function HomePage() {
                     <p className="text-3xl font-bold font-display tracking-tight">Data Link Failed</p>
                     <p className="text-muted-foreground max-w-sm mx-auto leading-relaxed">PrismFin could not reconcile the current holdings feed. The connection to the institutional terminal was interrupted.</p>
                   </div>
-                  <Button 
+                  <Button
                     onClick={() => refetch()}
                     className="rounded-2xl h-12 px-8 bg-foreground text-background font-bold gap-2 hover:bg-foreground/90 transition-all shadow-lg"
                   >
@@ -95,24 +99,29 @@ export function HomePage() {
                     refreshMutation.isPending && "opacity-60 blur-[1px]"
                   )}
                 >
-                  {/* Top Level KPIs */}
                   {data?.holdingsMetrics && (
                     <HoldingsMetricsGrid metrics={data.holdingsMetrics} />
                   )}
-                  {/* Mid-Level Analytical Row */}
                   <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
                     <div className="lg:col-span-8">
-                      <PerformanceChartCard 
-                        portfolio={data?.performance ?? []} 
-                        benchmark={data?.benchmarkPerformance ?? []} 
-                        range={range} 
+                      <PerformanceChartCard
+                        portfolio={data?.performance ?? []}
+                        benchmark={data?.benchmarkPerformance ?? []}
+                        range={range}
                       />
                     </div>
                     <div className="lg:col-span-4">
                       {data?.sectors && <SectorConcentrationCard sectors={data.sectors} />}
                     </div>
                   </div>
-                  {/* Secondary Analytical Row */}
+                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                    <div className="lg:col-span-8">
+                      <MonthlyReturnsCard data={data?.monthlyReturns ?? []} />
+                    </div>
+                    <div className="lg:col-span-4">
+                      <TopMoversCard movers={data?.topMovers ?? []} />
+                    </div>
+                  </div>
                   <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
                     <div className="lg:col-span-4">
                       <div className="h-full bg-card rounded-4xl p-8 shadow-soft border border-white/40 flex flex-col justify-between">
@@ -136,7 +145,6 @@ export function HomePage() {
                       <RiskRewardScatterCard data={data?.riskReward ?? []} />
                     </div>
                   </div>
-                  {/* Table View */}
                   <div className="pb-12">
                     <MetricsTableCard rows={data?.rows ?? []} />
                   </div>

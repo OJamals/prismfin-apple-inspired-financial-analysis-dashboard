@@ -59,6 +59,8 @@ export interface DashboardData {
   holdingsMetrics: HoldingsMetrics;
   performance: SeriesPoint[];
   benchmarkPerformance: SeriesPoint[];
+  monthlyReturns: SeriesPoint[];
+  topMovers: MetricsRow[];
   cashflow: SeriesPoint[];
   rows: MetricsRow[];
   alerts: Alert[];
