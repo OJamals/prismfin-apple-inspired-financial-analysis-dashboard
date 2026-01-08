@@ -78,7 +78,7 @@ export function AlertCenter() {
                   Signal Feed
                   {isFetching && <Activity className="size-4 animate-spin text-muted-foreground" />}
                 </SheetTitle>
-                <SheetDescription className="text-[10px] text-muted-foreground font-black uppercase tracking-widest">Threshold Sensitivty: {alertThresholds.volatility}% Vol</SheetDescription>
+                <SheetDescription className="text-[10px] text-muted-foreground font-black uppercase tracking-widest">Threshold Sensitivty: {alertThresholds?.volatility ?? 0}% Vol</SheetDescription>
               </div>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -104,7 +104,7 @@ export function AlertCenter() {
         </SheetHeader>
         <ScrollArea className="h-[calc(100vh-140px)]">
           <div className="p-6 space-y-4">
-            <AnimatePresence initial={false} mode="wait">
+            <AnimatePresence initial={false}>
               {filteredAlerts.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-32 text-center">
                   <div className="size-16 rounded-3xl bg-secondary/30 text-muted-foreground/30 flex items-center justify-center mb-6"><Activity className="size-8" /></div>

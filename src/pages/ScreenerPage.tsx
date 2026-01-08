@@ -170,9 +170,6 @@ export function ScreenerPage() {
                         <AnimatePresence
                           mode='popLayout'
                           initial={false}
-                          staggerChildren={0.025}
-                          layoutScroll={true}
-                          transition={{ staggerChildren: 0.025 }}
                         >
                           {filteredStocks.map((stock) => (
                             <motion.tr

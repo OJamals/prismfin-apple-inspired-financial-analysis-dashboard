@@ -17,6 +17,7 @@ import { QuantPage } from '@/pages/QuantPage'
 import { ScreenerPage } from '@/pages/ScreenerPage';
 import { SentimentPage } from '@/pages/SentimentPage';
 import { AcademyPage } from '@/pages/AcademyPage';
+import { LazyMotion, domAnimation } from 'framer-motion';
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -61,7 +62,9 @@ createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
       <ErrorBoundary>
-        <RouterProvider router={router} />
+        <LazyMotion features={domAnimation}>
+          <RouterProvider router={router} />
+        </LazyMotion>
       </ErrorBoundary>
     </QueryClientProvider>
   </React.StrictMode>
