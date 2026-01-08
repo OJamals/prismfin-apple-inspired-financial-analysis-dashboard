@@ -13,7 +13,7 @@ import { MonteCarloStats } from '@shared/types';
 import { formatCurrencyUSD } from '@/lib/format';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
 import { TrendingUp, AlertTriangle, Target } from 'lucide-react';
 import { cn } from '@/lib/utils';
 interface MonteCarloCardProps {
@@ -40,7 +40,7 @@ export function MonteCarloCard({ data }: MonteCarloCardProps) {
           <CardTitle className="text-2xl font-bold font-display tracking-tight text-foreground">Monte Carlo Projections</CardTitle>
           <p className="text-sm text-muted-foreground font-medium">Simulated terminal value distribution over {horizon} horizon</p>
         </div>
-        <Tabs value={horizon} onValueChange={(v) => setHorizon(v as any)} className="w-auto">
+        <Tabs value={horizon} onValueChange={(v) => setHorizon(v as '1Y' | '5Y' | '10Y')} className="w-auto">
           <TabsList className="bg-secondary/50 rounded-2xl p-1 h-11 ring-1 ring-black/5">
             <TabsTrigger value="1Y" className="rounded-xl text-xs font-bold px-6 data-[state=active]:bg-white data-[state=active]:shadow-sm">1Y</TabsTrigger>
             <TabsTrigger value="5Y" className="rounded-xl text-xs font-bold px-6 data-[state=active]:bg-white data-[state=active]:shadow-sm">5Y</TabsTrigger>
@@ -50,45 +50,48 @@ export function MonteCarloCard({ data }: MonteCarloCardProps) {
       </CardHeader>
       <CardContent className="p-8 space-y-10">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={`${horizon}-p10`}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="p-5 rounded-3xl bg-loss-50/30 border border-loss-100/50 space-y-2"
-            >
-              <div className="flex items-center gap-2 text-[10px] font-black text-loss-600 uppercase tracking-widest">
-                <AlertTriangle className="size-3" />
-                Worst-Case (P10)
-              </div>
-              <p className="text-2xl font-bold tabular-nums text-foreground tracking-tight">{formatCurrencyUSD(stats.p10)}</p>
-            </motion.div>
-            <motion.div
-              key={`${horizon}-median`}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.05 }}
-              className="p-5 rounded-3xl bg-brand-blue/5 border border-brand-blue/10 space-y-2"
-            >
-              <div className="flex items-center gap-2 text-[10px] font-black text-brand-blue uppercase tracking-widest">
-                <Target className="size-3" />
-                Expected Value
-              </div>
-              <p className="text-2xl font-bold tabular-nums text-foreground tracking-tight">{formatCurrencyUSD(stats.median)}</p>
-            </motion.div>
-            <motion.div
-              key={`${horizon}-p90`}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-              className="p-5 rounded-3xl bg-gain-50/30 border border-gain-100/50 space-y-2"
-            >
-              <div className="flex items-center gap-2 text-[10px] font-black text-gain-600 uppercase tracking-widest">
-                <TrendingUp className="size-3" />
-                Best-Case (P90)
-              </div>
-              <p className="text-2xl font-bold tabular-nums text-foreground tracking-tight">{formatCurrencyUSD(stats.p90)}</p>
-            </motion.div>
+          <AnimatePresence mode="popLayout">
+            <LayoutGroup id="monte-kpis">
+              <motion.div
+                key={`${horizon}-p10`}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0 }}
+                className="p-5 rounded-3xl bg-loss-50/30 border border-loss-100/50 space-y-2"
+              >
+                <div className="flex items-center gap-2 text-[10px] font-black text-loss-600 uppercase tracking-widest">
+                  <AlertTriangle className="size-3" />
+                  Worst-Case (P10)
+                </div>
+                <p className="text-2xl font-bold tabular-nums text-foreground tracking-tight">{formatCurrencyUSD(stats.p10)}</p>
+              </motion.div>
+              <motion.div
+                key={`${horizon}-median`}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.05 }}
+                className="p-5 rounded-3xl bg-brand-blue/5 border border-brand-blue/10 space-y-2"
+              >
+                <div className="flex items-center gap-2 text-[10px] font-black text-brand-blue uppercase tracking-widest">
+                  <Target className="size-3" />
+                  Expected Value
+                </div>
+                <p className="text-2xl font-bold tabular-nums text-foreground tracking-tight">{formatCurrencyUSD(stats.median)}</p>
+              </motion.div>
+              <motion.div
+                key={`${horizon}-p90`}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 }}
+                className="p-5 rounded-3xl bg-gain-50/30 border border-gain-100/50 space-y-2"
+              >
+                <div className="flex items-center gap-2 text-[10px] font-black text-gain-600 uppercase tracking-widest">
+                  <TrendingUp className="size-3" />
+                  Best-Case (P90)
+                </div>
+                <p className="text-2xl font-bold tabular-nums text-foreground tracking-tight">{formatCurrencyUSD(stats.p90)}</p>
+              </motion.div>
+            </LayoutGroup>
           </AnimatePresence>
         </div>
         <div className="h-[300px]">
