@@ -11,7 +11,7 @@ interface KpiCardProps {
 export function KpiCard({ label, value, deltaPct }: KpiCardProps) {
   const isPositive = deltaPct >= 0;
   return (
-    <Card className="rounded-4xl border-none shadow-soft transition-all duration-300 hover:-translate-y-1 hover:shadow-md bg-white overflow-hidden group">
+    <Card className="rounded-4xl border-none shadow-soft transition-all duration-300 hover:-translate-y-1 hover:shadow-md bg-card overflow-hidden group">
       <CardContent className="p-6">
         <div className="flex justify-between items-start mb-4">
           <p className="text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors">

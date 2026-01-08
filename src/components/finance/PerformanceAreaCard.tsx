@@ -17,7 +17,7 @@ interface PerformanceAreaCardProps {
 }
 export function PerformanceAreaCard({ data, range }: PerformanceAreaCardProps) {
   return (
-    <Card className="rounded-4xl border-none shadow-soft bg-white h-full min-h-[400px]">
+    <Card className="rounded-4xl border-none shadow-soft bg-card h-full min-h-[400px]">
       <CardHeader className="flex flex-row items-center justify-between pb-2">
         <div>
           <CardTitle className="text-lg font-semibold">Portfolio Performance</CardTitle>

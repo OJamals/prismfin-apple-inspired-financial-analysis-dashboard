@@ -39,7 +39,7 @@ export function DashboardHeader({
       <div className="flex items-center gap-2">
         {onRangeChange && (
           <Select value={range} onValueChange={onRangeChange}>
-            <SelectTrigger className="w-[100px] bg-white border-none shadow-soft rounded-xl h-10">
+            <SelectTrigger className="w-[100px] bg-card border-none shadow-soft rounded-xl h-10">
               <SelectValue placeholder="Range" />
             </SelectTrigger>
             <SelectContent>
@@ -56,7 +56,7 @@ export function DashboardHeader({
             size="icon"
             onClick={onRefresh}
             disabled={isRefreshing}
-            className="rounded-xl h-10 w-10 bg-white shadow-soft hover:bg-muted"
+            className="rounded-xl h-10 w-10 bg-card shadow-soft hover:bg-muted"
           >
             <RefreshCw className={cn("size-4", isRefreshing && "animate-spin")} />
           </Button>
@@ -64,7 +64,7 @@ export function DashboardHeader({
         <Button
           variant="ghost"
           size="icon"
-          className="rounded-xl h-10 w-10 bg-white shadow-soft hover:bg-muted"
+          className="rounded-xl h-10 w-10 bg-card shadow-soft hover:bg-muted"
         >
           <Download className="size-4" />
         </Button>

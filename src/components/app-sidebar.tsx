@@ -24,7 +24,7 @@ export function AppSidebar(): JSX.Element {
     { label: "Settings", icon: Settings, path: "/settings" },
   ];
   return (
-    <Sidebar className="bg-white/60 backdrop-blur-xl border-r border-white/60 shadow-soft">
+    <Sidebar className="bg-card/60 backdrop-blur-xl border-r border-card/60 shadow-soft">
       <SidebarHeader className="pt-6 pb-4">
         <div className="flex items-center gap-3 px-3 py-1">
           <div className="h-8 w-8 rounded-xl bg-gradient-to-br from-brand-teal to-brand-blue flex items-center justify-center shadow-soft">
@@ -50,9 +50,9 @@ export function AppSidebar(): JSX.Element {
                   isActive={location.pathname === item.path}
                   className={cn(
                     "rounded-xl px-4 py-5 transition-all duration-200",
-                    location.pathname === item.path 
-                      ? "bg-white shadow-soft text-brand-blue font-semibold" 
-                      : "text-muted-foreground hover:bg-white/50"
+                    location.pathname === item.path
+                      ? "bg-muted shadow-soft text-brand-blue font-semibold"
+                      : "text-muted-foreground hover:bg-muted/50"
                   )}
                 >
                   <Link to={item.path}>
