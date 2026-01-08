@@ -12,7 +12,6 @@ import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { RouteErrorBoundary } from '@/components/RouteErrorBoundary';
 import '@/index.css'
 import { HomePage } from '@/pages/HomePage'
-import { ReportsPage } from '@/pages/ReportsPage'
 import { SettingsPage } from '@/pages/SettingsPage'
 import { QuantPage } from '@/pages/QuantPage'
 const queryClient = new QueryClient();
@@ -20,11 +19,6 @@ const router = createBrowserRouter([
   {
     path: "/",
     element: <HomePage />,
-    errorElement: <RouteErrorBoundary />,
-  },
-  {
-    path: "/reports",
-    element: <ReportsPage />,
     errorElement: <RouteErrorBoundary />,
   },
   {
