@@ -22,23 +22,23 @@ export function ScreenerPage() {
     queryKey: ['screener', peMax, yieldMin, rsiMin],
     queryFn: () => api<ScreenerStock[]>(`/api/screener?peMax=${peMax}&yieldMin=${yieldMin}&rsiMin=${rsiMin}`),
   });
-  const filteredStocks = stocks.filter(s => 
-    s.symbol.toLowerCase().includes(search.toLowerCase()) || 
+  const filteredStocks = stocks.filter(s =>
+    s.symbol.toLowerCase().includes(search.toLowerCase()) ||
     s.name.toLowerCase().includes(search.toLowerCase())
   );
   return (
     <AppLayout>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="py-8 md:py-10 lg:py-12 space-y-8">
-          <DashboardHeader 
-            title="Market Screener" 
+          <DashboardHeader
+            title="Market Screener"
             subtitle="Scan the global equity markets using proprietary quantitative filters."
           />
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 rounded-3xl bg-card/40 backdrop-blur-md border border-card/60 shadow-soft ring-1 ring-border/10">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
-              <Input 
-                placeholder="Ticker or name..." 
+              <Input
+                placeholder="Ticker or name..."
                 className="pl-9 bg-card border-none rounded-xl h-10"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
@@ -60,8 +60,8 @@ export function ScreenerPage() {
               </SelectTrigger>
               <SelectContent className="rounded-2xl shadow-premium">
                 <SelectItem value="0">Any Yield</SelectItem>
-                <SelectItem value="2">Yield > 2%</SelectItem>
-                <SelectItem value="4">Yield > 4%</SelectItem>
+                <SelectItem value="2">Yield &gt; 2%</SelectItem>
+                <SelectItem value="4">Yield &gt; 4%</SelectItem>
               </SelectContent>
             </Select>
             <Select value={rsiMin} onValueChange={setRsiMin}>
@@ -70,8 +70,8 @@ export function ScreenerPage() {
               </SelectTrigger>
               <SelectContent className="rounded-2xl shadow-premium">
                 <SelectItem value="0">Any RSI</SelectItem>
-                <SelectItem value="30">RSI > 30 (Stable)</SelectItem>
-                <SelectItem value="50">RSI > 50 (Strong)</SelectItem>
+                <SelectItem value="30">RSI &gt; 30 (Stable)</SelectItem>
+                <SelectItem value="50">RSI &gt; 50 (Strong)</SelectItem>
               </SelectContent>
             </Select>
           </div>
