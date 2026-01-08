@@ -1,6 +1,6 @@
 # Cloudflare Workers Chat Demo
 
-[![[cloudflarebutton]]](https://deploy.workers.cloudflare.com/)
+[![[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/OJamals/prismfin-apple-inspired-financial-analysis-dashboard)]](https://deploy.workers.cloudflare.com/)
 
 A production-ready full-stack chat application built on Cloudflare Workers. Features stateful entities (Users, ChatBoards) powered by a single shared Durable Object for efficient storage, indexed listing with pagination, and a modern React frontend.
 
@@ -138,7 +138,7 @@ bun deploy
 wrangler pages dev dist/ --binding=D1_DB=...  # If using Pages
 ```
 
-[![[cloudflarebutton]]](https://deploy.workers.cloudflare.com/)
+[![[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/OJamals/prismfin-apple-inspired-financial-analysis-dashboard)]](https://deploy.workers.cloudflare.com/)
 
 ## 🤝 Contributing
 
