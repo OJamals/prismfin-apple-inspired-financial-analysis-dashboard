@@ -17,7 +17,7 @@ export function GlobalFilter() {
     setSearchParams(newParams);
   };
   return (
-    <div className="w-full flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide no-underline">
+    <div className="w-full flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide">
       <div className="flex bg-card/40 backdrop-blur-md p-1.5 rounded-2xl border border-card/60 shadow-soft ring-1 ring-border/20">
         {OPTIONS.map((opt) => {
           const isActive = activeMode === opt.value;
@@ -26,8 +26,9 @@ export function GlobalFilter() {
             <button
               key={opt.value}
               onClick={() => handleModeChange(opt.value)}
+              aria-pressed={isActive}
               className={cn(
-                "relative px-4 py-2 text-xs font-bold uppercase tracking-wider transition-all duration-300 rounded-xl whitespace-nowrap flex items-center gap-2",
+                "relative px-4 py-2 text-xs font-bold uppercase tracking-wider transition-all duration-300 rounded-xl whitespace-nowrap flex items-center gap-2 outline-none focus-visible:ring-2 focus-visible:ring-brand-blue/40",
                 isActive
                   ? "text-white"
                   : "text-muted-foreground hover:text-foreground hover:bg-white/50"
@@ -38,11 +39,11 @@ export function GlobalFilter() {
                   layoutId="activeFilter"
                   className={cn(
                     "absolute inset-0 rounded-xl shadow-lg",
-                    opt.value === 'live' 
-                      ? "bg-gradient-to-r from-rose-500 to-amber-500 shadow-rose-500/20" 
+                    opt.value === 'live'
+                      ? "bg-gradient-to-r from-rose-500 to-amber-500 shadow-rose-500/20"
                       : "bg-gradient-to-r from-brand-blue to-brand-teal shadow-brand-blue/20"
                   )}
-                  transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
+                  transition={{ type: 'spring', bounce: 0.15, duration: 0.4 }}
                 />
               )}
               <Icon className={cn("size-3.5 relative z-10", isActive ? "animate-pulse" : "")} />
