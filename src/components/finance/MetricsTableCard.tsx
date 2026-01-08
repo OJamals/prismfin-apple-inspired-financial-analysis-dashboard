@@ -40,7 +40,7 @@ export function MetricsTableCard({ rows }: MetricsTableCardProps) {
     setExpandedSymbol(expandedSymbol === symbol ? null : symbol);
   };
   return (
-    <Card className="rounded-4xl border border-white/40 shadow-soft bg-card overflow-hidden">
+    <Card className="rounded-4xl border border-border/40 shadow-soft bg-card overflow-hidden">
       <CardHeader className="px-8 pt-10">
         <CardTitle className="text-2xl font-bold font-display tracking-tight text-foreground">Position Ledger</CardTitle>
       </CardHeader>
@@ -114,13 +114,13 @@ export function MetricsTableCard({ rows }: MetricsTableCardProps) {
                                   </span>
                                 </div>
                                 <div className="w-16 flex justify-end px-4">
-                                  <div className={cn("size-8 rounded-xl flex items-center justify-center transition-all", isExpanded ? "bg-white shadow-soft" : "group-hover:bg-white/80")}>
+                                    <div className={cn("size-8 rounded-xl flex items-center justify-center transition-all", isExpanded ? "bg-card shadow-soft" : "group-hover:bg-card/80")}>
                                     {isExpanded ? <ChevronUp className="size-4 text-brand-blue" /> : <ChevronDown className="size-4 text-muted-foreground/30" />}
                                   </div>
                                 </div>
                               </div>
                             </ContextMenuTrigger>
-                            <ContextMenuContent className="w-64 rounded-2xl bg-card/95 backdrop-blur-xl border-white/10 shadow-premium p-2">
+                            <ContextMenuContent className="w-64 rounded-2xl bg-card/95 backdrop-blur-xl ring-1 ring-border/20 shadow-premium p-2">
                               <ContextMenuItem onClick={() => setSimTarget(row)} className="rounded-xl px-4 py-3 gap-3">
                                 <Play className="size-4 text-amber-500" />
                                 <div className="flex flex-col">
@@ -128,7 +128,7 @@ export function MetricsTableCard({ rows }: MetricsTableCardProps) {
                                   <span className="text-[9px] text-muted-foreground uppercase font-black">Open Paper Mode</span>
                                 </div>
                               </ContextMenuItem>
-                              <ContextMenuSeparator className="bg-border/5 my-1" />
+                              <ContextMenuSeparator className="bg-border/20 my-1" />
                               <ContextMenuItem onClick={() => navigate(`/sentiment?ticker=${row.symbol}`)} className="rounded-xl px-4 py-3 gap-3">
                                 <Newspaper className="size-4 text-brand-teal" />
                                 <div className="flex flex-col">
@@ -148,7 +148,7 @@ export function MetricsTableCard({ rows }: MetricsTableCardProps) {
                                 initial={{ height: 0, opacity: 0 }}
                                 animate={{ height: 'auto', opacity: 1 }}
                                 exit={{ height: 0, opacity: 0 }}
-                                className="overflow-hidden bg-muted/5 border-t border-white/40"
+                                className="overflow-hidden bg-muted/5 border-t border-border/40"
                               >
                                 <div className="px-10 py-12 grid grid-cols-1 md:grid-cols-3 gap-12">
                                   {/* Mini Trend Section */}
@@ -157,7 +157,7 @@ export function MetricsTableCard({ rows }: MetricsTableCardProps) {
                                       <Activity className="size-4 text-brand-blue" />
                                       <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Historical Trend</p>
                                     </div>
-                                    <div className="h-32 w-full bg-white/40 rounded-3xl p-4 ring-1 ring-black/5">
+                                    <div className="h-32 w-full bg-card/40 backdrop-blur-sm rounded-3xl p-4 ring-1 ring-border/20">
                                       <ResponsiveContainer width="100%" height="100%">
                                         <AreaChart data={row.miniSeries}>
                                           <defs>
@@ -212,7 +212,7 @@ export function MetricsTableCard({ rows }: MetricsTableCardProps) {
                                     </div>
                                     <div className="space-y-3">
                                       {row.news?.slice(0, 2).map((news, nIdx) => (
-                                        <div key={nIdx} className="p-3 bg-white/40 rounded-2xl ring-1 ring-black/5 hover:bg-white transition-colors cursor-pointer group/news">
+                                        <div key={nIdx} className="p-3 bg-card/40 backdrop-blur-sm rounded-2xl ring-1 ring-border/20 hover:bg-card transition-colors cursor-pointer group/news">
                                           <p className="text-[11px] font-bold text-foreground leading-snug line-clamp-2 group-hover/news:text-brand-blue">{news.headline}</p>
                                           <div className="flex items-center justify-between mt-2">
                                             <span className="text-[8px] font-black uppercase text-muted-foreground/60">PRISM SIGNAL</span>

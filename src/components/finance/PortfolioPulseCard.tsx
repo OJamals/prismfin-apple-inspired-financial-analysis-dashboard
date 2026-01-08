@@ -26,7 +26,7 @@ export function PortfolioPulseCard({ pulse }: PortfolioPulseCardProps) {
         )} />
         <Card className={cn(
           "relative rounded-5xl border-none shadow-premium overflow-hidden",
-          isHealthy ? "bg-white" : "bg-amber-50/10"
+          isHealthy ? "bg-card" : "bg-muted/20"
         )}>
           <CardContent className="p-8 md:p-12">
             <div className="flex flex-col md:flex-row items-center gap-10">
