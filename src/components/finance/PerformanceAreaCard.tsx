@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useId } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   AreaChart,
@@ -18,10 +18,11 @@ interface PerformanceAreaCardProps {
   range: string;
 }
 export function PerformanceAreaCard({ data, range }: PerformanceAreaCardProps) {
-  // Determine trend for gradient color
+  const uniqueId = useId();
   const isUp = data.length > 1 && data[data.length - 1].value >= data[0].value;
   const strokeColor = isUp ? "#34C759" : "#FF3B30";
   const stopColor = isUp ? "#34C759" : "#FF3B30";
+  const gradientId = `perfFill-${uniqueId.replace(/:/g, '')}`;
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -46,7 +47,7 @@ export function PerformanceAreaCard({ data, range }: PerformanceAreaCardProps) {
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={data}>
               <defs>
-                <linearGradient id="perfFill" x1="0" y1="0" x2="0" y2="1">
+                <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor={stopColor} stopOpacity={0.12}/>
                   <stop offset="95%" stopColor={stopColor} stopOpacity={0}/>
                 </linearGradient>
@@ -75,7 +76,7 @@ export function PerformanceAreaCard({ data, range }: PerformanceAreaCardProps) {
                 stroke={strokeColor}
                 strokeWidth={3.5}
                 fillOpacity={1}
-                fill="url(#perfFill)"
+                fill={`url(#${gradientId})`}
                 animationDuration={1500}
                 animationEasing="ease-out"
               />

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useId } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   AreaChart,
@@ -21,6 +21,9 @@ interface BenchmarkingChartProps {
 }
 export function BenchmarkingChart({ portfolio, benchmark, range }: BenchmarkingChartProps) {
   const [showBenchmark, setShowBenchmark] = useState(true);
+  const uniqueId = useId().replace(/:/g, '');
+  const portfolioGradientId = `colorPortfolio-${uniqueId}`;
+  const benchmarkGradientId = `colorBenchmark-${uniqueId}`;
   const combinedData = portfolio.map((p, i) => ({
     label: p.label,
     portfolio: p.value,
@@ -46,18 +49,18 @@ export function BenchmarkingChart({ portfolio, benchmark, range }: BenchmarkingC
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart data={combinedData}>
             <defs>
-              <linearGradient id="colorPortfolio" x1="0" y1="0" x2="0" y2="1">
+              <linearGradient id={portfolioGradientId} x1="0" y1="0" x2="0" y2="1">
                 <stop offset="5%" stopColor="#14B8A6" stopOpacity={0.08}/>
                 <stop offset="95%" stopColor="#14B8A6" stopOpacity={0}/>
               </linearGradient>
-              <linearGradient id="colorBenchmark" x1="0" y1="0" x2="0" y2="1">
+              <linearGradient id={benchmarkGradientId} x1="0" y1="0" x2="0" y2="1">
                 <stop offset="5%" stopColor="#0EA5E9" stopOpacity={0.08}/>
                 <stop offset="95%" stopColor="#0EA5E9" stopOpacity={0}/>
               </linearGradient>
             </defs>
             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-            <XAxis 
-              dataKey="label" 
+            <XAxis
+              dataKey="label"
               hide={false}
               axisLine={false}
               tickLine={false}
@@ -73,13 +76,13 @@ export function BenchmarkingChart({ portfolio, benchmark, range }: BenchmarkingC
                 boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05)',
                 backgroundColor: 'rgba(255, 255, 255, 0.95)',
                 backdropFilter: 'blur(12px)',
-                padding: '16px'
+                padding: '166x'
               }}
               formatter={(val: number) => [formatCurrencyUSD(val), 'Market Value']}
             />
-            <Legend 
-              verticalAlign="top" 
-              height={40} 
+            <Legend
+              verticalAlign="top"
+              height={40}
               iconType="circle"
               wrapperStyle={{ paddingTop: '0px', paddingBottom: '20px' }}
             />
@@ -90,7 +93,7 @@ export function BenchmarkingChart({ portfolio, benchmark, range }: BenchmarkingC
               stroke="#14B8A6"
               strokeWidth={3}
               fillOpacity={1}
-              fill="url(#colorPortfolio)"
+              fill={`url(#${portfolioGradientId})`}
               isAnimationActive={true}
             />
             {showBenchmark && (
@@ -102,7 +105,7 @@ export function BenchmarkingChart({ portfolio, benchmark, range }: BenchmarkingC
                 strokeWidth={2}
                 strokeDasharray="6 4"
                 fillOpacity={1}
-                fill="url(#colorBenchmark)"
+                fill={`url(#${benchmarkGradientId})`}
                 isAnimationActive={true}
               />
             )}
