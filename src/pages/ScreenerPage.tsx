@@ -2,7 +2,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useSearchParams } from 'react-router-dom';
 import { api } from '@/lib/api-client';
-import { ScreenerStock, ScreenerFilters } from '@shared/types';
+import { ScreenerStock, ScreenerFilters, TimeRange } from '@shared/types';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { DashboardHeader } from '@/components/finance/DashboardHeader';
 import { ScreenerFilterBar } from '@/components/finance/ScreenerFilterBar';
@@ -24,20 +24,12 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   LayoutGrid,
   List,
-  Download,
-  Bookmark,
-  TrendingUp,
-  AlertCircle,
-  Eye,
-  ArrowRight,
   Share2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { toast } from 'sonner';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { AreaChart, Area, ResponsiveContainer } from 'recharts';
 const INITIAL_FILTERS: ScreenerFilters = {
   pe: [0, 100],
   yield: [0, 15],
@@ -55,14 +47,28 @@ export function ScreenerPage() {
   const [selectedSymbols, setSelectedSymbols] = useState<string[]>([]);
   useEffect(() => {
     const sector = searchParams.get('sector') || 'all';
-    const peMin = parseInt(searchParams.get('pe_min') || '0');
-    const peMax = parseInt(searchParams.get('pe_max') || '100');
-    if (sector !== 'all' || peMin !== 0 || peMax !== 100) {
-      setFilters(prev => ({
-        ...prev,
-        sector,
-        pe: [peMin, peMax]
-      }));
+    const sentiment = searchParams.get('sentiment') || 'all';
+    const getRange = (key: string, def: number[]): number[] => {
+      const min = searchParams.get(`${key}_min`);
+      const max = searchParams.get(`${key}_max`);
+      if (min === null && max === null) return def;
+      return [
+        min !== null ? parseFloat(min) : def[0],
+        max !== null ? parseFloat(max) : def[1]
+      ];
+    };
+    const newFilters: ScreenerFilters = {
+      sector,
+      sentiment,
+      pe: getRange('pe', INITIAL_FILTERS.pe),
+      yield: getRange('yield', INITIAL_FILTERS.yield),
+      sharpe: getRange('sharpe', INITIAL_FILTERS.sharpe),
+      peg: getRange('peg', INITIAL_FILTERS.peg),
+      beta: getRange('beta', INITIAL_FILTERS.beta),
+    };
+    // Deep equality check to prevent loops
+    if (JSON.stringify(newFilters) !== JSON.stringify(filters)) {
+      setFilters(newFilters);
     }
   }, [searchParams]);
   const { data: stocks = [], isLoading } = useQuery<ScreenerStock[]>({
@@ -85,8 +91,20 @@ export function ScreenerPage() {
     });
   }, [stocks, search, filters]);
   const handleShare = () => {
-    const url = window.location.href;
-    navigator.clipboard.writeText(url);
+    const params = new URLSearchParams();
+    if (filters.sector !== 'all') params.set('sector', filters.sector);
+    if (filters.sentiment !== 'all') params.set('sentiment', filters.sentiment);
+    const setRangeParams = (key: string, current: number[], def: number[]) => {
+      if (current[0] !== def[0]) params.set(`${key}_min`, current[0].toString());
+      if (current[1] !== def[1]) params.set(`${key}_max`, current[1].toString());
+    };
+    setRangeParams('pe', filters.pe, INITIAL_FILTERS.pe);
+    setRangeParams('yield', filters.yield, INITIAL_FILTERS.yield);
+    setRangeParams('sharpe', filters.sharpe, INITIAL_FILTERS.sharpe);
+    setRangeParams('peg', filters.peg, INITIAL_FILTERS.peg);
+    setRangeParams('beta', filters.beta, INITIAL_FILTERS.beta);
+    const shareUrl = `${window.location.origin}${window.location.pathname}?${params.toString()}`;
+    navigator.clipboard.writeText(shareUrl);
     toast.success('Analytical view link copied to clipboard');
   };
   return (

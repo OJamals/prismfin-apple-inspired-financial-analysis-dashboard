@@ -18,9 +18,9 @@ import {
 } from "@/components/ui/context-menu";
 import { MetricsRow } from '@shared/types';
 import { formatCurrencyUSD, formatPct } from '@/lib/format';
-import { 
-  TrendingUp, TrendingDown, ChevronDown, ChevronUp, 
-  Zap, Target, Newspaper, Search, Copy, Eye 
+import {
+  TrendingUp, TrendingDown, ChevronDown, ChevronUp,
+  Zap, Target, Newspaper, Search, Copy
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
@@ -39,11 +39,18 @@ export function MetricsTableCard({ rows }: MetricsTableCardProps) {
   };
   const findSimilar = (row: MetricsRow) => {
     const params = new URLSearchParams();
-    params.set('sector', row.class === 'equity' ? 'Technology' : 'all'); // Mock logic
-    params.set('pe_min', '10');
-    params.set('pe_max', '40');
+    // Intelligent factor mapping based on asset class
+    if (row.class === 'equity') {
+      params.set('pe_min', (row.price / 10).toFixed(0)); // Mock logic: range around current price/earnings
+      params.set('pe_max', (row.price / 2).toFixed(0));
+      params.set('beta_min', '0.5');
+      params.set('beta_max', '1.5');
+    } else if (row.class === 'crypto') {
+      params.set('sentiment', 'Bullish');
+      params.set('beta_min', '1.5');
+    }
     navigate(`/screener?${params.toString()}`);
-    toast.success(`Scanning for assets similar to ${row.symbol}`);
+    toast.success(`Scanning factor engine for assets similar to ${row.symbol}`);
   };
   const copyTicker = (symbol: string) => {
     navigator.clipboard.writeText(symbol);
@@ -72,13 +79,14 @@ export function MetricsTableCard({ rows }: MetricsTableCardProps) {
                   const isExpanded = expandedSymbol === row.symbol;
                   const gradientId = `miniFill-${row.symbol}-${idx}-${layoutGroupId}`;
                   const isPositive = row.changePct >= 0;
+                  const hasMiniSeries = row.miniSeries && row.miniSeries.length > 0;
                   return (
                     <React.Fragment key={`${row.symbol}-${idx}`}>
                       <TableRow className="border-none p-0 h-0">
                         <TableCell colSpan={5} className="p-0 h-0 border-none">
                           <ContextMenu>
                             <ContextMenuTrigger asChild>
-                              <div 
+                              <div
                                 onClick={() => toggleRow(row.symbol)}
                                 className={cn(
                                   "flex items-center w-full py-6 px-2 rounded-2xl transition-all cursor-pointer group",
@@ -151,17 +159,23 @@ export function MetricsTableCard({ rows }: MetricsTableCardProps) {
                                       <Zap className="size-4 text-amber-500 fill-amber-500" /> Momentum Flux
                                     </div>
                                     <div className="h-32 w-full bg-white/60 rounded-3xl p-5 shadow-sm ring-1 ring-black/5">
-                                      <ResponsiveContainer width="100%" height="100%">
-                                        <AreaChart data={row.miniSeries}>
-                                          <defs>
-                                            <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
-                                              <stop offset="5%" stopColor={isPositive ? "#34C759" : "#FF3B30"} stopOpacity={0.15}/>
-                                              <stop offset="95%" stopColor={isPositive ? "#34C759" : "#FF3B30"} stopOpacity={0}/>
-                                            </linearGradient>
-                                          </defs>
-                                          <Area type="monotone" dataKey="value" stroke={isPositive ? "#34C759" : "#FF3B30"} strokeWidth={3} fill={`url(#${gradientId})`} />
-                                        </AreaChart>
-                                      </ResponsiveContainer>
+                                      {hasMiniSeries ? (
+                                        <ResponsiveContainer width="100%" height="100%">
+                                          <AreaChart data={row.miniSeries}>
+                                            <defs>
+                                              <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
+                                                <stop offset="5%" stopColor={isPositive ? "#34C759" : "#FF3B30"} stopOpacity={0.15}/>
+                                                <stop offset="95%" stopColor={isPositive ? "#34C759" : "#FF3B30"} stopOpacity={0}/>
+                                              </linearGradient>
+                                            </defs>
+                                            <Area type="monotone" dataKey="value" stroke={isPositive ? "#34C759" : "#FF3B30"} strokeWidth={3} fill={`url(#${gradientId})`} />
+                                          </AreaChart>
+                                        </ResponsiveContainer>
+                                      ) : (
+                                        <div className="h-full flex items-center justify-center text-xs text-muted-foreground italic">
+                                          Loading trend data...
+                                        </div>
+                                      )}
                                     </div>
                                   </div>
                                   <div className="lg:col-span-2 space-y-6">
@@ -169,12 +183,16 @@ export function MetricsTableCard({ rows }: MetricsTableCardProps) {
                                       <Newspaper className="size-4 text-brand-blue" /> Contextual Intelligence
                                     </div>
                                     <div className="space-y-3">
-                                      {row.news?.slice(0, 3).map((n, i) => (
+                                      {row.news && row.news.length > 0 ? row.news.slice(0, 3).map((n, i) => (
                                         <div key={i} className="flex items-center justify-between p-3.5 rounded-2xl bg-white shadow-sm ring-1 ring-black/5">
                                           <p className="text-xs font-bold text-foreground truncate flex-1 pr-4">{n.headline}</p>
                                           <Badge className="rounded-lg bg-secondary/80 text-[10px] font-black text-muted-foreground">{n.score}%</Badge>
                                         </div>
-                                      ))}
+                                      )) : (
+                                        <div className="p-4 text-center text-xs text-muted-foreground bg-white/40 rounded-2xl">
+                                          No recent headlines for {row.symbol}
+                                        </div>
+                                      )}
                                     </div>
                                   </div>
                                   <div className="space-y-6">
