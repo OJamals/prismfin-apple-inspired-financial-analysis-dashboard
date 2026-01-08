@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useSearchParams } from 'react-router-dom';
 import { api } from '@/lib/api-client';
-import { DashboardData, TimeRange } from '@shared/types';
+import { DashboardData, TimeRange, AssetClass } from '@shared/types';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { DashboardHeader } from '@/components/finance/DashboardHeader';
 import { KpiCard } from '@/components/finance/KpiCard';
@@ -12,16 +13,19 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
 export function HomePage() {
   const [range, setRange] = useState<TimeRange>('6M');
+  const [searchParams] = useSearchParams();
+  const filter = (searchParams.get('filter') as AssetClass) || 'all';
   const queryClient = useQueryClient();
   const { data, isLoading } = useQuery<DashboardData>({
-    queryKey: ['dashboard', range],
-    queryFn: () => api<DashboardData>(`/api/dashboard?range=${range}`),
+    queryKey: ['dashboard', range, filter],
+    queryFn: () => api<DashboardData>(`/api/dashboard?range=${range}&filter=${filter}`),
   });
   const refreshMutation = useMutation({
     mutationFn: () => api<DashboardData>(`/api/dashboard/refresh?range=${range}`, { method: 'POST' }),
     onSuccess: (updated) => {
-      queryClient.setQueryData(['dashboard', range], updated);
-      toast.success('Dashboard refreshed');
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+      queryClient.invalidateQueries({ queryKey: ['alerts'] });
+      toast.success('Market data updated');
     },
     onError: () => toast.error('Refresh failed'),
   });
@@ -29,10 +33,10 @@ export function HomePage() {
   return (
     <AppLayout>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="py-8 md:py-10 lg:py-12 space-y-8">
-          <DashboardHeader 
-            title="Dashboard" 
-            subtitle="Real-time portfolio analytics and market insights."
+        <div className="py-6 md:py-8 lg:py-10 space-y-8">
+          <DashboardHeader
+            title="Dashboard"
+            subtitle={`Real-time ${filter === 'all' ? 'portfolio' : filter} analytics and insights.`}
             range={range}
             onRangeChange={(r) => setRange(r as TimeRange)}
             onRefresh={onRefresh}
@@ -46,11 +50,11 @@ export function HomePage() {
               ))
             ) : (
               data?.kpis.map((kpi) => (
-                <KpiCard 
-                  key={kpi.id} 
-                  label={kpi.label} 
-                  value={kpi.value} 
-                  deltaPct={kpi.deltaPct} 
+                <KpiCard
+                  key={kpi.id}
+                  label={kpi.label}
+                  value={kpi.value}
+                  deltaPct={kpi.deltaPct}
                 />
               ))
             )}

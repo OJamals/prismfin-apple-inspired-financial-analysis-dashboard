@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { PanelLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { GlobalFilter } from "@/components/finance/GlobalFilter";
+import { AlertCenter } from "@/components/finance/AlertCenter";
 type AppLayoutProps = {
   children: React.ReactNode;
   container?: boolean;
@@ -33,6 +35,9 @@ export function AppLayout({ children, container = false, className, contentClass
           <AppSidebar />
         </div>
         <main className="flex-1 overflow-y-auto relative">
+          <div className="sticky top-0 z-30 px-4 sm:px-6 lg:px-8 py-3 bg-canvas/80 backdrop-blur-md border-b border-border/10">
+             <GlobalFilter />
+          </div>
           <div className={contentPaddingClass}>
             {children}
           </div>
@@ -44,6 +49,7 @@ export function AppLayout({ children, container = false, className, contentClass
     <>
       <div className={cn('relative min-h-screen flex flex-col bg-canvas', className)}>
         <header className="sticky top-0 z-20 flex items-center h-14 px-4 bg-white/80 backdrop-blur-md border-b border-border/40">
+          <div className="flex items-center flex-1">
           <Button
             variant='ghost'
             size='icon'
@@ -54,7 +60,12 @@ export function AppLayout({ children, container = false, className, contentClass
             <span className='sr-only'>Toggle sidebar</span>
           </Button>
           <span className="ml-3 font-semibold text-sm">PrismFin</span>
+          </div>
+          <AlertCenter />
         </header>
+        <div className="px-4 py-2 bg-canvas/60 border-b border-border/5">
+           <GlobalFilter />
+        </div>
         <main className="flex-1 overflow-y-auto">
           <div className={contentPaddingClass}>
             {children}
