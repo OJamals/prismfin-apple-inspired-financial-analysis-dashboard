@@ -17,7 +17,7 @@ interface MetricsTableCardProps {
 }
 export function MetricsTableCard({ rows }: MetricsTableCardProps) {
   return (
-    <Card className="rounded-4xl border-none shadow-soft bg-white overflow-hidden">
+    <Card className="rounded-4xl border-none shadow-soft bg-card overflow-hidden">
       <CardHeader className="px-8 pt-8">
         <CardTitle className="text-xl font-semibold">Top Positions</CardTitle>
       </CardHeader>

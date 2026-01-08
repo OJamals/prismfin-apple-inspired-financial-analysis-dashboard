@@ -12,7 +12,7 @@ export function AppLayout({ children, container = false, className, contentClass
   return (
     <SidebarProvider defaultOpen={true}>
       <AppSidebar />
-      <SidebarInset className={cn("min-h-screen bg-canvas", className)}>
+      <SidebarInset className={cn("min-h-screen bg-muted", className)}>
         <div className="absolute left-2 top-2 z-20 md:hidden">
           <SidebarTrigger />
         </div>

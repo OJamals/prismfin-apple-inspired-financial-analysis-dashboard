@@ -17,7 +17,7 @@ interface CashflowBarCardProps {
 }
 export function CashflowBarCard({ data }: CashflowBarCardProps) {
   return (
-    <Card className="rounded-4xl border-none shadow-soft bg-white h-full min-h-[400px]">
+    <Card className="rounded-4xl border-none shadow-soft bg-card h-full min-h-[400px]">
       <CardHeader className="pb-2">
         <CardTitle className="text-lg font-semibold">Monthly Cashflow</CardTitle>
         <p className="text-sm text-muted-foreground">Projected income by month</p>
