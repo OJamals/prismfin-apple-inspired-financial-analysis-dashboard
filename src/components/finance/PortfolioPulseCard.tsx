@@ -1,11 +1,11 @@
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { cn } from '@/lib/utils';
-import { motion } from 'framer-motion';
 import React, { useState } from 'react';
-import { Sparkles, ArrowRight, Info } from 'lucide-react';
-import { MetricsDetailDrawer } from './MetricsDetailDrawer';
+import { Card, CardContent } from '@/components/ui/card';
 import { PulseMetric } from '@shared/types';
+import { Sparkles, ArrowRight, Info } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { motion } from 'framer-motion';
+import { cn } from '@/lib/utils';
+import { MetricsDetailDrawer } from './MetricsDetailDrawer';
 interface PortfolioPulseCardProps {
   pulse: PulseMetric;
 }
@@ -26,7 +26,7 @@ export function PortfolioPulseCard({ pulse }: PortfolioPulseCardProps) {
         )} />
         <Card className={cn(
           "relative rounded-5xl border-none shadow-premium overflow-hidden",
-          isHealthy ? "bg-card" : "bg-muted/20"
+          isHealthy ? "bg-white" : "bg-amber-50/10"
         )}>
           <CardContent className="p-8 md:p-12">
             <div className="flex flex-col md:flex-row items-center gap-10">
@@ -65,8 +65,8 @@ export function PortfolioPulseCard({ pulse }: PortfolioPulseCardProps) {
           </CardContent>
         </Card>
       </motion.div>
-      <MetricsDetailDrawer
-        isOpen={showDetail}
+      <MetricsDetailDrawer 
+        isOpen={showDetail} 
         onClose={() => setShowDetail(false)}
         metricName="Portfolio Health"
         description={pulse.detail}

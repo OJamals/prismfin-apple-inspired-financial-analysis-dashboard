@@ -12,18 +12,18 @@ import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
 import { Layers, Activity, TrendingUp, AlertCircle } from "lucide-react";
 import { useUserSettings } from '@/hooks/use-user-settings';
-import { formatCurrencyUSD } from '@/lib/format';
+import { formatCurrencyUSD, formatPct } from '@/lib/format';
 interface SimulateChangeDrawerProps {
   isOpen: boolean;
   onClose: () => void;
   assetName?: string;
 }
 export function SimulateChangeDrawer({ isOpen, onClose, assetName }: SimulateChangeDrawerProps) {
-  const { setTradingMode } = useUserSettings();
+  const { setSimMode } = useUserSettings();
   const [stress, setStress] = useState([0]);
   const [adjust, setAdjust] = useState([0]);
   const handleApply = () => {
-    setTradingMode('paper');
+    setSimMode(true);
     onClose();
   };
   const projectedImpact = (stress[0] * 1200) + (adjust[0] * 500);
@@ -52,12 +52,12 @@ export function SimulateChangeDrawer({ isOpen, onClose, assetName }: SimulateCha
                   <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Market Stress Test</Label>
                   <span className="text-xs font-black text-amber-500">{stress[0]}% Market Shift</span>
                 </div>
-                <Slider
-                  value={stress}
-                  onValueChange={setStress}
-                  min={-20}
-                  max={20}
-                  step={1}
+                <Slider 
+                  value={stress} 
+                  onValueChange={setStress} 
+                  min={-20} 
+                  max={20} 
+                  step={1} 
                   className="py-4"
                 />
                 <p className="text-[10px] text-muted-foreground italic">Simulates a broader market rally or crash impact.</p>
@@ -67,12 +67,12 @@ export function SimulateChangeDrawer({ isOpen, onClose, assetName }: SimulateCha
                   <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Weight Adjustment</Label>
                   <span className="text-xs font-black text-brand-blue">{adjust[0]}% Allocation Change</span>
                 </div>
-                <Slider
-                  value={adjust}
-                  onValueChange={setAdjust}
-                  min={-50}
-                  max={50}
-                  step={5}
+                <Slider 
+                  value={adjust} 
+                  onValueChange={setAdjust} 
+                  min={-50} 
+                  max={50} 
+                  step={5} 
                   className="py-4"
                 />
                 <p className="text-[10px] text-muted-foreground italic">Simulates increasing or decreasing your position size.</p>

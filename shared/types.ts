@@ -6,6 +6,7 @@ export interface ApiResponse<T = unknown> {
 export type TimeRange = '1M' | '3M' | '6M' | '1Y';
 export type AssetClass = 'all' | 'equity' | 'crypto' | 'fixed-income';
 export type DensityMode = 'comfortable' | 'compact';
+export type SkillLevel = 'beginner' | 'advanced';
 export interface SeriesPoint {
   label: string;
   value: number;
@@ -15,6 +16,13 @@ export interface Kpi {
   label: string;
   value: number;
   deltaPct: number;
+  isWarning?: boolean;
+}
+export interface PulseMetric {
+  summary: string;
+  detail: string;
+  health: 'healthy' | 'warning';
+  comparisonLabel: string;
 }
 export interface HoldingsMetrics {
   diversificationPct: number;
@@ -51,6 +59,8 @@ export interface MetricsRow {
   rsi?: number;
   miniSeries: SeriesPoint[];
   news?: NewsHeadline[];
+  tags?: string[];
+  isImproving?: boolean;
 }
 export interface DashboardData {
   range: TimeRange;
@@ -66,6 +76,11 @@ export interface DashboardData {
   alerts: Alert[];
   sectors: Record<string, number>;
   riskReward: RiskRewardPoint[];
+  pulse: PulseMetric;
+}
+export interface SimScenario {
+  marketStress: number; // -20 to 20
+  adjustmentPct: number;
 }
 export interface QuantInsight {
   summary: string;

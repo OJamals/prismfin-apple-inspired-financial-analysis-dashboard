@@ -12,12 +12,14 @@ import { RiskRewardScatterCard } from '@/components/finance/RiskRewardScatterCar
 import { MonthlyReturnsCard } from '@/components/finance/MonthlyReturnsCard';
 import { TopMoversCard } from '@/components/finance/TopMoversCard';
 import { BetaSensitivityCard } from '@/components/finance/BetaSensitivityCard';
+import { PortfolioPulseCard } from '@/components/finance/PortfolioPulseCard';
 import { HoldingsMetricsSkeleton, ChartSkeleton } from '@/components/finance/PremiumSkeleton';
 import { motion, AnimatePresence, Variants } from 'framer-motion';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
-import { AlertTriangle, RefreshCw } from 'lucide-react';
+import { AlertTriangle, RefreshCw, Layers } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useUserSettings } from '@/hooks/use-user-settings';
 const containerVariants: Variants = {
   hidden: { opacity: 0 },
   show: {
@@ -30,18 +32,19 @@ const containerVariants: Variants = {
 };
 const itemVariants: Variants = {
   hidden: { opacity: 0, y: 20 },
-  show: { 
-    opacity: 1, 
-    y: 0, 
-    transition: { 
-      duration: 0.5, 
-      ease: "easeOut" 
-    } 
+  show: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.5,
+      ease: "easeOut"
+    }
   }
 };
 export function HomePage() {
   const [range, setRange] = useState<TimeRange>('6M');
   const queryClient = useQueryClient();
+  const { skillLevel, isSimMode } = useUserSettings();
   const { data, isLoading, isError, refetch } = useQuery<DashboardData>({
     queryKey: ['dashboard', range],
     queryFn: () => api<DashboardData>(`/api/dashboard?range=${range}`),
@@ -51,8 +54,7 @@ export function HomePage() {
     onSuccess: (newData) => {
       queryClient.setQueryData(['dashboard', range], newData);
       toast.success('Market state synchronized');
-    },
-    onError: () => toast.error('Market synchronization failed'),
+    }
   });
   const onRefresh = useCallback(() => {
     refreshMutation.mutate();
@@ -61,6 +63,19 @@ export function HomePage() {
     <AppLayout>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="py-8 md:py-10 lg:py-12 space-y-12">
+          {isSimMode && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              className="bg-amber-500 text-white px-8 py-3 rounded-2xl flex items-center justify-between shadow-lg shadow-amber-500/20"
+            >
+              <div className="flex items-center gap-3">
+                <Layers className="size-5 animate-pulse" />
+                <span className="text-sm font-black uppercase tracking-widest">Simulation Mode Active (Paper Trading)</span>
+              </div>
+              <p className="text-[10px] font-bold opacity-80 uppercase">Dashboards showing projected metrics</p>
+            </motion.div>
+          )}
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -85,17 +100,10 @@ export function HomePage() {
                 </div>
               </motion.div>
             ) : isError ? (
-              <motion.div key="error" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="py-40 text-center rounded-[3rem] bg-white shadow-soft flex flex-col items-center justify-center space-y-8">
-                <div className="size-20 rounded-full bg-loss-50 flex items-center justify-center">
-                  <AlertTriangle className="size-10 text-loss-500" />
-                </div>
-                <div className="space-y-2">
-                  <h2 className="text-3xl font-bold font-display">Data Link Failed</h2>
-                  <p className="text-muted-foreground">PrismFin could not reconcile the current holdings feed.</p>
-                </div>
-                <Button onClick={() => refetch()} className="rounded-2xl h-12 px-8 bg-foreground text-background">
-                  <RefreshCw className="size-4 mr-2" /> Reconnect Feed
-                </Button>
+              <motion.div key="error" className="py-40 text-center rounded-[3rem] bg-white shadow-soft flex flex-col items-center justify-center space-y-8">
+                <AlertTriangle className="size-16 text-loss-500" />
+                <h2 className="text-3xl font-bold">Data Link Failed</h2>
+                <Button onClick={() => refetch()} className="rounded-2xl h-12 px-8 bg-foreground text-background">Reconnect Feed</Button>
               </motion.div>
             ) : (
               <motion.div
@@ -105,6 +113,11 @@ export function HomePage() {
                 animate="show"
                 className={cn("space-y-12", refreshMutation.isPending && "opacity-60")}
               >
+                {skillLevel === 'beginner' && data?.pulse && (
+                  <motion.div variants={itemVariants}>
+                    <PortfolioPulseCard pulse={data.pulse} />
+                  </motion.div>
+                )}
                 <motion.div variants={itemVariants}>
                   {data?.holdingsMetrics && <HoldingsMetricsGrid metrics={data.holdingsMetrics} />}
                 </motion.div>
@@ -117,7 +130,11 @@ export function HomePage() {
                     />
                   </motion.div>
                   <motion.div variants={itemVariants} className="lg:col-span-4">
-                    <BetaSensitivityCard beta={data?.holdingsMetrics?.beta ?? 1.0} />
+                    {skillLevel === 'beginner' ? (
+                      <TopMoversCard movers={data?.topMovers ?? []} />
+                    ) : (
+                      <BetaSensitivityCard beta={data?.holdingsMetrics?.beta ?? 1.0} />
+                    )}
                   </motion.div>
                 </div>
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
@@ -126,14 +143,6 @@ export function HomePage() {
                   </motion.div>
                   <motion.div variants={itemVariants} className="lg:col-span-4">
                     {data?.sectors && <SectorConcentrationCard sectors={data.sectors} />}
-                  </motion.div>
-                </div>
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-                  <motion.div variants={itemVariants} className="lg:col-span-4">
-                    <TopMoversCard movers={data?.topMovers ?? []} />
-                  </motion.div>
-                  <motion.div variants={itemVariants} className="lg:col-span-8">
-                    <RiskRewardScatterCard data={data?.riskReward ?? []} />
                   </motion.div>
                 </div>
                 <motion.div variants={itemVariants} className="pb-12">

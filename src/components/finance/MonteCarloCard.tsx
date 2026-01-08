@@ -59,14 +59,17 @@ export function MonteCarloCard({ data }: MonteCarloCardProps) {
         </div>
       </CardHeader>
       <CardContent className="p-8 space-y-12 flex-1">
-        <div className="h-[350px] w-full">
+        <div className="h-[350px] w-full relative">
           <ResponsiveContainer width="100%" height="100%">
             <ComposedChart data={stats.series} key={horizon}>
               <defs>
                 <linearGradient id={`gradMonte-${instanceId}`} x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#14B8A6" stopOpacity={0.12}/>
-                  <stop offset="95%" stopColor="#14B8A6" stopOpacity={0.02}/>
+                  <stop offset="5%" stopColor="#14B8A6" stopOpacity={0.4}/>
+                  <stop offset="95%" stopColor="#14B8A6" stopOpacity={0.05}/>
                 </linearGradient>
+                <pattern id={`patternMonte-${instanceId}`} width="4" height="4" patternUnits="userSpaceOnUse">
+                  <path d="M 4 0 L 0 0 0 4" fill="none" stroke="#14B8A6" strokeWidth="0.5" opacity="0.1" />
+                </pattern>
               </defs>
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" opacity={0.5} />
               <XAxis dataKey="label" hide />
@@ -124,11 +127,11 @@ export function MonteCarloCard({ data }: MonteCarloCardProps) {
                 type="monotone"
                 dataKey="median"
                 stroke="#14B8A6"
-                strokeWidth={3}
-                strokeDasharray="5 5"
+                strokeWidth={4}
                 dot={false}
                 isAnimationActive={true}
                 animationDuration={1500}
+                className="drop-shadow-[0_0_8px_rgba(20,184,166,0.6)]"
               />
             </ComposedChart>
           </ResponsiveContainer>
