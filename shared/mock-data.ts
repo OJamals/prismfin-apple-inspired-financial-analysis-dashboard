@@ -150,12 +150,12 @@ export function generateDashboard(range: TimeRange): DashboardData {
     performance: Array.from({ length: 20 }).map((_, i) => ({ label: `T-${i}`, value: 100000 + i * 500 })),
     benchmarkPerformance: Array.from({ length: 20 }).map((_, i) => ({ label: `T-${i}`, value: 100000 + i * 400 })),
     monthlyReturns: Array.from({ length: 12 }).map((_, i) => ({ label: `M${i}`, value: 2 + Math.random() * 5 })),
-    topMovers: [],
-    cashflow: [],
-    rows: [],
+    rows: getMockRows(),
+    topMovers: getMockRows().slice(0, 6).toSorted((a, b) => b.changePct - a.changePct),
+    cashflow: Array.from({ length: 12 }, (_, i) => ({ label: `${i + 1}M`, value: (Math.random() - 0.4) * 4000 })),
     alerts: generateTechnicalAlerts(),
     sectors: { 'Tech': 30, 'Finance': 20, 'Health': 25, 'Other': 25 },
-    riskReward: [],
+    riskReward: SYMBOLS.slice(0, 8).map(s => ({ symbol: s, returns: (8 + Math.random() * 22), volatility: (12 + Math.random() * 18), sharpe: (0.6 + Math.random() * 1.2), weight: (5 + Math.random() * 15) })),
     pulse
   };
 }
@@ -240,5 +240,23 @@ export function generateQuantData(range: TimeRange): QuantData {
   };
 }
 export function getMockRows(): MetricsRow[] {
-  return [];
+  return ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'NVDA', 'META', 'TSLA', 'V', 'JPM', 'UNH', 'NFLX', 'CRM'].map((symbol) => ({
+    symbol,
+    name: `${symbol} Inc.`,
+    price: 100 + Math.random() * 300,
+    changePct: (Math.random() - 0.5) * 12,
+    ytdPct: (Math.random() - 0.5) * 60,
+    volume: `${(1 + Math.random() * 10).toFixed(1)}M`,
+    class: 'equity',
+    sentiment: Math.floor(20 + Math.random() * 60),
+    peRatio: 10 + Math.random() * 25,
+    rsi: 20 + Math.random() * 60,
+    miniSeries: Array.from({ length: 7 }).map((_, j) => ({ label: `D-${6 - j}`, value: 95 + Math.random() * 10 })),
+    news: Array.from({ length: 1 + Math.floor(Math.random() * 3) }).map((_, k) => ({
+      headline: `${symbol} ${['earnings beat', 'secures deal', 'upgrades rating', 'volume surge'][k % 4]}`,
+      score: 40 + Math.random() * 50
+    })),
+    tags: [`${symbol}-top`, 'active', 'watch'].slice(0, 2 + Math.random() * 2),
+    isImproving: Math.random() > 0.4
+  }));
 }
