@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api-client';
 import { DashboardData, TimeRange } from '@shared/types';
@@ -11,7 +11,7 @@ import { PerformanceChartCard } from '@/components/finance/PerformanceChartCard'
 import { RiskRewardScatterCard } from '@/components/finance/RiskRewardScatterCard';
 import { MonthlyReturnsCard } from '@/components/finance/MonthlyReturnsCard';
 import { TopMoversCard } from '@/components/finance/TopMoversCard';
-import { TableSkeleton, HoldingsMetricsSkeleton, ChartSkeleton, ListSkeleton } from '@/components/finance/PremiumSkeleton';
+import { HoldingsMetricsSkeleton, ChartSkeleton, ListSkeleton } from '@/components/finance/PremiumSkeleton';
 import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
@@ -22,18 +22,27 @@ export function HomePage() {
   const queryClient = useQueryClient();
   const { data, isLoading, isError, refetch } = useQuery<DashboardData>({
     queryKey: ['dashboard', range],
-    queryFn: () => api<DashboardData>(`/api/dashboard?range=${range}`),
+    queryFn: () => {
+      if (!range) throw new Error("Range is required");
+      return api<DashboardData>(`/api/dashboard?range=${range}`);
+    },
     retry: 1,
+    staleTime: 1000 * 60, // 1 minute stale time to prevent aggressive refetches
   });
   const refreshMutation = useMutation({
     mutationFn: () => api<DashboardData>(`/api/dashboard/refresh?range=${range}`, { method: 'POST' }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['dashboard', range] });
+    onSuccess: (newData) => {
+      queryClient.setQueryData(['dashboard', range], newData);
       toast.success('Market state synchronized');
     },
     onError: () => toast.error('Market synchronization failed'),
   });
-  const onRefresh = () => refreshMutation.mutate();
+  const onRefresh = useCallback(() => {
+    refreshMutation.mutate();
+  }, [refreshMutation]);
+  const handleRangeChange = useCallback((r: string) => {
+    setRange(r as TimeRange);
+  }, []);
   return (
     <AppLayout>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -43,16 +52,16 @@ export function HomePage() {
               title="Dashboard"
               subtitle="Real-time portfolio intelligence and position health analysis."
               range={range}
-              onRangeChange={(r) => setRange(r as TimeRange)}
+              onRangeChange={handleRangeChange}
               onRefresh={onRefresh}
               isRefreshing={refreshMutation.isPending}
             />
           </div>
-          <LayoutGroup id="dashboard-content">
+          <LayoutGroup id="dashboard-main-layout">
             <AnimatePresence mode="popLayout">
               {isLoading ? (
                 <motion.div
-                  key="skeletons"
+                  key="loading-skeletons"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
@@ -70,7 +79,7 @@ export function HomePage() {
                 </motion.div>
               ) : isError ? (
                 <motion.div
-                  key="error"
+                  key="error-state"
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
                   className="py-40 text-center rounded-[3rem] bg-white border border-dashed border-muted-foreground/20 flex flex-col items-center justify-center space-y-8 shadow-soft"
@@ -80,7 +89,7 @@ export function HomePage() {
                   </div>
                   <div className="space-y-2">
                     <p className="text-3xl font-bold font-display tracking-tight">Data Link Failed</p>
-                    <p className="text-muted-foreground max-w-sm mx-auto leading-relaxed">PrismFin could not reconcile the current holdings feed. The connection to the institutional terminal was interrupted.</p>
+                    <p className="text-muted-foreground max-w-sm mx-auto leading-relaxed">PrismFin could not reconcile the current holdings feed.</p>
                   </div>
                   <Button
                     onClick={() => refetch()}
@@ -91,7 +100,7 @@ export function HomePage() {
                 </motion.div>
               ) : (
                 <motion.div
-                  key="content"
+                  key="dashboard-content"
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   className={cn(
@@ -131,7 +140,7 @@ export function HomePage() {
                             <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Portfolio Efficiency</span>
                           </div>
                           <h4 className="text-xl font-bold font-display">Alpha Scoring</h4>
-                          <p className="text-sm text-muted-foreground leading-relaxed">Your strategy is currently generating 4.2% excess return relative to the S&P 500 benchmark on a risk-adjusted basis.</p>
+                          <p className="text-sm text-muted-foreground leading-relaxed">Your strategy is currently generating 4.2% excess return relative to the benchmark.</p>
                         </div>
                         <div className="pt-8 flex items-center gap-4">
                           <div className="flex-1 h-1.5 bg-secondary rounded-full overflow-hidden">
