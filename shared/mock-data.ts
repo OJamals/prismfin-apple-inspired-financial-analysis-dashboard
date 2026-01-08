@@ -16,7 +16,7 @@ import {
   CorrelationData,
   MonteCarloSeriesPoint,
   SentimentCategory,
-  QuantInsight
+  Alert
 } from './types';
 const SYMBOLS = [
   'AAPL', 'MSFT', 'GOOGL', 'AMZN', 'NVDA', 'META', 'TSLA', 'V', 'JPM', 'UNH',
@@ -26,6 +26,43 @@ const SYMBOLS = [
   'INTU', 'UPS', 'IBM', 'BA', 'AMGN', 'GE', 'MS', 'NEE', 'PM', 'GS'
 ];
 const SECTORS = ['Technology', 'Financials', 'Healthcare', 'Energy', 'Consumer Staples', 'Consumer Discretionary', 'Industrials', 'Real Estate'];
+export function generateTechnicalAlerts(): Alert[] {
+  const alerts: Alert[] = [
+    {
+      id: 'alert-1',
+      type: 'technical',
+      priority: 'high',
+      message: 'Golden Cross detected: NVDA 50-day EMA crossed above 200-day EMA.',
+      timestamp: Date.now() - 1000 * 60 * 45,
+      assetSymbol: 'NVDA'
+    },
+    {
+      id: 'alert-2',
+      type: 'volatility',
+      priority: 'medium',
+      message: 'Abnormal Volatility Spike: BTC daily range exceeded 8.5%.',
+      timestamp: Date.now() - 1000 * 60 * 120,
+      assetSymbol: 'BTC'
+    },
+    {
+      id: 'alert-3',
+      type: 'sentiment',
+      priority: 'low',
+      message: 'Social Sentiment Surge: Unusual retail interest spike for TSLA.',
+      timestamp: Date.now() - 1000 * 60 * 300,
+      assetSymbol: 'TSLA'
+    },
+    {
+      id: 'alert-4',
+      type: 'technical',
+      priority: 'high',
+      message: 'RSI Divergence: AAPL showing oversold conditions on H4 timeframe.',
+      timestamp: Date.now() - 1000 * 60 * 15,
+      assetSymbol: 'AAPL'
+    }
+  ];
+  return alerts;
+}
 export function getMockScreenerData(): ScreenerStock[] {
   return SYMBOLS.map((symbol, i) => {
     const sector = SECTORS[i % SECTORS.length];
@@ -153,45 +190,51 @@ export function generateCorrelationMatrix(): CorrelationData {
     matrix[s1] = {};
     symbols.forEach(s2 => {
       if (s1 === s2) matrix[s1][s2] = 1;
-      else matrix[s1][s2] = (Math.random() * 2 - 1); // Full spectrum -1 to 1
+      else matrix[s1][s2] = (Math.random() * 2 - 1);
     });
   });
   return { symbols, matrix };
 }
-export function generateQuantInsight(): QuantInsight {
+export function generateDashboard(range: TimeRange): DashboardData {
+  const rows = getMockRows();
+  const topMovers = [...rows].sort((a, b) => Math.abs(b.changePct) - Math.abs(a.changePct));
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  // Base benchmark (S&P 500 equivalent)
+  const baseBenchmark = Array.from({ length: 20 }).map((_, i) => ({ 
+    label: `Day ${i}`, 
+    value: 100000 + i * 400 + (Math.random() - 0.5) * 500 
+  }));
   return {
-    summary: "Portfolio risk has escalated by 12% due to increased correlation between Technology holdings and Crypto assets.",
-    attribution: "Alpha generation is currently driven by Quality factors (35%), while Momentum has stagnated in the mid-cap segment.",
-    riskExposure: "Exposure to interest-rate sensitive sectors is at a 6-month high. Recommend hedging via fixed-income overlay.",
-    recommendation: "Neutralize Beta by trimming TSLA and NVDA positions in favor of Consumer Staples for the Q1 horizon."
-  };
-}
-export function generateQuantData(range: TimeRange): QuantData {
-  return {
-    range,
+    range, 
     updatedAt: Date.now(),
-    insight: generateQuantInsight(),
-    portfolio: Array.from({ length: 20 }).map((_, i) => ({ label: `D${i}`, value: 100000 + i * 800 })),
-    benchmark: Array.from({ length: 20 }).map((_, i) => ({ label: `D${i}`, value: 100000 + i * 600 })),
-    factors: generateFactors(),
-    monteCarlo: {
-      '1Y': generateMonteCarloStats('1Y'),
-      '5Y': generateMonteCarloStats('5Y'),
-      '10Y': generateMonteCarloStats('10Y')
+    kpis: getMockKPIs(),
+    holdingsMetrics: {
+      diversificationPct: 82,
+      diversificationLabel: 'High across sectors',
+      riskLevel: 'Moderate',
+      beta: 1.08,
+      yieldPct: 1.25,
+      yieldLabel: 'Annual projection'
     },
-    riskReward: generateRiskReward(),
-    drawdown: generateDrawdown(),
-    correlation: generateCorrelationMatrix()
-  };
-}
-export function calculateHoldingsMetrics(rows: MetricsRow[]) {
-  return {
-    diversificationPct: 82,
-    diversificationLabel: 'High across sectors',
-    riskLevel: 'Moderate' as const,
-    beta: 1.08,
-    yieldPct: 1.25,
-    yieldLabel: 'Annual projection'
+    performance: Array.from({ length: 20 }).map((_, i) => ({ 
+      label: `Day ${i}`, 
+      value: 100000 + i * 500 + (Math.random() - 0.5) * 1000 
+    })),
+    benchmarkPerformance: baseBenchmark,
+    monthlyReturns: months.map(m => ({ label: m, value: (Math.random() - 0.3) * 8 })),
+    topMovers: topMovers.slice(0, 4),
+    cashflow: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'].map(m => ({ label: m, value: 4000 + Math.random() * 2000 })),
+    rows: rows,
+    alerts: generateTechnicalAlerts(),
+    sectors: {
+      'Technology': 28.5,
+      'Financials': 15.2,
+      'Healthcare': 12.8,
+      'Energy': 8.4,
+      'Consumer Disc.': 10.1,
+      'Others': 25.0
+    },
+    riskReward: generateRiskReward().slice(0, 5)
   };
 }
 export function getMockKPIs(): Kpi[] {
@@ -210,29 +253,27 @@ export function getMockRows(): MetricsRow[] {
     { name: 'Tesla Inc.', symbol: 'TSLA', price: 175.22, changePct: -3.4, ytdPct: -15.2, volume: '95.2M', class: 'equity', sentiment: 45, miniSeries: [] },
   ];
 }
-export function generateDashboard(range: TimeRange): DashboardData {
-  const rows = getMockRows();
-  const topMovers = [...rows].sort((a, b) => Math.abs(b.changePct) - Math.abs(a.changePct));
-  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+export function generateQuantData(range: TimeRange): QuantData {
+  const dash = generateDashboard(range);
   return {
-    range, updatedAt: Date.now(),
-    kpis: getMockKPIs(),
-    holdingsMetrics: calculateHoldingsMetrics([]),
-    performance: Array.from({ length: 20 }).map((_, i) => ({ label: `Day ${i}`, value: 100000 + i * 500 })),
-    benchmarkPerformance: Array.from({ length: 20 }).map((_, i) => ({ label: `Day ${i}`, value: 100000 + i * 400 })),
-    monthlyReturns: months.map(m => ({ label: m, value: (Math.random() - 0.3) * 8 })),
-    topMovers: topMovers.slice(0, 4),
-    cashflow: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'].map(m => ({ label: m, value: 4000 + Math.random() * 2000 })),
-    rows: rows,
-    alerts: [],
-    sectors: {
-      'Technology': 28.5,
-      'Financials': 15.2,
-      'Healthcare': 12.8,
-      'Energy': 8.4,
-      'Consumer Disc.': 10.1,
-      'Others': 25.0
+    range,
+    updatedAt: Date.now(),
+    insight: {
+      summary: "Portfolio risk has escalated by 12% due to increased correlation between Technology holdings and Crypto assets.",
+      attribution: "Alpha generation is currently driven by Quality factors (35%), while Momentum has stagnated in the mid-cap segment.",
+      riskExposure: "Exposure to interest-rate sensitive sectors is at a 6-month high. Recommend hedging via fixed-income overlay.",
+      recommendation: "Neutralize Beta by trimming TSLA and NVDA positions in favor of Consumer Staples for the Q1 horizon."
     },
-    riskReward: generateRiskReward().slice(0, 5)
+    portfolio: dash.performance,
+    benchmark: dash.benchmarkPerformance,
+    factors: generateFactors(),
+    monteCarlo: {
+      '1Y': generateMonteCarloStats('1Y'),
+      '5Y': generateMonteCarloStats('5Y'),
+      '10Y': generateMonteCarloStats('10Y')
+    },
+    riskReward: generateRiskReward(),
+    drawdown: generateDrawdown(),
+    correlation: generateCorrelationMatrix()
   };
 }

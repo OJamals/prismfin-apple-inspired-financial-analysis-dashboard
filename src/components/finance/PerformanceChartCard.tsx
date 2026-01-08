@@ -5,6 +5,13 @@ import { SeriesPoint } from '@shared/types';
 import { formatCurrencyUSD } from '@/lib/format';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { cn } from '@/lib/utils';
 interface PerformanceChartCardProps {
   portfolio: SeriesPoint[];
@@ -13,27 +20,49 @@ interface PerformanceChartCardProps {
 }
 export function PerformanceChartCard({ portfolio, benchmark, range }: PerformanceChartCardProps) {
   const [showBenchmark, setShowBenchmark] = useState(true);
+  const [benchmarkType, setBenchmarkType] = useState<'SPX' | 'IXIC'>('SPX');
   const id = useId().replace(/[^a-zA-Z0-9]/g, '-');
-  const combinedData = portfolio.map((p, i) => ({
-    label: p.label,
-    portfolio: p.value,
-    benchmark: benchmark[i]?.value ?? 0
-  }));
+  const combinedData = portfolio.map((p, i) => {
+    const baseBench = benchmark[i]?.value ?? 0;
+    // Simulate Nasdaq (IXIC) being more volatile/growth-oriented than S&P 500 (SPX)
+    const adjustedBench = benchmarkType === 'IXIC' 
+      ? baseBench * (1 + (i * 0.005) + (Math.random() * 0.01))
+      : baseBench;
+    return {
+      label: p.label,
+      portfolio: p.value,
+      benchmark: adjustedBench
+    };
+  });
   return (
     <Card className="rounded-4xl border-none shadow-soft bg-card overflow-hidden h-full">
-      <CardHeader className="flex flex-row items-center justify-between p-8 pb-0">
+      <CardHeader className="flex flex-col md:flex-row md:items-center justify-between p-8 pb-0 gap-4">
         <div>
           <CardTitle className="text-2xl font-bold font-display tracking-tight">Performance Alpha</CardTitle>
           <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mt-1">Growth Dynamics ({range})</p>
         </div>
-        <div className="flex items-center gap-3 bg-secondary/40 px-4 py-2 rounded-2xl ring-1 ring-black/5">
-          <Label htmlFor="perf-benchmark-toggle" className="text-[10px] font-black text-muted-foreground uppercase tracking-widest cursor-pointer">S&P 500 Overlay</Label>
-          <Switch 
-            id="perf-benchmark-toggle" 
-            checked={showBenchmark} 
-            onCheckedChange={setShowBenchmark}
-            className="data-[state=checked]:bg-brand-blue"
-          />
+        <div className="flex items-center gap-4 bg-secondary/40 px-4 py-2 rounded-2xl ring-1 ring-black/5">
+          <div className="flex items-center gap-2">
+            <Select value={benchmarkType} onValueChange={(v) => setBenchmarkType(v as 'SPX' | 'IXIC')}>
+              <SelectTrigger className="w-[100px] h-8 bg-card border-none text-[10px] font-black uppercase tracking-widest rounded-lg shadow-sm">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="rounded-xl border-none shadow-premium">
+                <SelectItem value="SPX" className="text-xs font-bold uppercase py-2">S&P 500</SelectItem>
+                <SelectItem value="IXIC" className="text-xs font-bold uppercase py-2">Nasdaq</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="w-px h-5 bg-muted-foreground/20" />
+          <div className="flex items-center gap-2">
+            <Label htmlFor="perf-benchmark-toggle" className="text-[10px] font-black text-muted-foreground uppercase tracking-widest cursor-pointer">Overlay</Label>
+            <Switch
+              id="perf-benchmark-toggle"
+              checked={showBenchmark}
+              onCheckedChange={setShowBenchmark}
+              className="data-[state=checked]:bg-brand-blue"
+            />
+          </div>
         </div>
       </CardHeader>
       <CardContent className="h-[320px] p-8 pt-8">
@@ -41,8 +70,8 @@ export function PerformanceChartCard({ portfolio, benchmark, range }: Performanc
           <AreaChart data={combinedData}>
             <defs>
               <linearGradient id={`portfolioFill-${id}`} x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#14B8A6" stopOpacity={0.15}/>
-                <stop offset="95%" stopColor="#14B8A6" stopOpacity={0}/>
+                <stop offset="5%" stopColor="#34C759" stopOpacity={0.15}/>
+                <stop offset="95%" stopColor="#34C759" stopOpacity={0}/>
               </linearGradient>
               <linearGradient id={`benchmarkFill-${id}`} x1="0" y1="0" x2="0" y2="1">
                 <stop offset="5%" stopColor="#0EA5E9" stopOpacity={0.08}/>
@@ -63,11 +92,11 @@ export function PerformanceChartCard({ portfolio, benchmark, range }: Performanc
                       <div className="space-y-3">
                         <div className="flex justify-between items-center">
                           <span className="text-xs font-bold text-foreground">Portfolio</span>
-                          <span className="text-sm font-black tabular-nums">{formatCurrencyUSD(pVal)}</span>
+                          <span className="text-sm font-black tabular-nums text-[#34C759]">{formatCurrencyUSD(pVal)}</span>
                         </div>
                         {showBenchmark && bVal && (
                           <div className="flex justify-between items-center opacity-60">
-                            <span className="text-[10px] font-bold text-muted-foreground">S&P 500</span>
+                            <span className="text-[10px] font-bold text-muted-foreground">{benchmarkType === 'SPX' ? 'S&P 500' : 'Nasdaq'}</span>
                             <span className="text-xs font-bold tabular-nums">{formatCurrencyUSD(bVal)}</span>
                           </div>
                         )}
@@ -81,7 +110,7 @@ export function PerformanceChartCard({ portfolio, benchmark, range }: Performanc
             <Area
               type="monotone"
               dataKey="portfolio"
-              stroke="#14B8A6"
+              stroke="#34C759"
               strokeWidth={4}
               fill={`url(#portfolioFill-${id})`}
               isAnimationActive={true}
