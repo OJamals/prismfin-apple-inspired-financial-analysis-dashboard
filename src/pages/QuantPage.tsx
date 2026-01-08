@@ -81,7 +81,7 @@ export function QuantPage() {
               </motion.button>
             </div>
           </div>
-          <AnimatePresence mode="wait">
+          <AnimatePresence>
             {isLoading ? (
               <motion.div key="loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-12">
                 <PulseSkeleton /><div className="grid grid-cols-1 lg:grid-cols-12 gap-8"><div className="lg:col-span-12"><ChartSkeleton /></div></div>

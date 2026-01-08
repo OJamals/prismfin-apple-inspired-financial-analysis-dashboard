@@ -75,7 +75,7 @@ export function HomePage() {
             onRefresh={onRefresh}
             isRefreshing={refreshMutation.isPending}
           />
-          <AnimatePresence mode="wait">
+          <AnimatePresence>
             {isLoading ? (
               <motion.div key="loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-12">
                 <HoldingsMetricsSkeleton />

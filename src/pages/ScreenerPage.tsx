@@ -42,7 +42,7 @@ export function ScreenerPage() {
   const [filters, setFilters] = useState<ScreenerFilters>(INITIAL_FILTERS);
   const [selectedSymbols, setSelectedSymbols] = useState<string[]>([]);
   // Ref for checking filter changes without triggering dependency loops
-  const filtersRef = useRef(filters);
+  const filtersRef = useRef<ScreenerFilters>(INITIAL_FILTERS);
   useEffect(() => {
     filtersRef.current = filters;
   }, [filters]);
@@ -167,13 +167,17 @@ export function ScreenerPage() {
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        <AnimatePresence mode='popLayout'>
+                        <AnimatePresence
+                          mode='popLayout'
+                          initial={false}
+                          staggerChildren={0.025}
+                          layoutScroll={true}
+                          transition={{ staggerChildren: 0.025 }}
+                        >
                           {filteredStocks.map((stock) => (
                             <motion.tr
                               key={stock.symbol}
                               layout
-                              initial={{ opacity: 0 }}
-                              animate={{ opacity: 1 }}
                               className={cn(
                                 "border-none hover:bg-muted/10 transition-all",
                                 selectedSymbols.includes(stock.symbol) && "bg-brand-blue/5"

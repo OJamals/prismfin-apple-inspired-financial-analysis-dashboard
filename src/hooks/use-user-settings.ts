@@ -64,6 +64,22 @@ export function useUserSettings() {
       alertThresholds: { ...prev.alertThresholds, ...thresholds }
     }));
   }, []);
+
+  const handleStorageChange = useCallback((e: StorageEvent) => {
+    if (e.key === SETTINGS_KEY && e.newValue) {
+      try {
+        const parsed = JSON.parse(e.newValue);
+        setSettings({ ...DEFAULT_SETTINGS, ...parsed });
+      } catch {
+        // Invalid data, ignore
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, [handleStorageChange]);
   return {
     ...settings,
     setSkillLevel,
