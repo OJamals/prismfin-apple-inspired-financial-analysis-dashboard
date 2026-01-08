@@ -70,7 +70,7 @@ export function QuantPage() {
             isRefreshing={refreshMutation.isPending}
             mode={mode}
           />
-          <AnimatePresence mode="wait">
+          <AnimatePresence mode="popLayout">
             {isLoading ? (
               <motion.div
                 key="skeletons"
