@@ -18,24 +18,24 @@ export function AppLayout({ children, container = false, className, contentClass
   const isMobile = useIsMobile();
   const location = useLocation();
   const [sheetOpen, setSheetOpen] = useState(false);
-  // Automatically close mobile sidebar on navigation
   useEffect(() => {
     setSheetOpen(false);
   }, [location.pathname]);
   const sidebarClass = 'bg-card/60 backdrop-blur-xl border-r border-card/60 shadow-soft';
   const contentPaddingClass = cn(
-    'flex-1 flex flex-col min-h-0', 
-    container ? 'max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-10 lg:py-12 w-full' : 'w-full', 
+    'flex-1 flex flex-col min-h-0',
+    container ? 'max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-10 lg:py-12 w-full' : 'w-full',
     contentClassName
   );
+  // Desktop View
   if (!isMobile) {
     return (
       <div className={cn('flex h-screen overflow-hidden bg-canvas', className)}>
-        <div className={`w-[17rem] h-full flex flex-col shrink-0 border-r ${sidebarClass}`}>
+        <div className={cn('w-[17rem] h-full flex flex-col shrink-0 border-r', sidebarClass)}>
           <AppSidebar />
         </div>
-        <main className="flex-1 overflow-y-auto relative">
-          <div className="sticky top-0 z-30 px-4 sm:px-6 lg:px-8 py-3 bg-canvas/80 backdrop-blur-md border-b border-border/10">
+        <main className="flex-1 overflow-y-auto relative flex flex-col">
+          <div className="sticky top-0 z-30 px-4 sm:px-6 lg:px-8 py-3 bg-canvas/80 backdrop-blur-md border-b border-border/10 shrink-0">
              <GlobalFilter />
           </div>
           <div className={contentPaddingClass}>
@@ -45,25 +45,26 @@ export function AppLayout({ children, container = false, className, contentClass
       </div>
     );
   }
+  // Mobile View
   return (
     <>
       <div className={cn('relative min-h-screen flex flex-col bg-canvas', className)}>
-        <header className="sticky top-0 z-20 flex items-center h-14 px-4 bg-white/80 backdrop-blur-md border-b border-border/40">
+        <header className="sticky top-0 z-20 flex items-center h-14 px-4 bg-white/80 backdrop-blur-md border-b border-border/40 shrink-0">
           <div className="flex items-center flex-1">
-          <Button
-            variant='ghost'
-            size='icon'
-            className='-ml-2 h-9 w-9'
-            onClick={() => setSheetOpen(true)}
-          >
-            <PanelLeft className='h-5 w-5'/>
-            <span className='sr-only'>Toggle sidebar</span>
-          </Button>
-          <span className="ml-3 font-semibold text-sm">PrismFin</span>
+            <Button
+              variant='ghost'
+              size='icon'
+              className='-ml-2 h-9 w-9'
+              onClick={() => setSheetOpen(true)}
+            >
+              <PanelLeft className='h-5 w-5'/>
+              <span className='sr-only'>Toggle sidebar</span>
+            </Button>
+            <span className="ml-3 font-semibold text-sm">PrismFin</span>
           </div>
           <AlertCenter />
         </header>
-        <div className="px-4 py-2 bg-canvas/60 border-b border-border/5">
+        <div className="px-4 py-2 bg-canvas/60 border-b border-border/5 shrink-0">
            <GlobalFilter />
         </div>
         <main className="flex-1 overflow-y-auto">
@@ -73,7 +74,7 @@ export function AppLayout({ children, container = false, className, contentClass
         </main>
       </div>
       <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
-        <SheetContent side='left' className={`p-0 w-[18rem] ${sidebarClass}`}>
+        <SheetContent side='left' className={cn('p-0 w-[18rem]', sidebarClass)}>
           <AppSidebar />
         </SheetContent>
       </Sheet>
