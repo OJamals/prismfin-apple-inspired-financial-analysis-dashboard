@@ -58,7 +58,7 @@ export function AcademyTopicDetail({ topic }: AcademyTopicDetailProps) {
                   <span className="truncate max-w-[140px]">{step.title}</span>
                 </div>
                 {isStepCompleted(topic.id, step.id) && (
-                  <CheckCircle2 className={cn("size-4", currentStepIdx === idx ? "text-brand-teal" : "text-brand-teal")} />
+                  <CheckCircle2 className="size-4 text-brand-teal" />
                 )}
               </button>
             ))}
@@ -93,16 +93,16 @@ export function AcademyTopicDetail({ topic }: AcademyTopicDetailProps) {
                 {currentStep.title}
               </h1>
             </header>
-            <div className="prose prose-slate max-w-none prose-lg text-muted-foreground leading-relaxed">
+            <div className="prose prose-lg max-w-none prose-headings:text-foreground prose-p:text-muted-foreground prose-strong:text-foreground prose-code:text-card-foreground prose-code:font-mono prose-a:text-brand-blue prose-blockquote:border-foreground/20 prose-blockquote:text-foreground/80 prose-li:text-muted-foreground prose-ol:text-muted-foreground prose-ul:text-muted-foreground leading-relaxed">
               <p className="whitespace-pre-wrap">{currentStep.content}</p>
             </div>
             {currentStep.formula && (
-              <Card className="bg-slate-900 text-slate-100 p-10 rounded-4xl border-none shadow-premium flex items-center justify-center font-mono text-2xl md:text-3xl italic tracking-wider">
+              <Card className="bg-foreground text-background p-10 rounded-4xl border-none shadow-premium flex items-center justify-center font-mono text-2xl md:text-3xl italic tracking-wider">
                 <div className="relative">
                   <span className="text-brand-teal mr-4">f(x) = </span>
                   {currentStep.formula}
                   <div className="absolute -top-6 -right-6">
-                    <Info className="size-5 text-slate-700 hover:text-brand-teal cursor-help transition-colors" />
+                    <Info className="size-5 text-muted-foreground hover:text-brand-teal cursor-help transition-colors" />
                   </div>
                 </div>
               </Card>

@@ -144,7 +144,7 @@ export function AcademyPage() {
         </div>
       </div>
       <Drawer open={!!selectedTopic} onOpenChange={(open) => !open && setSelectedTopic(null)}>
-        <DrawerContent className="h-[95vh] bg-canvas/95 backdrop-blur-3xl border-t border-white/20">
+        <DrawerContent className="h-[95vh] bg-canvas/95 backdrop-blur-3xl border-t border-border/20">
           <div className="max-w-6xl mx-auto w-full h-full overflow-hidden flex flex-col">
             <AnimatePresence mode="wait">
               {selectedTopic && <AcademyTopicDetail topic={selectedTopic} />}

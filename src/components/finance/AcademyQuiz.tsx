@@ -56,7 +56,7 @@ export function AcademyQuiz({ questions, onComplete }: AcademyQuizProps) {
     );
   }
   return (
-    <Card className="rounded-4xl border-none shadow-premium bg-white overflow-hidden">
+    <Card className="rounded-4xl border-none shadow-premium bg-card overflow-hidden">
       <div className="bg-secondary/50 p-6 flex items-center justify-between border-b border-border/5">
         <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-muted-foreground">
           <HelpCircle className="size-3.5" /> Concept Check

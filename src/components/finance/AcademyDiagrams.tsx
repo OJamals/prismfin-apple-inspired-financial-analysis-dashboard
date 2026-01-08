@@ -8,7 +8,7 @@ interface AcademyDiagramsProps {
 export function AcademyDiagrams({ type, className }: AcademyDiagramsProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   useEffect(() => {
-    if (type === 'bell-curve' && canvasRef.current) {
+    if (type === 'bell-curve' && canvasRef.current && document) {
       const canvas = canvasRef.current;
       const ctx = canvas.getContext('2d');
       if (!ctx) return;
@@ -18,10 +18,18 @@ export function AcademyDiagrams({ type, className }: AcademyDiagramsProps) {
       ctx.clearRect(0, 0, width, height);
       const mean = width / 2;
       const stdDev = width / 8;
+
+      // Get theme colors
+      const rootStyle = getComputedStyle(document.documentElement);
+      const mutedForeground = rootStyle.getPropertyValue('--muted-foreground').trim();
+      const gainColor = rootStyle.getPropertyValue('--gain').trim();
+      const gainHsl = gainColor.match(/hsl\((\d+),\s*(\d+)%,\s*(\d+)%\)/);
+      const gainHsla = gainHsl ? `hsla(${gainHsl[1]}, ${gainHsl[2]}, ${gainHsl[3]}, 0.1)` : 'hsla(172, 50%, 45%, 0.1)';
+      
       // Draw Bell Curve
       ctx.beginPath();
       ctx.lineWidth = 4;
-      ctx.strokeStyle = '#14B8A6';
+      ctx.strokeStyle = gainColor;
       for (let x = 0; x < width; x++) {
         const exponent = -Math.pow(x - mean, 2) / (2 * Math.pow(stdDev, 2));
         const y = height - (height * 0.8 * Math.exp(exponent));
@@ -30,7 +38,7 @@ export function AcademyDiagrams({ type, className }: AcademyDiagramsProps) {
       }
       ctx.stroke();
       // Shading for 1SD
-      ctx.fillStyle = 'rgba(20, 184, 166, 0.1)';
+      ctx.fillStyle = gainHsla;
       ctx.beginPath();
       for (let x = mean - stdDev; x <= mean + stdDev; x++) {
         const exponent = -Math.pow(x - mean, 2) / (2 * Math.pow(stdDev, 2));
@@ -41,14 +49,14 @@ export function AcademyDiagrams({ type, className }: AcademyDiagramsProps) {
       ctx.lineTo(mean + stdDev, height);
       ctx.fill();
       // Labels
-      ctx.fillStyle = '#94a3b8';
+      ctx.fillStyle = mutedForeground;
       ctx.font = 'bold 10px Inter';
       ctx.textAlign = 'center';
       ctx.fillText('68% within 1 SD', mean, height - 10);
     }
   }, [type]);
   return (
-    <Card className={cn("p-10 rounded-4xl border-none shadow-soft bg-white/60 flex items-center justify-center", className)}>
+    <Card className={cn("p-10 rounded-4xl border-none shadow-soft bg-card/60 flex items-center justify-center", className)}>
       {type === 'bell-curve' ? (
         <div className="space-y-6 w-full flex flex-col items-center">
           <canvas ref={canvasRef} width={600} height={300} className="w-full h-auto max-w-lg" />
