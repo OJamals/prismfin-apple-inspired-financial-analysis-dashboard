@@ -92,7 +92,7 @@ export function AlertCenter() {
         </SheetHeader>
         <ScrollArea className="h-[calc(100vh-120px)]">
           <div className="p-6 space-y-4">
-            <AnimatePresence initial={false} mode="popLayout">
+            <AnimatePresence initial={false} mode="wait">
               {alerts.length === 0 ? (
                 <motion.div 
                   key="empty" 
@@ -110,10 +110,9 @@ export function AlertCenter() {
                 alerts.map((alert) => (
                   <motion.div
                     key={alert.id}
-                    layout
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
+                    initial={{ opacity: 0, scale: 1.05 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
                     className="group relative p-5 rounded-3xl border bg-card shadow-soft transition-all hover:shadow-premium border-white/40 mb-4"
                   >
                     <div className="flex gap-4">
