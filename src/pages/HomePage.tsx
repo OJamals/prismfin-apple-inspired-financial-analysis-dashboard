@@ -12,13 +12,13 @@ import { RiskRewardScatterCard } from '@/components/finance/RiskRewardScatterCar
 import { MonthlyReturnsCard } from '@/components/finance/MonthlyReturnsCard';
 import { TopMoversCard } from '@/components/finance/TopMoversCard';
 import { BetaSensitivityCard } from '@/components/finance/BetaSensitivityCard';
-import { HoldingsMetricsSkeleton, ChartSkeleton, ListSkeleton } from '@/components/finance/PremiumSkeleton';
-import { motion, AnimatePresence } from 'framer-motion';
+import { HoldingsMetricsSkeleton, ChartSkeleton } from '@/components/finance/PremiumSkeleton';
+import { motion, AnimatePresence, Variants } from 'framer-motion';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-const containerVariants = {
+const containerVariants: Variants = {
   hidden: { opacity: 0 },
   show: {
     opacity: 1,
@@ -28,9 +28,16 @@ const containerVariants = {
     }
   }
 };
-const itemVariants = {
+const itemVariants: Variants = {
   hidden: { opacity: 0, y: 20 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } }
+  show: { 
+    opacity: 1, 
+    y: 0, 
+    transition: { 
+      duration: 0.5, 
+      ease: "easeOut" 
+    } 
+  }
 };
 export function HomePage() {
   const [range, setRange] = useState<TimeRange>('6M');
@@ -54,8 +61,8 @@ export function HomePage() {
     <AppLayout>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="py-8 md:py-10 lg:py-12 space-y-12">
-          <motion.div 
-            initial={{ opacity: 0, y: -10 }} 
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             className="sticky top-[100px] z-20 bg-canvas/60 backdrop-blur-xl -mx-4 px-4 py-4 rounded-3xl border border-white/5 ring-1 ring-black/5 mb-8"
           >
@@ -110,7 +117,7 @@ export function HomePage() {
                     />
                   </motion.div>
                   <motion.div variants={itemVariants} className="lg:col-span-4">
-                    <BetaSensitivityCard beta={data?.holdingsMetrics.beta ?? 1.0} />
+                    <BetaSensitivityCard beta={data?.holdingsMetrics?.beta ?? 1.0} />
                   </motion.div>
                 </div>
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">

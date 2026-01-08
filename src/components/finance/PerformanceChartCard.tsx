@@ -1,4 +1,4 @@
-import React, { useState, useId } from 'react';
+import React, { useState, useId, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { SeriesPoint } from '@shared/types';
@@ -22,18 +22,21 @@ export function PerformanceChartCard({ portfolio, benchmark, range }: Performanc
   const [showBenchmark, setShowBenchmark] = useState(true);
   const [benchmarkType, setBenchmarkType] = useState<'SPX' | 'IXIC'>('SPX');
   const id = useId().replace(/[^a-zA-Z0-9]/g, '-');
-  const combinedData = portfolio.map((p, i) => {
-    const baseBench = benchmark[i]?.value ?? 0;
-    // Simulate Nasdaq (IXIC) being more volatile/growth-oriented than S&P 500 (SPX)
-    const adjustedBench = benchmarkType === 'IXIC' 
-      ? baseBench * (1 + (i * 0.005) + (Math.random() * 0.01))
-      : baseBench;
-    return {
-      label: p.label,
-      portfolio: p.value,
-      benchmark: adjustedBench
-    };
-  });
+  const combinedData = useMemo(() => {
+    return portfolio.map((p, i) => {
+      const baseBench = benchmark[i]?.value ?? 0;
+      // Deterministic IXIC simulation for stability during renders
+      const ixicVol = (Math.sin(i * 0.5) * 0.002); 
+      const adjustedBench = benchmarkType === 'IXIC'
+        ? baseBench * (1 + (i * 0.003) + ixicVol)
+        : baseBench;
+      return {
+        label: p.label,
+        portfolio: p.value,
+        benchmark: adjustedBench
+      };
+    });
+  }, [portfolio, benchmark, benchmarkType]);
   return (
     <Card className="rounded-4xl border-none shadow-soft bg-card overflow-hidden h-full">
       <CardHeader className="flex flex-col md:flex-row md:items-center justify-between p-8 pb-0 gap-4">
@@ -67,7 +70,7 @@ export function PerformanceChartCard({ portfolio, benchmark, range }: Performanc
       </CardHeader>
       <CardContent className="h-[320px] p-8 pt-8">
         <ResponsiveContainer width="100%" height="100%">
-          <AreaChart data={combinedData}>
+          <AreaChart data={combinedData} key={`perf-${range}-${benchmarkType}`}>
             <defs>
               <linearGradient id={`portfolioFill-${id}`} x1="0" y1="0" x2="0" y2="1">
                 <stop offset="5%" stopColor="#34C759" stopOpacity={0.15}/>
@@ -84,17 +87,18 @@ export function PerformanceChartCard({ portfolio, benchmark, range }: Performanc
             <Tooltip
               content={({ active, payload }) => {
                 if (active && payload && payload.length) {
-                  const pVal = payload[0].value as number;
+                  const pVal = payload[0]?.value as number;
                   const bVal = payload[1]?.value as number;
+                  const label = payload[0]?.payload?.label;
                   return (
                     <div className="glass-premium p-5 rounded-3xl border-none shadow-premium min-w-[180px] space-y-4">
-                      <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest border-b border-border/10 pb-2">{payload[0].payload.label}</p>
+                      <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest border-b border-border/10 pb-2">{label}</p>
                       <div className="space-y-3">
                         <div className="flex justify-between items-center">
                           <span className="text-xs font-bold text-foreground">Portfolio</span>
                           <span className="text-sm font-black tabular-nums text-[#34C759]">{formatCurrencyUSD(pVal)}</span>
                         </div>
-                        {showBenchmark && bVal && (
+                        {showBenchmark && bVal !== undefined && (
                           <div className="flex justify-between items-center opacity-60">
                             <span className="text-[10px] font-bold text-muted-foreground">{benchmarkType === 'SPX' ? 'S&P 500' : 'Nasdaq'}</span>
                             <span className="text-xs font-bold tabular-nums">{formatCurrencyUSD(bVal)}</span>

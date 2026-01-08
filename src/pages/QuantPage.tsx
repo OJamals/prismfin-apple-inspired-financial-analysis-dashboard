@@ -12,12 +12,12 @@ import { DrawdownChartCard } from '@/components/finance/DrawdownChartCard';
 import { CorrelationMatrixCard } from '@/components/finance/CorrelationMatrixCard';
 import { AIAnalystNote } from '@/components/finance/AIAnalystNote';
 import { ChartSkeleton } from '@/components/finance/PremiumSkeleton';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, Variants } from 'framer-motion';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { FileDown, Layout, LayoutPanelLeft } from 'lucide-react';
-const containerVariants = {
+const containerVariants: Variants = {
   hidden: { opacity: 0 },
   show: {
     opacity: 1,
@@ -27,9 +27,17 @@ const containerVariants = {
     }
   }
 };
-const itemVariants = {
+const itemVariants: Variants = {
   hidden: { opacity: 0, scale: 0.98, y: 15 },
-  show: { opacity: 1, scale: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } }
+  show: { 
+    opacity: 1, 
+    scale: 1, 
+    y: 0, 
+    transition: { 
+      duration: 0.6, 
+      ease: "easeOut" 
+    } 
+  }
 };
 export function QuantPage() {
   const [range, setRange] = useState<TimeRange>('6M');
@@ -89,8 +97,9 @@ export function QuantPage() {
           <AnimatePresence mode="wait">
             {isLoading ? (
               <motion.div key="loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <div className="lg:col-span-2"><ChartSkeleton /></div>
-                <ChartSkeleton /><ChartSkeleton />
+                <div className="lg:col-span-12"><ChartSkeleton /></div>
+                <div className="lg:col-span-6"><ChartSkeleton /></div>
+                <div className="lg:col-span-6"><ChartSkeleton /></div>
               </motion.div>
             ) : (
               <motion.div
@@ -109,10 +118,10 @@ export function QuantPage() {
                   </motion.div>
                 )}
                 <motion.div variants={itemVariants} className="lg:col-span-12">
-                  <PerformanceChartCard 
-                    portfolio={data?.portfolio ?? []} 
-                    benchmark={data?.benchmark ?? []} 
-                    range={range} 
+                  <PerformanceChartCard
+                    portfolio={data?.portfolio ?? []}
+                    benchmark={data?.benchmark ?? []}
+                    range={range}
                   />
                 </motion.div>
                 <motion.div variants={itemVariants} className="lg:col-span-8">
@@ -128,7 +137,7 @@ export function QuantPage() {
                   <CorrelationMatrixCard data={data?.correlation ?? { symbols: [], matrix: {} }} />
                 </motion.div>
                 <motion.div variants={itemVariants} className="lg:col-span-12 pb-12">
-                  <MonteCarloCard data={data?.monteCarlo ?? {} as any} />
+                  <MonteCarloCard data={data?.monteCarlo ?? ({} as any)} />
                 </motion.div>
               </motion.div>
             )}
