@@ -55,6 +55,7 @@ export interface MetricsRow {
   volume: string;
   class: AssetClass;
   sentiment: number;
+  sector?: string;
   peRatio?: number;
   rsi?: number;
   miniSeries: SeriesPoint[];
@@ -187,7 +188,6 @@ export interface SentimentOverview {
   trend: 'improving' | 'declining' | 'stable';
   articles: SentimentArticle[];
 }
-// --- Academy & Learning Hub Types ---
 export type AcademyDifficulty = 'Beginner' | 'Intermediate' | 'Advanced';
 export type AcademyStepType = 'content' | 'video' | 'interactive' | 'quiz' | 'diagram';
 export interface AcademyStep {

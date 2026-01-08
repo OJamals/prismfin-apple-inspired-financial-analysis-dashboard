@@ -137,6 +137,7 @@ export function generateDashboard(range: TimeRange): DashboardData {
     health: 'healthy',
     comparisonLabel: "Performing 4.2% better than 60/40 benchmark"
   };
+  const mockRows = getMockRows();
   return {
     range,
     updatedAt: Date.now(),
@@ -150,8 +151,8 @@ export function generateDashboard(range: TimeRange): DashboardData {
     performance: Array.from({ length: 20 }).map((_, i) => ({ label: `T-${i}`, value: 100000 + i * 500 })),
     benchmarkPerformance: Array.from({ length: 20 }).map((_, i) => ({ label: `T-${i}`, value: 100000 + i * 400 })),
     monthlyReturns: Array.from({ length: 12 }).map((_, i) => ({ label: `M${i}`, value: 2 + Math.random() * 5 })),
-    rows: getMockRows(),
-    topMovers: getMockRows().slice(0, 6).toSorted((a, b) => b.changePct - a.changePct),
+    rows: mockRows,
+    topMovers: mockRows.slice().sort((a, b) => b.changePct - a.changePct).slice(0, 6),
     cashflow: Array.from({ length: 12 }, (_, i) => ({ label: `${i + 1}M`, value: (Math.random() - 0.4) * 4000 })),
     alerts: generateTechnicalAlerts(),
     sectors: { 'Tech': 30, 'Finance': 20, 'Health': 25, 'Other': 25 },
@@ -169,14 +170,13 @@ function generateMCSim(horizon: '1Y' | '5Y' | '10Y'): MonteCarloStats {
     const t = i / steps;
     const timeFactor = horizon === '1Y' ? 1 : horizon === '5Y' ? 5 : 10;
     const actualT = t * timeFactor;
-    // Geometric drift and widening dispersion
     const median = startValue * Math.exp(drift * actualT);
     const dispersion = startValue * vol * Math.sqrt(actualT);
     series.push({
       label: `T+${i}`,
       median: median,
-      p10: median - (dispersion * 1.28), // ~10th percentile
-      p90: median + (dispersion * 1.28), // ~90th percentile
+      p10: median - (dispersion * 1.28),
+      p90: median + (dispersion * 1.28),
     });
   }
   const last = series[series.length - 1];
@@ -195,7 +195,6 @@ export function generateQuantData(range: TimeRange): QuantData {
     health: 'healthy',
     comparisonLabel: "Portfolio efficiency exceeds market benchmark by 4.5% adjusted for vol"
   };
-
   return {
     range,
     updatedAt: Date.now(),
@@ -248,7 +247,7 @@ export function generateQuantData(range: TimeRange): QuantData {
   };
 }
 export function getMockRows(): MetricsRow[] {
-  return ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'NVDA', 'META', 'TSLA', 'V', 'JPM', 'UNH', 'NFLX', 'CRM'].map((symbol) => ({
+  return ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'NVDA', 'META', 'TSLA', 'V', 'JPM', 'UNH', 'NFLX', 'CRM'].map((symbol, i) => ({
     symbol,
     name: `${symbol} Inc.`,
     price: 100 + Math.random() * 300,
@@ -257,6 +256,7 @@ export function getMockRows(): MetricsRow[] {
     volume: `${(1 + Math.random() * 10).toFixed(1)}M`,
     class: 'equity',
     sentiment: Math.floor(20 + Math.random() * 60),
+    sector: SECTORS[i % SECTORS.length],
     peRatio: 10 + Math.random() * 25,
     rsi: 20 + Math.random() * 60,
     miniSeries: Array.from({ length: 7 }).map((_, j) => ({ label: `D-${6 - j}`, value: 95 + Math.random() * 10 })),

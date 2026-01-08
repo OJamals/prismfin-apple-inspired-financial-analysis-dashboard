@@ -122,54 +122,56 @@ export function QuantPage() {
             ) : isError ? (
               <ErrorRecoveryDisplay key="error" onRetry={() => refetch()} />
             ) : (
-              <motion.div
-                key="content"
-                variants={containerVariants}
-                initial="hidden"
-                animate="show"
-                className={cn(
-                  "grid grid-cols-1 lg:grid-cols-12",
-                  density === 'comfortable' ? "gap-10" : "gap-4"
-                )}
-              >
-                {data?.pulse && (
-                  <motion.div variants={itemVariants} className="lg:col-span-12" id="quant-pulse">
-                    <PortfolioPulseCard pulse={data.pulse} />
-                  </motion.div>
-                )}
-                {data?.insight && (
+              <>
+                <motion.div
+                  key="content"
+                  variants={containerVariants}
+                  initial="hidden"
+                  animate="show"
+                  className={cn(
+                    "grid grid-cols-1 lg:grid-cols-12",
+                    density === 'comfortable' ? "gap-10" : "gap-4"
+                  )}
+                >
+                  {data?.pulse && (
+                    <motion.div variants={itemVariants} className="lg:col-span-12" id="quant-pulse">
+                      <PortfolioPulseCard pulse={data.pulse} />
+                    </motion.div>
+                  )}
+                  {data?.insight && (
+                    <motion.div variants={itemVariants} className="lg:col-span-12">
+                      <AIAnalystNote insight={data.insight} />
+                    </motion.div>
+                  )}
                   <motion.div variants={itemVariants} className="lg:col-span-12">
-                    <AIAnalystNote insight={data.insight} />
+                    <PerformanceChartCard
+                      portfolio={data?.portfolio ?? []}
+                      benchmark={data?.benchmark ?? []}
+                      range={range}
+                    />
                   </motion.div>
-                )}
-                <motion.div variants={itemVariants} className="lg:col-span-12">
-                  <PerformanceChartCard
-                    portfolio={data?.portfolio ?? []}
-                    benchmark={data?.benchmark ?? []}
-                    range={range}
-                  />
+                  <motion.div variants={itemVariants} className="lg:col-span-8">
+                    <DrawdownChartCard data={data?.drawdown ?? { maxDrawdown: 0, series: [] }} />
+                  </motion.div>
+                  <motion.div variants={itemVariants} className="lg:col-span-4">
+                    <FactorAttributionCard factors={data?.factors ?? []} />
+                  </motion.div>
+                  <motion.div variants={itemVariants} className="lg:col-span-6" id="efficiency-frontier">
+                    <RiskRewardScatterCard data={data?.riskReward ?? []} />
+                  </motion.div>
+                  <motion.div variants={itemVariants} className="lg:col-span-6">
+                    <CorrelationMatrixCard data={data?.correlation ?? { symbols: [], matrix: {} }} />
+                  </motion.div>
+                  <motion.div variants={itemVariants} className="lg:col-span-12 pb-12" id="monte-carlo">
+                    <MonteCarloCard data={data?.monteCarlo ?? ({} as any)} />
+                  </motion.div>
                 </motion.div>
-                <motion.div variants={itemVariants} className="lg:col-span-8">
-                  <DrawdownChartCard data={data?.drawdown ?? { maxDrawdown: 0, series: [] }} />
-                </motion.div>
-                <motion.div variants={itemVariants} className="lg:col-span-4">
-                  <FactorAttributionCard factors={data?.factors ?? []} />
-                </motion.div>
-                <motion.div variants={itemVariants} className="lg:col-span-6" id="efficiency-frontier">
-                  <RiskRewardScatterCard data={data?.riskReward ?? []} />
-                </motion.div>
-                <motion.div variants={itemVariants} className="lg:col-span-6">
-                  <CorrelationMatrixCard data={data?.correlation ?? { symbols: [], matrix: {} }} />
-                </motion.div>
-                <motion.div variants={itemVariants} className="lg:col-span-12 pb-12" id="monte-carlo">
-                  <MonteCarloCard data={data?.monteCarlo ?? ({} as any)} />
-                </motion.div>
-              </motion.div>
+                <GuidedTour steps={QUANT_TOUR_STEPS} isOpen={isTourOpen} onComplete={completeTour} />
+              </>
             )}
           </AnimatePresence>
         </div>
       </div>
-      <GuidedTour steps={QUANT_TOUR_STEPS} isOpen={isTourOpen} onComplete={completeTour} />
     </AppLayout>
   );
 }

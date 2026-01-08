@@ -32,11 +32,17 @@ export function GuidedTour({ steps, onComplete, isOpen }: GuidedTourProps) {
           height: rect.height,
         });
         el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      } else {
+        console.warn(`GuidedTour: Element with id "${step.targetId}" not found.`);
       }
     };
     updateCoords();
+    const timeoutId = setTimeout(updateCoords, 100);
     window.addEventListener('resize', updateCoords);
-    return () => window.removeEventListener('resize', updateCoords);
+    return () => {
+      window.removeEventListener('resize', updateCoords);
+      clearTimeout(timeoutId);
+    };
   }, [currentStepIdx, isOpen, steps]);
   if (!isOpen) return null;
   const step = steps[currentStepIdx];
@@ -64,14 +70,13 @@ export function GuidedTour({ steps, onComplete, isOpen }: GuidedTourProps) {
   };
   return (
     <div className="fixed inset-0 z-[100] pointer-events-none">
-      {/* Spotlight Overlay */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         className="absolute inset-0 bg-black/40 backdrop-blur-[2px]"
         style={{
-          clipPath: `polygon(0% 0%, 0% 100%, ${coords.left}px 100%, ${coords.left}px ${coords.top}px, ${coords.left + coords.width}px ${coords.top}px, ${coords.left + coords.width}px ${coords.top + coords.height}px, ${coords.left}px ${coords.top + coords.height}px, ${coords.left}px 100%, 100% 100%, 100% 0%)`
+          clipPath: coords.width > 0 ? `polygon(0% 0%, 0% 100%, ${coords.left}px 100%, ${coords.left}px ${coords.top}px, ${coords.left + coords.width}px ${coords.top}px, ${coords.left + coords.width}px ${coords.top + coords.height}px, ${coords.left}px ${coords.top + coords.height}px, ${coords.left}px 100%, 100% 100%, 100% 0%)` : 'none'
         }}
       />
       <AnimatePresence mode="wait">
