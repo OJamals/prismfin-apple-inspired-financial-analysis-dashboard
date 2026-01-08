@@ -20,6 +20,8 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
     return ok(c, updated);
   });
   app.get('/api/screener', async (c) => {
+    // In a real app, we'd parse filters here:
+    // const filters = c.req.query('filters');
     const data = getMockScreenerData();
     return ok(c, data);
   });
