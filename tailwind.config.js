@@ -19,7 +19,7 @@ export default {
   		colors: {
   			background: 'hsl(var(--background))',
   			foreground: 'hsl(var(--foreground))',
-  			canvas: '#F9FAFB',
+  			canvas: 'hsl(var(--canvas))',
   			brand: {
   				teal: '#14B8A6',
   				blue: '#0EA5E9',

@@ -148,7 +148,7 @@ export function MetricsTableCard({ rows }: MetricsTableCardProps) {
                                         {row.sentiment > 70 ? 'Greed' : row.sentiment < 30 ? 'Fear' : 'Neutral'}
                                       </span>
                                     </div>
-                                    <div className="relative h-2 w-full bg-white shadow-inner rounded-full overflow-hidden">
+                                    <div className="relative h-2 w-full bg-secondary/50 shadow-inner rounded-full overflow-hidden">
                                       <div 
                                         className={cn(
                                           "h-full rounded-full transition-all duration-700",
@@ -160,11 +160,11 @@ export function MetricsTableCard({ rows }: MetricsTableCardProps) {
                                   </div>
                                 </div>
                                 <div className="grid grid-cols-2 gap-5">
-                                  <div className="p-5 rounded-3xl bg-white shadow-soft border border-white/60 hover:shadow-md transition-all">
+                                  <div className="p-5 rounded-3xl bg-card shadow-soft border border-card/60 hover:shadow-md transition-all">
                                     <p className="text-[10px] font-bold text-muted-foreground uppercase mb-1.5 tracking-tighter">P/E Ratio</p>
                                     <p className="text-lg font-bold tabular-nums text-foreground">{row.peRatio ?? 'N/A'}</p>
                                   </div>
-                                  <div className="p-5 rounded-3xl bg-white shadow-soft border border-white/60 hover:shadow-md transition-all">
+                                  <div className="p-5 rounded-3xl bg-card shadow-soft border border-card/60 hover:shadow-md transition-all">
                                     <p className="text-[10px] font-bold text-muted-foreground uppercase mb-1.5 tracking-tighter">RSI (14D)</p>
                                     <p className={cn(
                                       "text-lg font-bold tabular-nums",

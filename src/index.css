@@ -31,6 +31,7 @@
     --sidebar-accent-foreground: 240 5.9% 10%;
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217.2 91.2% 59.8%;
+    --canvas: 220 17% 97%;
     /* Semantic Gains/Losses */
     --gain: 138 56% 49%;
     --loss: 2 100% 59%;
@@ -55,14 +56,15 @@
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
     --input: 0 0% 14.9%;
+    --canvas: 220 17% 12%;
   }
 }
 @layer components {
   .glass-premium {
-    @apply bg-white/40 backdrop-blur-3xl border border-white/40 shadow-premium;
+    @apply bg-card/40 backdrop-blur-3xl border border-card/40 shadow-premium;
   }
   .shimmer-fast {
-    @apply relative overflow-hidden before:absolute before:inset-0 before:-translate-x-full before:animate-shimmer-fast before:bg-gradient-to-r before:from-transparent before:via-white/30 before:to-transparent;
+    @apply relative overflow-hidden before:absolute before:inset-0 before:-translate-x-full before:animate-shimmer-fast before:bg-gradient-to-r before:from-transparent before:via-card/30 before:to-transparent;
   }
 }
 html {
