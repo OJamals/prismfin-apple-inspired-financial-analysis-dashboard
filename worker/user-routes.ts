@@ -45,4 +45,12 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
     const data = await entity.getRange('6M');
     return ok(c, data.alerts);
   });
+  app.post('/api/alerts/dismiss', async (c) => {
+    const { id } = await c.req.json();
+    if (!id) return bad(c, 'alert id required');
+    await DashboardEntity.ensureSeed(c.env);
+    const entity = new DashboardEntity(c.env, 'main');
+    await entity.dismissAlert(id);
+    return ok(c, { dismissed: id });
+  });
 }
